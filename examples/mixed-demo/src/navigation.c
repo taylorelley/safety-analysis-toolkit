@@ -1,4 +1,3 @@
-#include <assert.h>
 /** @req R-NAV
  * @baseline BL-DEMO-1 */
 int navigate(int enabled) {
@@ -8,5 +7,3 @@ int navigate(int enabled) {
 done:
   return enabled;
 }
-/** @req R-NAV */
-int main(void) { assert(navigate(1) == 1); return 0; }

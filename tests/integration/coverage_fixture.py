@@ -43,6 +43,14 @@ with tempfile.TemporaryDirectory() as directory:
     assert any(f["rule_id"] == "coverage-gap-mcdc" for f in run["findings"])
     exported = json.loads((root/".safety/runs"/run["id"]/"coverage.json").read_text())
     assert exported["export"]["data"][0]["totals"]["mcdc"]["percent"] == 50
+    # One profile cannot silently cover two semantic compilation variants.
+    db.append({**db[0],"arguments":[*db[0]["arguments"],"-DOTHER=1"]})
+    (root/"compile_commands.json").write_text(json.dumps(db))
+    provenance["compile_commands_sha256"]=sha("compile_commands.json")
+    (root/"provenance.json").write_text(json.dumps(provenance))
+    variants=subprocess.run(args+["--provenance","provenance.json"],capture_output=True,timeout=30)
+    assert variants.returncode == 3
+    assert json.loads(variants.stdout)["completeness"]["unsupported"] == 2
     (root/"test.profdata").write_text("corrupted profile")
     failed = subprocess.run(args,capture_output=True,timeout=30)
     assert failed.returncode == 3

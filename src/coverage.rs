@@ -42,6 +42,31 @@ pub fn import(
             .push("llvm-cov-19 unavailable or not allowlisted".into());
         return evidence::finish(root, c, &dir, run);
     };
+    match runner::execute(
+        &tool,
+        &["--version".into()],
+        root,
+        &dir,
+        c.tools.timeout_seconds,
+        c.tools.memory_mb,
+        c.tools.require_filesystem_isolation,
+    ) {
+        Ok(e) => {
+            let compatible = e.failure.is_none() && e.stdout.contains("version 19.1.7");
+            run.executions.push(e);
+            if !compatible {
+                run.completeness.unsupported = units.len();
+                run.limitations
+                    .push("Coverage import requires LLVM 19.1.7".into());
+                return evidence::finish(root, c, &dir, run);
+            }
+        }
+        Err(e) => {
+            run.completeness.failed = units.len();
+            run.limitations.push(e.to_string());
+            return evidence::finish(root, c, &dir, run);
+        }
+    }
     let mut provenance_valid = false;
     if let Some(path) = provenance {
         let data = fs::read(inside(root, path)?)?;
@@ -92,6 +117,26 @@ pub fn import(
                     value["type"] == "llvm.coverage.json.export" && value["version"] == "2.0.1",
                     "unsupported LLVM coverage export schema"
                 );
+                let data = value["data"].as_array().context("missing coverage data")?;
+                anyhow::ensure!(!data.is_empty(), "empty coverage data");
+                for object in data {
+                    for file in object["files"]
+                        .as_array()
+                        .context("missing coverage files")?
+                    {
+                        inside(
+                            root,
+                            Path::new(file["filename"].as_str().context("missing filename")?),
+                        )?;
+                        for metric in ["regions", "branches", "mcdc"] {
+                            let stats = &file["summary"][metric];
+                            let count = stats["count"].as_u64().context("missing metric count")?;
+                            let covered =
+                                stats["covered"].as_u64().context("missing covered count")?;
+                            anyhow::ensure!(covered <= count, "inconsistent coverage counters");
+                        }
+                    }
+                }
                 Ok(value)
             })();
             if e.failure.is_none() {
@@ -123,7 +168,10 @@ pub fn import(
                             }
                         }
                         for unit in &units {
-                            if files.contains_key(&unit.file) {
+                            if units.iter().filter(|u| u.file == unit.file).count() > 1 {
+                                run.completeness.unsupported += 1;
+                                run.limitations.push(format!("Profile does not establish which compilation variant of {} was instrumented",unit.file.display()));
+                            } else if files.contains_key(&unit.file) {
                                 run.completeness.analyzed += 1
                             } else {
                                 run.completeness.excluded += 1

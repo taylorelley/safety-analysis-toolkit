@@ -17,7 +17,7 @@ output.mkdir(parents=True,exist_ok=True)
 commands=[("doctor",["doctor",str(root)],3),
  ("scan",["scan",str(root)],3),
  ("frama-c",["prove","src/navigation.c","--path",str(root),"--engine","frama-c"],3),
- ("esbmc-c",["prove","src/navigation.c","--path",str(root),"--engine","esbmc"],0),
+ ("esbmc-c",["prove","harness/navigation_harness.c","--path",str(root),"--engine","esbmc"],0),
  ("esbmc-cpp",["prove","src/controller.cpp","--path",str(root),"--engine","esbmc"],1),
  ("trace",["trace",str(root)],1),
  ("coverage",["coverage","import","--path",str(root),"--profile","build/test.profdata",
@@ -63,7 +63,7 @@ try:
     receive(1)
     send({"method":"notifications/initialized"})
     calls=[("safety.doctor",{}),("safety.scan",{}),
-        ("safety.prove",{"source":"src/navigation.c"}),
+        ("safety.prove",{"source":"harness/navigation_harness.c"}),
         ("safety.prove",{"source":"src/controller.cpp"}),
         ("safety.trace",{}),("safety.coverage",{"profile":"build/test.profdata",
            "binary":"build/test","provenance":"build/provenance.json"})]

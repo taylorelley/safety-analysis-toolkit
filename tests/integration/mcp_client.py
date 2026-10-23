@@ -63,6 +63,21 @@ try:
         assert "error" in result or result["result"].get("isError"), result
     traversal = call(11,"safety.get_run",{"run_id":"../../etc/passwd"})
     assert traversal["result"]["isError"]
+    # Cancel a genuinely long real-Clang scan, then ensure the analysis slot frees.
+    from pathlib import Path
+    db_path=Path(root)/"compile_commands.json"
+    db=json.loads(db_path.read_text())
+    long_db=[]
+    for i in range(1000):
+        entry=dict(db[0])
+        entry["arguments"]=[*entry["arguments"],f"-DMCP_CANCEL_CASE={i}"]
+        long_db.append(entry)
+    db_path.write_text(json.dumps(long_db))
+    send({"id":20,"method":"tools/call","params":{"name":"safety.scan","arguments":{}}})
+    time.sleep(0.2)
+    send({"method":"notifications/cancelled","params":{"requestId":20,"reason":"real cancellation regression test"}})
+    send({"id":21,"method":"tools/call","params":{"name":"safety.get_run","arguments":{"run_id":run_id}}})
+    assert receive(21,timeout=5)["result"]["structuredContent"]["run_id"] == run_id
     print("Real MCP stdio: initialize/list/doctor/scan/findings/run/report/strict-errors passed")
 finally:
     process.stdin.close()

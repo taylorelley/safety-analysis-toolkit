@@ -108,6 +108,7 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
             (
                 "dirty",
                 vec![
+                    "--no-optional-locks".into(),
                     "-c".into(),
                     "core.fsmonitor=false".into(),
                     "status".into(),

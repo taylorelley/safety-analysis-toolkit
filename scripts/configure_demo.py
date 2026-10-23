@@ -11,6 +11,7 @@ repo = Path(__file__).resolve().parent.parent
 root = repo/"build/demo"
 root.mkdir(parents=True, exist_ok=True)
 shutil.copytree(repo/"examples/mixed-demo/src", root/"src", dirs_exist_ok=True)
+shutil.copytree(repo/"examples/mixed-demo/harness", root/"harness", dirs_exist_ok=True)
 shutil.copyfile(repo/"examples/mixed-demo/trace.yaml", root/"trace.yaml")
 (root/"build").mkdir(exist_ok=True)
 flags = ["-fprofile-instr-generate","-fcoverage-mapping","-fcoverage-mcdc"]
@@ -21,6 +22,8 @@ for name in ["navigation.c","controller.cpp","decision.c","test.c"]:
         "arguments":["clang++-19" if cpp else "clang-19",
         "-std=c++17" if cpp else "-std=c11","-DSAFETY_DEMO=1",
         *(flags if name in ["decision.c","test.c"] else []),"-c",f"src/{name}"]})
+entries.append({"directory":str(root),"file":"harness/navigation_harness.c",
+    "arguments":["clang-19","-std=c11","-DSAFETY_DEMO=1","-c","harness/navigation_harness.c"]})
 (root/"build/compile_commands.json").write_text(json.dumps(entries,indent=2)+"\n")
 module = (repo/"build/clang/SafetyMisra.so").resolve(strict=True)
 allow = [str(module)]
@@ -49,5 +52,6 @@ provenance = {"version":1,"binary_sha256":sha("build/test"),
     "execution_environment":"host","build_variant":"SAFETY_DEMO=1",
     "instrumentation_warnings":[],"exclusions":[],"test_ids":["T-DEC"],
     "requirement_ids":["R-DEC"]}
+provenance["sources"]["harness/navigation_harness.c"]=sha("harness/navigation_harness.c")
 (root/"build/provenance.json").write_text(json.dumps(provenance,indent=2)+"\n")
 print(root)

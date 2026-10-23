@@ -1,0 +1,11 @@
+version: 1
+target: navigate
+property: enabled navigation returns one without a modeled memory error
+source: navigation_harness.c
+input_assumptions:
+  - enabled is fixed to one by this harness; other inputs are outside its scope
+environment_model: ESBMC sequential source and library model
+build_configuration: SAFETY_DEMO=1, C11, 64-bit model
+requirements: [R-NAV]
+analyzer: ESBMC 8.6.0, Z3, unwind 8, default unwinding assertions
+review_status: unapproved draft; metadata is retained but not validated by the engine

@@ -80,3 +80,12 @@ coverage fixture), then `python3 scripts/e2e.py`. The latter records CLI and
 independent MCP outputs and copies integrity-checked run artifacts into
 `validation/e2e/`. The report deliberately remains incomplete. This client is
 not passed off as Claude Code, Codex, Hermes or Pi.
+
+The first mixed-demo scan found the custom check but not the library's null
+path when its only visible caller passed constant one. That result is preserved
+in `validation/exploratory-demo/constant-caller-scan.json`. The demonstration now
+keeps the open-input library translation unit separate from its fixed-input
+verification harness. This is a real Clang interprocedural-scope limitation, not
+a claim that scanning a TU explores every possible function context. The
+standalone library scan detects the null path; the harness proves only its
+explicit fixed-input property. No broad proof is inferred from that harness.

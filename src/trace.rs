@@ -284,6 +284,10 @@ pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
                     let mut out = Vec::new();
                     for line in e.stdout.lines() {
                         let mut s: Symbol = serde_json::from_str(line)?;
+                        anyhow::ensure!(
+                            !s.usr.is_empty(),
+                            "Clang could not provide an unambiguous symbol identifier"
+                        );
                         s.file = inside(root, &u.directory.join(&s.file))?
                             .display()
                             .to_string();

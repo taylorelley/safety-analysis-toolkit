@@ -139,7 +139,7 @@ pub fn prove(
             return evidence::finish(root, c, &dir, run);
         }
     };
-    let version = runner::execute(
+    let version = match runner::execute(
         &tool,
         &["--version".into()],
         root,
@@ -147,7 +147,14 @@ pub fn prove(
         c.tools.timeout_seconds,
         c.tools.memory_mb,
         c.tools.require_filesystem_isolation,
-    )?;
+    ) {
+        Ok(e) => e,
+        Err(e) => {
+            run.completeness.failed = 1;
+            run.limitations.push(e.to_string());
+            return evidence::finish(root, c, &dir, run);
+        }
+    };
     let supported = version.failure.is_none() && version.stdout.contains("ESBMC version 8.6.0");
     run.executions.push(version);
     if !supported {
