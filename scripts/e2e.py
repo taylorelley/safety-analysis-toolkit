@@ -86,7 +86,13 @@ assert report.returncode==3
     "reason":"Frama-C unvalidated, MISRA mappings unvalidated, known trace and MC/DC gaps; two real agent harnesses not exercised",
     "results":summary},indent=2)+"\n")
 # Copy only generated records, never analyzer binaries or a third-party bundle.
-shutil.copytree(root/".safety/runs",output/"runs",dirs_exist_ok=True)
+(output/"runs").mkdir(exist_ok=True)
+for original in (root/".safety/runs").iterdir():
+    destination=output/"runs"/original.name
+    if destination.exists():
+        assert (destination/"evidence.json").read_bytes()==(original/"evidence.json").read_bytes(), "Refusing to overwrite archived evidence"
+    else:
+        shutil.copytree(original,destination)
 for directory in (output/"runs").iterdir():
     inventory=json.loads((directory/"evidence.json").read_text())
     for name,expected in inventory.items():

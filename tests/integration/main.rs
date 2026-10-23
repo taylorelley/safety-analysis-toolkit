@@ -315,6 +315,15 @@ fn real_esbmc_properties() {
                     .iter()
                     .any(|p| p["outcome"] == outcome)
             );
+            let report = bin()
+                .arg("report")
+                .arg(t.path())
+                .args(["--run", r["id"].as_str().unwrap(), "--format", "markdown"])
+                .output()
+                .unwrap();
+            let text = String::from_utf8(report.stdout).unwrap();
+            assert!(text.contains(outcome));
+            assert!(text.contains("finite unwind 2"));
             if exit == 1 {
                 let dir = t
                     .path()

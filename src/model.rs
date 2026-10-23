@@ -58,6 +58,8 @@ pub struct Execution {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Run {
     pub schema_version: u32,
+    #[serde(default)]
+    pub configuration: serde_json::Value,
     pub id: String,
     pub operation: String,
     pub project: String,
@@ -103,4 +105,16 @@ pub struct Property {
     pub unwind_bound: Option<u32>,
     pub completeness_established: bool,
     pub native_references: Vec<String>,
+}
+
+impl ProofOutcome {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Proven => "PROVEN",
+            Self::Violated => "VIOLATED",
+            Self::Unknown => "UNKNOWN",
+            Self::NotChecked => "NOT_CHECKED",
+            Self::Failed => "FAILED",
+        }
+    }
 }

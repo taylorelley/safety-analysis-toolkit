@@ -303,6 +303,12 @@
           "native_references"
         ]
       }
+    },
+    "configuration": {
+      "type": [
+        "object",
+        "null"
+      ]
     }
   },
   "required": [

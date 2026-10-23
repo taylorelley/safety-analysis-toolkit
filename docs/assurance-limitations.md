@@ -40,3 +40,5 @@ and hashes. Review decisions are not stored or impersonated by this snapshot.
 A SHA inventory binds all generated files except itself. Ordinary operations
 create new records and do not overwrite completed records. Loading verifies the
 inventory and rejects added, missing, altered or symlinked artifacts.
+
+Input snapshots are not fully archived by the engine: retain the exact source/baseline material matching recorded hashes for replay. Parent-process aggregate memory and malicious-input fuzzing require additional release hardening. CLI interruption behavior has not been validated; MCP cancellation and runner timeouts are tested.

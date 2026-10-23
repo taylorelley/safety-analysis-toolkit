@@ -24,13 +24,62 @@ pub fn markdown(r: &Run) -> String {
             f.build_variant
         ))
     }
-    s.push_str("\n## Formal properties\n\n");
-    for p in &r.properties {
+    s.push_str("\n## Selected profiles and scope\n\n");
+    if r.configuration.is_null() {
+        s.push_str("Configuration snapshot is unavailable in this legacy record.\n")
+    } else {
         s.push_str(&format!(
-            "- {}: {:?}; {}. Scope: {}\n",
-            p.id, p.outcome, p.description, p.scope
+            "Operation: {}. Assurance: `{}`. Coding editions: `{}`.\n\n",
+            r.operation, r.configuration["assurance"], r.configuration["coding"]
         ));
     }
+    s.push_str(&format!(
+        "Input files fingerprinted: {}. Git metadata: `{}`. Build variants: {}.\n\n",
+        r.inputs.len(),
+        r.git
+            .as_ref()
+            .map_or("unavailable".into(), |g| g.to_string()),
+        r.completeness.build_variants.join(", ")
+    ));
+    s.push_str("## Tools and provenance\n\n");
+    let mut tools = std::collections::BTreeSet::new();
+    for e in &r.executions {
+        if tools.insert(e.executable.clone()) {
+            let version = r
+                .executions
+                .iter()
+                .find(|v| {
+                    v.executable == e.executable
+                        && v.arguments
+                            .iter()
+                            .any(|a| a == "--version" || a == "-version")
+                })
+                .map(|v| v.stdout.trim())
+                .filter(|s| !s.is_empty())
+                .unwrap_or("version not separately probed");
+            s.push_str(&format!(
+                "- `{}`: {}; SHA-256 `{}`. Restrictions: {}.\n",
+                e.executable,
+                version.replace('\n', " "),
+                e.executable_sha256,
+                e.restrictions
+            ));
+        }
+    }
+    if r.configuration["coding"]["c"].is_string() || r.configuration["coding"]["cpp"].is_string() {
+        s.push_str("\n## MISRA draft status\n\nNo guideline mapping is validated. GEP/GCS metadata in `misra-drafts.json` is incomplete draft evidence; no guideline is marked compliant from analyzer silence.\n");
+    }
+    s.push_str("\n## Formal properties\n\n");
+    for p in &r.properties {
+        s.push_str(&format!("- {}: {}; {}. Scope: {}. Unwind bound: {:?}; model completeness established: {}. Supplied assumptions: {:?}. Evidence: {}.\n",p.id,p.outcome.as_str(),p.description,p.scope,p.unwind_bound,p.completeness_established,p.assumptions,p.native_references.join(", ")));
+    }
+    if r.operation == "coverage" {
+        s.push_str("\n## Structural coverage\n\nMeasured gaps are listed above. Native regions, branches and MC/DC records are preserved in `coverage.json` and `raw/llvm-cov.json`. Missing provenance or excluded units leave scope incomplete.\n");
+    }
+    if r.operation == "trace" {
+        s.push_str("\n## Traceability\n\nRelationship gaps are listed above. Indexed symbols and the explicit graph are preserved in `trace.json`; links do not establish semantic correctness.\n");
+    }
+    s.push_str("\n## Evidence references\n\nThis run's `manifest.json`, `config.json`, `findings.json` and SHA-256 inventory `evidence.json` bind the inputs, exact argv/environment and native files. Evidence hashes are verified when loading or exporting; they are not an authenticity signature.\n");
     s.push_str("\n## Outstanding work and limitations\n\n");
     for l in &r.limitations {
         s.push_str(&format!("- {}\n", l))

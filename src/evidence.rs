@@ -100,7 +100,7 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
             &serde_json::to_vec_pretty(&crate::misra::drafts(c))?,
         )?;
     }
-    let mut run=Run{schema_version:1,id,operation:operation.into(),project:c.project.name.clone(),status:Status::Incomplete,complete:false,completeness:Completeness::default(),started_unix_ms:now(),completed_unix_ms:0,inputs,executions:Vec::new(),findings:Vec::new(),properties:Vec::new(),limitations:vec!["Automated evidence for human review; no certification or compliance approval.".into(),"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.".into(),"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.".into()],git:None};
+    let mut run=Run{schema_version:1,configuration:serde_json::to_value(c)?,id,operation:operation.into(),project:c.project.name.clone(),status:Status::Incomplete,complete:false,completeness:Completeness::default(),started_unix_ms:now(),completed_unix_ms:0,inputs,executions:Vec::new(),findings:Vec::new(),properties:Vec::new(),limitations:vec!["Automated evidence for human review; no certification or compliance approval.".into(),"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.".into(),"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.".into()],git:None};
     if let Some(git) = crate::discovery::executable("git", &c.tools.allowlist) {
         let mut values = serde_json::Map::new();
         for (name, args) in [
