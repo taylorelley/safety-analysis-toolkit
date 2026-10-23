@@ -543,3 +543,39 @@ fn draft_misra_process_rejects_unreviewed_mapping_and_weakening() {
     let bad = bin().arg("doctor").arg(t.path()).output().unwrap();
     assert_eq!(bad.status.code(), Some(2));
 }
+
+#[test]
+#[ignore = "requires pinned Frama-C and ESBMC"]
+fn real_frama_c_rejects_unreviewed_compiler() {
+    let t = proof_fixture(
+        false,
+        "#include <assert.h>\nint main(void){assert(1);return 0;}",
+    );
+    let path = t.path().join("compile_commands.json");
+    let mut entries: serde_json::Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+    entries[0]["arguments"][0] = "unreviewed-proprietary-cc".into();
+    fs::write(path, entries.to_string()).unwrap();
+    for engine in ["esbmc", "frama-c"] {
+        let out = bin()
+            .args(["prove", "unsafe.c", "--path"])
+            .arg(t.path())
+            .args(["--engine", engine])
+            .output()
+            .unwrap();
+        assert_eq!(
+            out.status.code(),
+            Some(3),
+            "{}",
+            String::from_utf8_lossy(&out.stdout)
+        );
+        let run: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert_eq!(run["completeness"]["unsupported"], 1);
+        assert!(
+            run["properties"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|p| p["outcome"] != "PROVEN")
+        );
+    }
+}

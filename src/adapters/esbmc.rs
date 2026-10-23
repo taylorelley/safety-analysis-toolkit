@@ -7,6 +7,11 @@ use crate::{
 use anyhow::{Result, bail};
 use std::{fs, path::Path};
 fn translate(unit: &discovery::Unit) -> Result<Vec<String>> {
+    anyhow::ensure!(
+        unit.unsupported.is_empty(),
+        "Unreviewed compilation semantics: {:?}",
+        unit.unsupported
+    );
     let mut out = Vec::new();
     let mut args = unit.arguments.iter();
     while let Some(arg) = args.next() {

@@ -8,6 +8,11 @@ use anyhow::{Context, Result, bail};
 use std::{fs, path::Path};
 
 fn preprocess_options(unit: &discovery::Unit) -> Result<Vec<String>> {
+    anyhow::ensure!(
+        unit.unsupported.is_empty(),
+        "Unreviewed compilation semantics: {:?}",
+        unit.unsupported
+    );
     let mut result = Vec::new();
     let mut args = unit.arguments.iter();
     while let Some(arg) = args.next() {
@@ -350,6 +355,7 @@ pub fn prove(
                 })
                 && !log.contains("Neither code nor specification")
                 && !log.to_lowercase().contains("unsupported")
+                && !log.to_lowercase().contains("warning:")
                 && !log.contains("User Error");
             run.record(e);
             if !report.exists() {
