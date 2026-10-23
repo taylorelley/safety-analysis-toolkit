@@ -116,6 +116,12 @@ fn validate(manifest: &mut Manifest, symbols: &[Symbol]) -> Vec<(String, Option<
         if nodes.insert(n.id.clone(), n.kind.clone()).is_some() {
             gaps.push((format!("Duplicate identifier {}", n.id), None))
         }
+        if n.kind == Kind::Code && !symbols.iter().any(|s| s.definition && s.usr == n.id) {
+            gaps.push((
+                format!("Code symbol {} is absent from this build's AST index", n.id),
+                None,
+            ));
+        }
         if n.baseline.is_some() && n.baseline != manifest.baseline {
             gaps.push((format!("Baseline mismatch for {}", n.id), None))
         }
@@ -225,10 +231,12 @@ fn validate(manifest: &mut Manifest, symbols: &[Symbol]) -> Vec<(String, Option<
                 gaps.push((format!("Requirement {} has no parent", n.id), None))
             }
             for (kind, label) in [(Kind::Code, "implementation"), (Kind::Test, "test")] {
-                if !nodes
-                    .iter()
-                    .any(|(id, k)| *k == kind && reachable(&n.id, id, &valid))
-                {
+                if !nodes.iter().any(|(id, k)| {
+                    *k == kind
+                        && (kind != Kind::Code
+                            || symbols.iter().any(|s| s.definition && &s.usr == id))
+                        && reachable(&n.id, id, &valid)
+                }) {
                     gaps.push((format!("Requirement {} has no linked {label}", n.id), None))
                 }
             }
@@ -507,6 +515,19 @@ mod tests {
         let mut m:Manifest=serde_yaml::from_str("version: 1\nnodes:\n- {id: R1, kind: requirement}\n- {id: T1, kind: test}\nlinks:\n- {from: MISSING, to: T1}\n").unwrap();
         let gaps = validate(&mut m, &[]);
         assert_eq!(gaps.len(), 5);
+    }
+    #[test]
+    fn external_code_link_requires_indexed_definition() {
+        let mut m: Manifest=serde_yaml::from_str("version: 1\nnodes:\n- {id: R, kind: requirement, root: true}\n- {id: FAKE, kind: code}\n- {id: T, kind: test}\nlinks:\n- {from: R, to: FAKE}\n- {from: R, to: T}\n").unwrap();
+        let gaps = validate(&mut m, &[]);
+        assert!(
+            gaps.iter()
+                .any(|(s, _)| s.contains("absent from this build"))
+        );
+        assert!(
+            gaps.iter()
+                .any(|(s, _)| s.contains("no linked implementation"))
+        );
     }
     #[test]
     fn tokens_only() {

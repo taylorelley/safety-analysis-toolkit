@@ -262,6 +262,24 @@ fn real_ast_trace() {
         !f.iter()
             .any(|f| f["message"].as_str().unwrap().contains("R1 has no linked"))
     );
+    // A link in one preprocessor build must not fill the other build's gap.
+    fs::write(
+        t.path().join("safe.cpp"),
+        "#if VARIANT == 1\n/** @req R1 */\nint safe_value(int *p){return p ? *p : 0;}\n#else\nint safe_value(int *p){return p ? *p : 0;}\n#endif\n",
+    )
+    .unwrap();
+    fs::write(t.path().join("unsafe.cpp"), "int other(void){return 0;}\n").unwrap();
+    let out = bin().arg("trace").arg(t.path()).output().unwrap();
+    assert_eq!(out.status.code(), Some(1));
+    let r: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    let missing: Vec<_> = r["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|f| f["message"] == "Requirement R1 has no linked implementation")
+        .collect();
+    assert_eq!(missing.len(), 1, "{r}");
+    assert_eq!(missing[0]["build_variant"], "two");
 }
 fn proof_fixture(cpp: bool, code: &str) -> tempfile::TempDir {
     let t = fixture(cpp);

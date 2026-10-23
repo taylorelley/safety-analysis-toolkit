@@ -22,3 +22,4 @@ full-validation: validation
 	cargo test --locked real_esbmc -- --ignored
 	frama-c -version
 	cargo test --locked real_frama_c -- --ignored
+	python3 tests/integration/cli_cancel.py target/release/safety
