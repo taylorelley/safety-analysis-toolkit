@@ -48,18 +48,26 @@ pub struct Assurance {
 #[derive(Debug, Default, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Coding {
+    #[serde(default)]
+    pub registries: Vec<PathBuf>,
+    #[serde(default)]
+    pub deviations: Option<PathBuf>,
+    #[serde(default)]
+    pub recategorization: Option<PathBuf>,
     pub c: Option<String>,
     pub cpp: Option<String>,
 }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Build {
+    pub variants: std::collections::BTreeMap<String, Vec<String>>,
     pub compile_commands: PathBuf,
 }
 impl Default for Build {
     fn default() -> Self {
         Self {
             compile_commands: "build/compile_commands.json".into(),
+            variants: Default::default(),
         }
     }
 }
@@ -92,12 +100,14 @@ impl Default for Tools {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct Evidence {
+    pub reviews: Option<PathBuf>,
     pub directory: PathBuf,
 }
 impl Default for Evidence {
     fn default() -> Self {
         Self {
             directory: ".safety/runs".into(),
+            reviews: None,
         }
     }
 }
@@ -116,7 +126,8 @@ impl Config {
     }
     pub fn load(root: &Path) -> Result<Self> {
         let config: Self = serde_yaml::from_slice(
-            &fs::read(root.join("safety.yaml")).context("read safety.yaml")?,
+            &read_bounded(&inside(root, Path::new("safety.yaml"))?, 1024 * 1024)
+                .context("read safety.yaml")?,
         )?;
         config.validate()?;
         Ok(config)
@@ -168,6 +179,27 @@ impl Config {
             && (!module.is_absolute() || !self.tools.allowlist.contains(module))
         {
             bail!("clang_module must be an absolute path explicitly included in tools.allowlist")
+        }
+        if let Some(path) = &self.evidence.reviews {
+            relative(path)?;
+        }
+        for path in self
+            .coding
+            .registries
+            .iter()
+            .chain(self.coding.deviations.iter())
+            .chain(self.coding.recategorization.iter())
+        {
+            relative(path)?;
+        }
+        for (name, definitions) in &self.build.variants {
+            anyhow::ensure!(
+                !name.is_empty()
+                    && name.len() <= 128
+                    && !definitions.is_empty()
+                    && definitions.iter().all(|d| !d.is_empty()),
+                "invalid build variant grouping"
+            );
         }
         for p in &self.tools.allowlist {
             if !p.is_absolute() {
@@ -221,6 +253,20 @@ pub fn output_dir(root: &Path, path: &Path) -> Result<PathBuf> {
     }
     Ok(p)
 }
+/// Bound untrusted structured input before parsing; reject device and pipe inputs.
+pub fn read_bounded(path: &Path, limit: u64) -> Result<Vec<u8>> {
+    use std::io::Read;
+    let file = fs::File::open(path)?;
+    anyhow::ensure!(file.metadata()?.is_file(), "input must be a regular file");
+    let mut bytes = Vec::new();
+    file.take(limit + 1).read_to_end(&mut bytes)?;
+    anyhow::ensure!(
+        bytes.len() as u64 <= limit,
+        "input exceeds configured parser limit"
+    );
+    Ok(bytes)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -10,8 +10,10 @@ pub fn with_cancellation<T>(check: impl Fn() -> bool + 'static, work: impl FnOnc
     let _reset = Reset;
     work()
 }
+pub static CLI_CANCELLED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 pub fn cancelled() -> bool {
-    CANCEL.with(|c| c.borrow().as_ref().is_some_and(|check| check()))
+    CLI_CANCELLED.load(std::sync::atomic::Ordering::Relaxed)
+        || CANCEL.with(|c| c.borrow().as_ref().is_some_and(|check| check()))
 }
 use crate::model::Execution;
 use anyhow::{Result, bail};
@@ -23,7 +25,7 @@ use std::{
     time::{Duration, Instant},
 };
 const OUTPUT_LIMIT: usize = 4 * 1024 * 1024;
-fn capture(mut reader: impl Read) -> (String, bool) {
+fn capture(mut reader: impl Read) -> (Vec<u8>, bool) {
     let mut out = Vec::new();
     let mut buf = [0; 8192];
     let mut truncated = false;
@@ -41,7 +43,7 @@ fn capture(mut reader: impl Read) -> (String, bool) {
             }
         }
     }
-    (String::from_utf8_lossy(&out).into_owned(), truncated)
+    (out, truncated)
 }
 pub fn execute(
     exe: &Path,
@@ -55,6 +57,7 @@ pub fn execute(
     if !exe.is_absolute() || !exe.is_file() {
         bail!("executable must be an existing absolute path")
     }
+    anyhow::ensure!(!cancelled(), "request cancelled before execution");
     let executable_sha256 = crate::evidence::hash_file(exe)?;
     let env = BTreeMap::from([
         ("LC_ALL".to_string(), "C".to_string()),
@@ -138,7 +141,22 @@ pub fn execute(
     } else if !status.success() && failure.is_none() {
         failure = Some("nonzero_exit".into())
     }
+    static OUTPUT_SEQUENCE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+    let raw = write_dir.join("raw");
+    if !raw.exists() {
+        std::fs::create_dir(&raw)?;
+    }
+    let sequence = OUTPUT_SEQUENCE.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    let output_refs = vec![
+        format!("raw/exec-{sequence}.stdout"),
+        format!("raw/exec-{sequence}.stderr"),
+    ];
+    crate::evidence::write_new(&write_dir.join(&output_refs[0]), &stdout)?;
+    crate::evidence::write_new(&write_dir.join(&output_refs[1]), &stderr)?;
+    let stdout = String::from_utf8_lossy(&stdout).into_owned();
+    let stderr = String::from_utf8_lossy(&stderr).into_owned();
     Ok(Execution {
+        output_refs,metadata_output_truncated:false,
         executable_sha256,
         executable: exe.display().to_string(),
         arguments: args.to_vec(),

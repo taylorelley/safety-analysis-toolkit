@@ -39,7 +39,7 @@ pub struct Link {
     pub from: String,
     pub to: String,
 }
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Manifest {
     pub version: u32,
@@ -59,6 +59,14 @@ pub struct Symbol {
     pub comment: String,
     pub macro_expansion: bool,
     pub template_parent: String,
+    #[serde(default)]
+    pub template_kind: String,
+    #[serde(default)]
+    pub calls: Vec<String>,
+    #[serde(default)]
+    pub unresolved_calls: usize,
+    #[serde(default)]
+    pub build_group: String,
     #[serde(default)]
     pub variant: String,
 }
@@ -87,7 +95,7 @@ fn allowed(a: &Kind, b: &Kind) -> bool {
             | (Kind::ChangeRequest, _)
     )
 }
-fn reachable(from: &str, to: &str, links: &[Link]) -> bool {
+pub(crate) fn reachable(from: &str, to: &str, links: &[Link]) -> bool {
     let mut todo = vec![from];
     let mut seen = BTreeSet::new();
     while let Some(id) = todo.pop() {
@@ -115,7 +123,30 @@ fn validate(manifest: &mut Manifest, symbols: &[Symbol]) -> Vec<(String, Option<
     for s in symbols.iter().filter(|s| s.definition) {
         nodes.entry(s.usr.clone()).or_insert(Kind::Code);
     }
+    let mut signatures: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
     for s in symbols.iter().filter(|s| s.definition) {
+        signatures.entry(s.usr.clone()).or_default().insert(format!(
+            "{:?}|{:?}|{:?}|{:?}",
+            tokens(&s.comment, "@req"),
+            tokens(&s.comment, "@design"),
+            tokens(&s.comment, "@test"),
+            tokens(&s.comment, "@baseline")
+        ));
+    }
+    for s in symbols.iter().filter(|s| s.definition) {
+        if s.unresolved_calls > 0 {
+            gaps.push((
+                format!(
+                    "{} indirect, virtual or lambda call relationships unresolved for {}",
+                    s.unresolved_calls, s.name
+                ),
+                Some(s.clone()),
+            ));
+        }
+        if signatures.get(&s.usr).is_some_and(|set| set.len() > 1) {
+            gaps.push(("Annotations differ across translation-unit contexts; automatic mapping is ambiguous".into(),Some(s.clone())));
+            continue;
+        }
         let tests = tokens(&s.comment, "@test");
         let targets = if tests.is_empty() {
             vec![s.usr.clone()]
@@ -173,6 +204,18 @@ fn validate(manifest: &mut Manifest, symbols: &[Symbol]) -> Vec<(String, Option<
         }
     }
     for n in &manifest.nodes {
+        if n.kind == Kind::Requirement
+            && valid.iter().any(|l| {
+                l.from == n.id
+                    && nodes.get(&l.to) == Some(&Kind::Requirement)
+                    && reachable(&l.to, &n.id, &valid)
+            })
+        {
+            gaps.push((
+                format!("Cyclic requirement parent relationship at {}", n.id),
+                None,
+            ));
+        }
         if n.kind == Kind::Requirement {
             if !n.root
                 && !valid
@@ -210,9 +253,9 @@ fn validate(manifest: &mut Manifest, symbols: &[Symbol]) -> Vec<(String, Option<
     }
     gaps
 }
-fn load_manifest(root: &Path, path: &Path) -> Result<Manifest> {
+pub(crate) fn load_manifest(root: &Path, path: &Path) -> Result<Manifest> {
     let path = inside(root, path)?;
-    let text = fs::read_to_string(path)?;
+    let text = String::from_utf8(crate::config::read_bounded(&path, 4 * 1024 * 1024)?)?;
     let text = if text.starts_with("---\n") {
         text.strip_prefix("---\n")
             .unwrap()
@@ -228,12 +271,54 @@ fn load_manifest(root: &Path, path: &Path) -> Result<Manifest> {
     };
     Ok(m)
 }
+pub fn check_coverage_links(
+    root: &Path,
+    c: &Config,
+    requirements: &[String],
+    tests: &[String],
+) -> Result<()> {
+    if requirements.is_empty() && tests.is_empty() {
+        return Ok(());
+    }
+    let manifest = load_manifest(root, &c.trace.manifest)?;
+    for req in requirements {
+        anyhow::ensure!(
+            manifest
+                .nodes
+                .iter()
+                .any(|n| n.id == *req && n.kind == Kind::Requirement),
+            "unknown coverage requirement {req}"
+        );
+        anyhow::ensure!(
+            tests
+                .iter()
+                .any(|test| reachable(req, test, &manifest.links)),
+            "coverage requirement {req} has no linked supplied test"
+        );
+    }
+    for test in tests {
+        anyhow::ensure!(
+            manifest
+                .nodes
+                .iter()
+                .any(|n| n.id == *test && n.kind == Kind::Test),
+            "unknown coverage test {test}"
+        );
+        anyhow::ensure!(
+            requirements
+                .iter()
+                .any(|req| reachable(req, test, &manifest.links)),
+            "coverage test {test} has no linked supplied requirement"
+        );
+    }
+    Ok(())
+}
 pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
     let units = discovery::database(root, &c.build.compile_commands)?;
     let (mut run, dir) = evidence::begin(root, c, "trace")?;
     run.completeness.total = units.len();
     run.completeness.build_variants = units.iter().map(|u| u.variant.clone()).collect();
-    let mut manifest = match load_manifest(root, &c.trace.manifest) {
+    let manifest = match load_manifest(root, &c.trace.manifest) {
         Ok(m) => m,
         Err(e) => {
             run.completeness.failed = units.len();
@@ -249,12 +334,37 @@ pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
         return evidence::finish(root, c, &dir, run);
     };
     let mut symbols = Vec::new();
+    let mut groups = BTreeSet::new();
+
     for (i, u) in units.iter().enumerate() {
+        if runner::cancelled() {
+            run.completeness.failed += units.len() - i;
+            break;
+        }
         if !u.unsupported.is_empty() {
             run.completeness.unsupported += 1;
             run.limitations.extend(u.unsupported.clone());
             continue;
         }
+        let matched: Vec<_> = c
+            .build
+            .variants
+            .iter()
+            .filter(|(_, defs)| defs.iter().all(|d| u.definitions.contains(d)))
+            .map(|(name, _)| name.clone())
+            .collect();
+        let group = if matched.len() == 1 {
+            matched[0].clone()
+        } else if c.build.variants.is_empty()
+            && units.iter().filter(|unit| unit.file == u.file).count() == 1
+        {
+            "default".into()
+        } else {
+            run.completeness.unsupported += 1;
+            run.limitations.push(format!("{}: define an unambiguous build.variants grouping before merging trace relationships",u.variant));
+            continue;
+        };
+        groups.insert(group.clone());
         let work = dir.join(format!("unit-{i}"));
         fs::create_dir(&work)?;
         let db = serde_json::json!([{"directory":u.directory,"file":u.file,"arguments":std::iter::once(u.compiler.clone()).chain(u.arguments.clone()).collect::<Vec<_>>()}]);
@@ -266,6 +376,10 @@ pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
             &tool,
             &[
                 format!("-p={}", work.display()),
+                format!(
+                    "--dependencies={}",
+                    work.join("dependencies.json").display()
+                ),
                 u.file.display().to_string(),
             ],
             &u.directory,
@@ -281,6 +395,21 @@ pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
                 )?;
                 evidence::write_new(&dir.join(format!("raw/index-{i}.log")), e.stderr.as_bytes())?;
                 let parsed = (|| -> Result<Vec<Symbol>> {
+                    let dependencies: Vec<String> =
+                        serde_json::from_slice(&crate::config::read_bounded(
+                            &work.join("dependencies.json"),
+                            4 * 1024 * 1024,
+                        )?)?;
+                    let mut hashes = std::collections::BTreeMap::new();
+                    for name in dependencies {
+                        let path = u.directory.join(&name).canonicalize()?;
+                        anyhow::ensure!(path.is_file(), "non-file dependency");
+                        hashes.insert(path.display().to_string(), evidence::hash_file(&path)?);
+                    }
+                    evidence::write_new(
+                        &work.join("dependency-hashes.json"),
+                        &serde_json::to_vec_pretty(&hashes)?,
+                    )?;
                     let mut out = Vec::new();
                     for line in e.stdout.lines() {
                         let mut s: Symbol = serde_json::from_str(line)?;
@@ -292,6 +421,7 @@ pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
                             .display()
                             .to_string();
                         s.variant = u.variant.clone();
+                        s.build_group = group.clone();
                         out.push(s)
                     }
                     Ok(out)
@@ -310,7 +440,7 @@ pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
                 } else {
                     run.completeness.failed += 1
                 }
-                run.executions.push(e);
+                run.record(e);
             }
             Err(e) => {
                 run.completeness.failed += 1;
@@ -318,35 +448,44 @@ pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
             }
         }
     }
-    let gaps = validate(&mut manifest, &symbols);
-    for (message, symbol) in gaps {
-        let (file, line, column, variant) = if let Some(s) = symbol {
-            (s.file, s.line, s.column, s.variant)
-        } else {
-            (
-                c.trace.manifest.display().to_string(),
-                1,
-                1,
-                "manifest".into(),
-            )
-        };
-        run.findings.push(Finding {
-            id: String::new(),
-            tool: "safety-trace".into(),
-            rule_id: format!("trace-{}", &evidence::hash(message.as_bytes())[..16]),
-            file,
-            line,
-            column,
-            severity: "warning".into(),
-            message,
-            build_variant: variant,
-            outcome: "DIAGNOSTIC".into(),
-            native_references: vec!["trace.json".into()],
-        });
+    let mut graphs = std::collections::BTreeMap::new();
+    for group in groups {
+        let mut graph = manifest.clone();
+        let members: Vec<_> = symbols
+            .iter()
+            .filter(|s| s.build_group == group)
+            .cloned()
+            .collect();
+        let gaps = validate(&mut graph, &members);
+        for (message, symbol) in gaps {
+            let (file, line, column, variant) = if let Some(s) = symbol {
+                (s.file, s.line, s.column, s.variant)
+            } else {
+                (c.trace.manifest.display().to_string(), 1, 1, group.clone())
+            };
+            run.findings.push(Finding {
+                id: String::new(),
+                tool: "safety-trace".into(),
+                rule_id: format!("trace-{}", &evidence::hash(message.as_bytes())[..16]),
+                file,
+                line,
+                column,
+                severity: "warning".into(),
+                message,
+                build_variant: variant,
+                outcome: "DIAGNOSTIC".into(),
+                native_references: vec!["trace.json".into()],
+                ..Default::default()
+            });
+        }
+
+        graphs.insert(group, graph);
     }
     evidence::write_new(
         &dir.join("trace.json"),
-        &serde_json::to_vec_pretty(&serde_json::json!({"manifest":manifest,"symbols":symbols}))?,
+        &serde_json::to_vec_pretty(
+            &serde_json::json!({"manifest":manifest,"variant_graphs":graphs,"symbols":symbols}),
+        )?,
     )?;
     run.findings = crate::findings::correlate(run.findings, root);
     run.complete = run.completeness.complete();
@@ -357,7 +496,7 @@ pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
     } else {
         Status::Findings
     };
-    run.limitations.push("Trace links establish recorded relationships only, not semantic requirements satisfaction. Call graph extraction and complete template-specialization coverage are outstanding.".into());
+    run.limitations.push("Trace links establish recorded relationships only, not semantic requirements satisfaction. Direct call edges and template identities are retained; indirect calls/lambda ownership are explicitly unresolved and require review.".into());
     evidence::finish(root, c, &dir, run)
 }
 #[cfg(test)]

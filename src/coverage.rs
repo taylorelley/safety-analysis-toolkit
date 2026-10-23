@@ -7,7 +7,7 @@ use crate::{
 use anyhow::{Context, Result};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use std::{collections::BTreeMap, fs, path::Path};
+use std::{collections::BTreeMap, path::Path};
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Provenance {
@@ -53,7 +53,7 @@ pub fn import(
     ) {
         Ok(e) => {
             let compatible = e.failure.is_none() && e.stdout.contains("version 19.1.7");
-            run.executions.push(e);
+            run.record(e);
             if !compatible {
                 run.completeness.unsupported = units.len();
                 run.limitations
@@ -68,8 +68,10 @@ pub fn import(
         }
     }
     let mut provenance_valid = false;
+    let mut requirements = Vec::new();
+    let mut tests = Vec::new();
     if let Some(path) = provenance {
-        let data = fs::read(inside(root, path)?)?;
+        let data = crate::config::read_bounded(&inside(root, path)?, 4 * 1024 * 1024)?;
         let p: Provenance = serde_json::from_slice(&data)?;
         provenance_valid = p.version == 1
             && ["host", "target"].contains(&p.execution_environment.as_str())
@@ -88,7 +90,13 @@ pub fn import(
                 .sources
                 .contains_key(unit.file.strip_prefix(root)?.to_string_lossy().as_ref());
         }
-        let _links = (&p.test_ids, &p.requirement_ids);
+        if let Err(e) = crate::trace::check_coverage_links(root, c, &p.requirement_ids, &p.test_ids)
+        {
+            provenance_valid = false;
+            run.limitations.push(format!("Coverage trace links: {e}"));
+        }
+        requirements = p.requirement_ids;
+        tests = p.test_ids;
         evidence::write_new(&dir.join("coverage-provenance.json"), &data)?;
     }
     if !provenance_valid {
@@ -157,7 +165,22 @@ pub fn import(
                                     let count = stats["count"].as_u64().unwrap_or(0);
                                     let covered = stats["covered"].as_u64().unwrap_or(0);
                                     if covered < count {
-                                        run.findings.push(Finding{id:String::new(),tool:"llvm-cov-19".into(),rule_id:format!("coverage-gap-{metric}"),file:path.display().to_string(),line:1,column:1,severity:"warning".into(),message:format!("{metric}: {covered}/{count} measured items covered; investigate linked requirements and requirements-based tests"),build_variant:"coverage-artifact".into(),outcome:"DIAGNOSTIC".into(),native_references:vec!["raw/llvm-cov.json".into()]});
+                                        run.findings.push(Finding{id:String::new(),tool:"llvm-cov-19".into(),rule_id:format!("coverage-gap-{metric}"),file:path.display().to_string(),line:1,column:1,severity:"warning".into(),message:format!("{metric}: {covered}/{count} measured items covered; investigate linked requirements and requirements-based tests"),build_variant:"coverage-artifact".into(),outcome:"DIAGNOSTIC".into(),native_references:vec!["raw/llvm-cov.json".into()], ..Default::default()});
+                                    }
+                                }
+                                if let Some(records) = file["mcdc_records"].as_array() {
+                                    for record in records {
+                                        if let Some(conditions) =
+                                            record.get(6).and_then(|v| v.as_array())
+                                        {
+                                            for (condition, covered) in
+                                                conditions.iter().enumerate()
+                                            {
+                                                if covered == false {
+                                                    run.findings.push(Finding{id:String::new(),tool:"llvm-cov-19".into(),rule_id:format!("coverage-mcdc-condition-{}",condition+1),file:path.display().to_string(),line:record[0].as_u64().unwrap_or(1) as usize,column:record[1].as_u64().unwrap_or(1) as usize,severity:"warning".into(),message:format!("Condition {} has no measured MC/DC independence pair; investigate requirements-based tests, infeasibility and instrumentation scope",condition+1),build_variant:"coverage-artifact".into(),outcome:"DIAGNOSTIC".into(),native_references:vec!["raw/llvm-cov.json".into()], ..Default::default()});
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                                 if file["summary"]["branches"]["count"].as_u64().unwrap_or(0) > 0
@@ -199,12 +222,16 @@ pub fn import(
             } else {
                 run.completeness.failed = units.len();
             }
-            run.executions.push(e);
+            run.record(e);
         }
         Err(e) => {
             run.completeness.failed = units.len();
             run.limitations.push(e.to_string());
         }
+    }
+    for finding in &mut run.findings {
+        finding.requirement_ids = requirements.clone();
+        finding.test_ids = tests.clone();
     }
     run.findings = crate::findings::correlate(run.findings, root);
     run.status = if !run.complete {

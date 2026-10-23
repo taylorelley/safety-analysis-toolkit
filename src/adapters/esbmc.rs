@@ -99,14 +99,30 @@ fn results(log: &str, exit: Option<i32>, bounded: u32, bits: u32) -> Vec<Propert
     }
     properties
 }
+pub struct Options<'a> {
+    pub unwind: u32,
+    pub bits: u32,
+    pub method: &'a str,
+    pub entry: &'a str,
+}
 pub fn prove(
     root: &Path,
     c: &Config,
     source: &Path,
     variant: Option<&str>,
-    unwind: u32,
-    bits: u32,
+    options: Options<'_>,
 ) -> Result<Run> {
+    let Options {
+        unwind,
+        bits,
+        method,
+        entry,
+    } = options;
+    anyhow::ensure!(
+        ["bmc", "induction"].contains(&method),
+        "unsupported ESBMC method"
+    );
+
     anyhow::ensure!(
         (1..=10000).contains(&unwind) && [32, 64].contains(&bits),
         "invalid verification bounds or target bits"
@@ -156,14 +172,14 @@ pub fn prove(
         }
     };
     let supported = version.failure.is_none() && version.stdout.contains("ESBMC version 8.6.0");
-    run.executions.push(version);
+    run.record(version);
     if !supported {
         run.completeness.unsupported = 1;
         run.limitations
             .push("Only ESBMC 8.6.0 output is currently supported".into());
         return evidence::finish(root, c, &dir, run);
     }
-    let args = std::iter::once(source.display().to_string())
+    let mut args = std::iter::once(source.display().to_string())
         .chain(vec![
             "--z3".into(),
             "--unwind".into(),
@@ -174,6 +190,14 @@ pub fn prove(
         ])
         .chain(extra)
         .collect::<Vec<_>>();
+    args.extend(["--function".into(), entry.into()]);
+    if method == "induction" {
+        args.extend([
+            "--k-induction".into(),
+            "--max-k-step".into(),
+            unwind.to_string(),
+        ]);
+    }
     match runner::execute(
         &tool,
         &args,
@@ -187,6 +211,13 @@ pub fn prove(
             let log = format!("{}\n{}", e.stdout, e.stderr);
             evidence::write_new(&dir.join("raw/esbmc.log"), log.as_bytes())?;
             run.properties = results(&log, e.exit_code, unwind, bits);
+            for p in &mut run.properties {
+                p.scope = p.scope.replace("entry main", &format!("entry {entry}"));
+                if method == "induction" {
+                    p.scope.push_str("; k-induction requested; phase logs preserved; finite bound is the induction search limit, not an unrestricted model claim");
+                }
+            }
+
             if let Some(failure) = &e.failure
                 && failure != "nonzero_exit"
             {
@@ -223,14 +254,14 @@ pub fn prove(
             } else {
                 Status::Passed
             };
-            run.executions.push(e);
+            run.record(e);
         }
         Err(e) => {
             run.completeness.failed = 1;
             run.limitations.push(e.to_string());
         }
     }
-    run.limitations.push("Advisory source-model verification only. No independently approved harness/environment assumptions were supplied. Counterexamples are model traces, not automatically confirmed production defects. No induction-based proof is claimed.".into());
+    run.limitations.push("Advisory source-model verification only. No independently approved harness/environment assumptions were supplied. Counterexamples are model traces, not automatically confirmed production defects. Proof method and induction search limits, where selected, are retained in verification.json and native phase logs.".into());
     evidence::finish(root, c, &dir, run)
 }
 #[cfg(test)]

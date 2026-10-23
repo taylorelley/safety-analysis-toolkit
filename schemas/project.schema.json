@@ -96,6 +96,35 @@
               "type": "null"
             }
           ]
+        },
+        "registries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+          }
+        },
+        "deviations": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "recategorization": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [],
@@ -107,6 +136,16 @@
         "compile_commands": {
           "type": "string",
           "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+        },
+        "variants": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          }
         }
       },
       "required": [],
@@ -118,6 +157,17 @@
         "directory": {
           "type": "string",
           "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+        },
+        "reviews": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [],

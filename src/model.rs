@@ -26,8 +26,28 @@ impl Completeness {
             && self.excluded == 0
     }
 }
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Finding {
+    #[serde(default = "schema_one")]
+    pub schema_version: u32,
+    #[serde(default)]
+    pub run_id: String,
+    #[serde(default)]
+    pub category: String,
+    #[serde(default)]
+    pub end_line: Option<usize>,
+    #[serde(default)]
+    pub end_column: Option<usize>,
+    #[serde(default)]
+    pub certainty: Option<String>,
+    #[serde(default)]
+    pub requirement_ids: Vec<String>,
+    #[serde(default)]
+    pub test_ids: Vec<String>,
+    #[serde(default)]
+    pub related_findings: Vec<String>,
+    #[serde(default)]
+    pub human_disposition_ref: Option<String>,
     pub id: String,
     pub tool: String,
     pub rule_id: String,
@@ -42,6 +62,10 @@ pub struct Finding {
 }
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Execution {
+    #[serde(default)]
+    pub output_refs: Vec<String>,
+    #[serde(default)]
+    pub metadata_output_truncated: bool,
     pub executable_sha256: String,
     pub restrictions: String,
     pub executable: String,
@@ -62,6 +86,8 @@ pub struct Run {
     pub configuration: serde_json::Value,
     #[serde(default)]
     pub toolkit: serde_json::Value,
+    #[serde(default)]
+    pub verification: serde_json::Value,
     pub id: String,
     pub operation: String,
     pub project: String,
@@ -79,6 +105,19 @@ pub struct Run {
     pub git: Option<serde_json::Value>,
 }
 impl Run {
+    pub fn record(&mut self, mut execution: Execution) {
+        for text in [&mut execution.stdout, &mut execution.stderr] {
+            if text.len() > 16384 {
+                let mut end = 16384;
+                while !text.is_char_boundary(end) {
+                    end -= 1
+                }
+                text.truncate(end);
+                execution.metadata_output_truncated = true;
+            }
+        }
+        self.executions.push(execution);
+    }
     pub fn exit_code(&self) -> i32 {
         match self.status {
             Status::Passed => 0,
@@ -119,4 +158,8 @@ impl ProofOutcome {
             Self::Failed => "FAILED",
         }
     }
+}
+
+fn schema_one() -> u32 {
+    1
 }

@@ -25,10 +25,6 @@ pub fn hash_file(path: &Path) -> Result<String> {
     let mut hasher = Sha256::new();
     let mut bytes = [0u8; 65536];
     loop {
-        anyhow::ensure!(
-            !crate::runner::cancelled(),
-            "request cancelled during hashing"
-        );
         let n = file.read(&mut bytes)?;
         if n == 0 {
             break;
@@ -94,13 +90,23 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
     fs::create_dir(dir.join("raw"))?;
     let inputs = fingerprint(root, &base)?;
     write_new(&dir.join("config.json"), &serde_json::to_vec_pretty(c)?)?;
+    let mut run=Run{schema_version:1,configuration:serde_json::to_value(c)?,verification:crate::verification::context(),toolkit:serde_json::json!({"version":env!("CARGO_PKG_VERSION"),"executable_sha256":hash_file(&std::env::current_exe()?)?,"host_arch":std::env::consts::ARCH}),id,operation:operation.into(),project:c.project.name.clone(),status:Status::Incomplete,complete:false,completeness:Completeness::default(),started_unix_ms:now(),completed_unix_ms:0,inputs,executions:Vec::new(),findings:Vec::new(),properties:Vec::new(),limitations:vec!["Automated evidence for human review; no certification or compliance approval.".into(),"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.".into(),"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.".into()],git:None};
     if c.coding.c.is_some() || c.coding.cpp.is_some() {
+        crate::misra::drafts(root, c, &run)?;
+    }
+    if let Some(path) = &c.evidence.reviews {
+        let bytes = fs::read(inside(root, path)?)?;
+        let records: Vec<crate::misra::Review> = serde_yaml::from_slice(&bytes)?;
+        for review in &records {
+            crate::misra::review_valid(root, review)?;
+        }
         write_new(
-            &dir.join("misra-drafts.json"),
-            &serde_json::to_vec_pretty(&crate::misra::drafts(c))?,
+            &dir.join("human-reviews.json"),
+            &serde_json::to_vec_pretty(
+                &serde_json::json!({"origin":"supplied external process; not authenticated or approved by toolkit","records":records}),
+            )?,
         )?;
     }
-    let mut run=Run{schema_version:1,configuration:serde_json::to_value(c)?,toolkit:serde_json::json!({"version":env!("CARGO_PKG_VERSION"),"executable_sha256":hash_file(&std::env::current_exe()?)?,"host_arch":std::env::consts::ARCH}),id,operation:operation.into(),project:c.project.name.clone(),status:Status::Incomplete,complete:false,completeness:Completeness::default(),started_unix_ms:now(),completed_unix_ms:0,inputs,executions:Vec::new(),findings:Vec::new(),properties:Vec::new(),limitations:vec!["Automated evidence for human review; no certification or compliance approval.".into(),"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.".into(),"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.".into()],git:None};
     if let Some(git) = crate::discovery::executable("git", &c.tools.allowlist) {
         let mut values = serde_json::Map::new();
         for (name, args) in [
@@ -137,7 +143,7 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
                             },
                         );
                     }
-                    run.executions.push(e);
+                    run.record(e);
                 }
                 Err(e) => run
                     .limitations
@@ -151,12 +157,52 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
     Ok((run, dir))
 }
 pub fn finish(root: &Path, c: &Config, dir: &Path, mut run: Run) -> Result<Run> {
-    let after = fingerprint(root, &root.join(&c.evidence.directory))?;
-    if after != run.inputs {
+    let changed = if crate::runner::cancelled() {
+        run.limitations
+            .push("Execution cancelled; final input stability could not be established".into());
+        true
+    } else {
+        fingerprint(root, &root.join(&c.evidence.directory))? != run.inputs
+    };
+    if changed {
         run.status = Status::Incomplete;
         run.complete = false;
         run.limitations
             .push("Inputs changed during execution".into());
+    }
+    if !run.verification.is_null() {
+        write_new(
+            &dir.join("verification.json"),
+            &serde_json::to_vec_pretty(&run.verification)?,
+        )?;
+        if let Some(assumptions) = run.verification["harness"]["input_assumptions"].as_array() {
+            for p in &mut run.properties {
+                for assumption in assumptions.iter().filter_map(|s| s.as_str()) {
+                    p.assumptions.push(format!(
+                        "User-supplied harness assumption (not approved by this tool): {assumption}"
+                    ));
+                }
+            }
+        }
+    }
+    if c.coding.c.is_some() || c.coding.cpp.is_some() {
+        let drafts = crate::misra::drafts(root, c, &run)?;
+        write_new(
+            &dir.join("misra-drafts.json"),
+            &serde_json::to_vec_pretty(&drafts)?,
+        )?;
+    }
+    for finding in &mut run.findings {
+        finding.schema_version = 1;
+        finding.run_id = run.id.clone();
+        finding.category = if finding.tool == "safety-trace" {
+            "traceability-gap"
+        } else if finding.tool == "llvm-cov-19" {
+            "structural-coverage"
+        } else {
+            "static-diagnostic"
+        }
+        .into();
     }
     run.completed_unix_ms = now();
     write_new(

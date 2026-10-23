@@ -4,7 +4,6 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
     collections::BTreeSet,
-    fs,
     path::{Path, PathBuf},
 };
 #[derive(Debug, Deserialize)]
@@ -30,7 +29,8 @@ pub struct Unit {
 }
 pub fn database(root: &Path, path: &Path) -> Result<Vec<Unit>> {
     let path = inside(root, path)?;
-    let entries: Vec<Entry> = serde_json::from_slice(&fs::read(path)?)?;
+    let entries: Vec<Entry> =
+        serde_json::from_slice(&crate::config::read_bounded(&path, 32 * 1024 * 1024)?)?;
     if entries.is_empty() {
         bail!("empty compilation database")
     }
@@ -296,7 +296,7 @@ pub fn doctor(root: &Path, c: &crate::config::Config) -> Result<crate::model::Ru
             ) {
                 Ok(e) => {
                     missing |= required && e.failure.is_some();
-                    run.executions.push(e)
+                    run.record(e)
                 }
                 Err(e) => {
                     missing |= required;
@@ -325,6 +325,7 @@ pub fn doctor(root: &Path, c: &crate::config::Config) -> Result<crate::model::Ru
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
     #[test]
     fn flags() {
         assert!(

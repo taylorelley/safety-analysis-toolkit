@@ -32,7 +32,7 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     match version {
         Ok(v) => {
             let valid = v.failure.is_none() && v.stdout.contains("version 19.1.7");
-            run.executions.push(v);
+            run.record(v);
             if !valid {
                 run.completeness.unsupported = units.len();
                 run.limitations.push("Requires pinned LLVM 19.1.7".into());
@@ -56,16 +56,22 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
         evidence::write_new(
             &dir.join("module.json"),
             &serde_json::to_vec_pretty(
-                &serde_json::json!({"path":path,"sha256":hash,"check":"safety-prohibited-goto","misra_mapping":"unvalidated"}),
+                &serde_json::json!({"path":path,"sha256":hash,"checks":["safety-prohibited-goto","safety-unsafe-library-call","safety-repeated-macro-parameter"],"misra_mapping":"unvalidated"}),
             )?,
         )?;
         run.limitations
-            .push("Custom goto project-policy check enabled; MISRA mapping unvalidated".into());
+            .push("Original project-policy checks enabled; MISRA mappings unvalidated".into());
         Some(path)
     } else {
         None
     };
     for (i, u) in units.iter().enumerate() {
+        if runner::cancelled() {
+            run.completeness.failed += units.len() - i;
+            run.limitations
+                .push("Remaining translation units cancelled".into());
+            break;
+        }
         if !u.unsupported.is_empty() {
             run.completeness.unsupported += 1;
             run.limitations.extend(
@@ -92,7 +98,7 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
             u.file.display().to_string(),
         ];
         if let Some(path) = module {
-            args[1] = format!("--checks={CHECKS},safety-prohibited-goto");
+            args[1] = format!("--checks={CHECKS},safety-*");
             args.insert(0, format!("--load={}", path.display()));
         }
         match runner::execute(
@@ -135,7 +141,7 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
                 } else {
                     run.completeness.analyzed += 1
                 }
-                run.executions.push(e);
+                run.record(e);
             }
             Err(e) => {
                 run.completeness.failed += 1;

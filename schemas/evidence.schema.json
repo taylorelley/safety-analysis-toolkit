@@ -149,6 +149,15 @@
           "timeout_seconds": {
             "type": "integer",
             "minimum": 0
+          },
+          "output_refs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "metadata_output_truncated": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -210,6 +219,59 @@
             "items": {
               "type": "string"
             }
+          },
+          "schema_version": {
+            "const": 1
+          },
+          "run_id": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "end_line": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "end_column": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "certainty": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "requirement_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "test_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "related_findings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "human_disposition_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -311,6 +373,12 @@
       ]
     },
     "toolkit": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "verification": {
       "type": [
         "object",
         "null"

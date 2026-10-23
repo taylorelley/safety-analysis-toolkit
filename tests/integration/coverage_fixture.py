@@ -24,6 +24,7 @@ with tempfile.TemporaryDirectory() as directory:
     db = [{"directory":directory,"file":str(source),"arguments":args}]
     (root/"compile_commands.json").write_text(json.dumps(db))
     (root/"safety.yaml").write_text("version: 1\nproject: {name: mcdc-known-gap}\nbuild: {compile_commands: compile_commands.json}\n")
+    (root/"trace.yaml").write_text("version: 1\nnodes:\n- {id: REQ-DEC-1, kind: requirement, root: true}\n- {id: TST-DEC-1, kind: test}\nlinks:\n- {from: REQ-DEC-1, to: TST-DEC-1}\n")
     def sha(path):
         return hashlib.sha256((root/path).read_bytes()).hexdigest()
     provenance = {"version":1,"binary_sha256":sha("test"),

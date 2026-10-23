@@ -24,6 +24,17 @@ struct Message {
     file: String,
     #[serde(rename = "FileOffset")]
     offset: usize,
+    #[serde(rename = "Ranges", default)]
+    ranges: Vec<SourceRange>,
+}
+#[derive(Deserialize)]
+struct SourceRange {
+    #[serde(rename = "FilePath")]
+    file: String,
+    #[serde(rename = "FileOffset")]
+    offset: usize,
+    #[serde(rename = "Length")]
+    length: usize,
 }
 pub fn parse(
     data: &[u8],
@@ -37,7 +48,28 @@ pub fn parse(
     for d in export.diagnostics {
         let file = directory.join(&d.message.file);
         let source = std::fs::read(&file).context("diagnostic source unavailable")?;
-        let offset = d.message.offset.min(source.len());
+        anyhow::ensure!(
+            d.message.offset <= source.len(),
+            "diagnostic offset outside source"
+        );
+        let offset = d.message.offset;
+        let end = d
+            .message
+            .ranges
+            .iter()
+            .find(|r| {
+                r.file == d.message.file
+                    && r.offset <= offset
+                    && r.offset.saturating_add(r.length) >= offset
+            })
+            .map(|r| r.offset.saturating_add(r.length).min(source.len()));
+        let end_line = end.map(|p| source[..p].iter().filter(|b| **b == b'\n').count() + 1);
+        let end_column = end.map(|p| {
+            source[..p]
+                .iter()
+                .rposition(|b| *b == b'\n')
+                .map_or(p + 1, |line| p - line)
+        });
         let prefix = &source[..offset];
         let line = prefix.iter().filter(|&&b| b == b'\n').count() + 1;
         let column = prefix
@@ -51,11 +83,14 @@ pub fn parse(
             file: file.display().to_string(),
             line,
             column,
+            end_line,
+            end_column,
             severity: d.level.unwrap_or("warning".into()).to_lowercase(),
             message: d.message.text,
             build_variant: variant.into(),
             outcome: "DIAGNOSTIC".into(),
             native_references: vec![reference.into()],
+            ..Default::default()
         });
     }
     Ok(findings)

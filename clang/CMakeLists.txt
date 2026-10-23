@@ -33,3 +33,11 @@ if(BUILD_TESTING)
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/index.py $<TARGET_FILE:safety-source-index>
   ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()
+if(BUILD_TESTING)
+ add_test(NAME original-policies COMMAND ${Python3_EXECUTABLE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/policies.py ${CLANG_TIDY}
+  $<TARGET_FILE:SafetyMisra> ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+endif()
+
+install(TARGETS safety-source-index RUNTIME DESTINATION bin)
+install(TARGETS SafetyMisra LIBRARY DESTINATION lib/safety)

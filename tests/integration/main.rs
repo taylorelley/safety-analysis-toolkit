@@ -232,6 +232,8 @@ fn real_custom_module() {
 #[ignore = "requires real safety-source-index on PATH"]
 fn real_ast_trace() {
     let t = fixture(true);
+    let config = serde_json::json!({"version":1,"project":{"name":"trace-variants"},"build":{"compile_commands":"compile_commands.json","variants":{"one":["VARIANT=1"],"two":["VARIANT=2"]}}});
+    fs::write(t.path().join("safety.yaml"), config.to_string()).unwrap();
     fs::write(t.path().join("trace.yaml"),"version: 1\nnodes:\n- {id: R1, kind: requirement, root: true}\n- {id: T1, kind: test}\nlinks:\n- {from: R1, to: T1}\n").unwrap();
     fs::write(
         t.path().join("safe.cpp"),
@@ -359,4 +361,185 @@ fn real_llvm_mcdc() {
         String::from_utf8_lossy(&out.stdout),
         String::from_utf8_lossy(&out.stderr)
     );
+}
+#[test]
+#[ignore = "requires pinned Frama-C Manganese and Clang 19.1.7"]
+fn real_frama_c() {
+    for (code, method, entry, expected, success) in [
+        (
+            "#include <assert.h>\nint main(void){int x=1;assert(x==1);return 0;}",
+            "eva",
+            "main",
+            "PROVEN",
+            true,
+        ),
+        (
+            "#include <assert.h>\nint main(void){int x=1;assert(x==2);return 0;}",
+            "eva",
+            "main",
+            "UNKNOWN",
+            false,
+        ),
+        (
+            "/*@ assigns \\nothing; ensures \\result == x; */\nint identity(int x){return x;}",
+            "wp",
+            "identity",
+            "PROVEN",
+            true,
+        ),
+    ] {
+        let t = proof_fixture(false, code);
+        let out = bin()
+            .args(["prove", "unsafe.c", "--path"])
+            .arg(t.path())
+            .args(["--engine", "frama-c", "--method", method, "--entry", entry])
+            .output()
+            .unwrap();
+        assert_eq!(
+            out.status.code(),
+            Some(if success { 0 } else { 3 }),
+            "{}",
+            String::from_utf8_lossy(&out.stdout)
+        );
+        let value: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert!(
+            value["properties"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|p| p["outcome"] == expected),
+            "{value}"
+        );
+        assert!(
+            value["properties"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .all(|p| p["scope"].as_str().unwrap().contains(entry))
+        );
+    }
+}
+
+#[test]
+fn malformed_harness_and_oversized_config_rejected() {
+    let t = proof_fixture(false, "int main(void){return 0;}");
+    fs::write(
+        t.path().join("harness.yaml"),
+        "version: 1\nsource: unsafe.c\nanalyzer: arbitrary-shell-command",
+    )
+    .unwrap();
+    let out = bin()
+        .args(["prove", "unsafe.c", "--path"])
+        .arg(t.path())
+        .args(["--harness", "harness.yaml"])
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(2));
+    fs::write(t.path().join("safety.yaml"), vec![b' '; 1024 * 1024 + 1]).unwrap();
+    let out = bin().arg("doctor").arg(t.path()).output().unwrap();
+    assert_eq!(out.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&out.stdout).contains("parser limit"));
+}
+#[test]
+#[ignore = "requires real ESBMC 8.6.0"]
+fn real_esbmc_induction_harness() {
+    let t = proof_fixture(
+        false,
+        "#include <assert.h>\nint main(void){int x=0;for(int i=0;i<5;i++)x++;assert(x==5);return 0;}",
+    );
+    let metadata = serde_json::json!({"version":1,"source":"unsafe.c","target":"main","property":"loop increments five times","input_assumptions":["sequential harness; fixed loop count"],"environment_model":"ESBMC sequential C model","build_configuration":"C11 64 bit","requirements":["TEST-REQ"],"analyzer":{"engine":"esbmc","method":"induction","entry":"main","bits":64,"unwind":8}});
+    fs::write(t.path().join("harness.yaml"), metadata.to_string()).unwrap();
+    let out = bin()
+        .args(["prove", "unsafe.c", "--path"])
+        .arg(t.path())
+        .args([
+            "--engine",
+            "esbmc",
+            "--method",
+            "induction",
+            "--harness",
+            "harness.yaml",
+        ])
+        .output()
+        .unwrap();
+    assert_eq!(
+        out.status.code(),
+        Some(0),
+        "{}",
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let r: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(r["verification"]["request"]["method"], "induction");
+    assert_eq!(r["verification"]["human_approval"], "not_granted_by_tool");
+    for p in r["properties"].as_array().unwrap() {
+        assert!(
+            p["scope"]
+                .as_str()
+                .unwrap()
+                .contains("induction search limit")
+        );
+        assert!(
+            p["assumptions"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|a| a.as_str().unwrap().contains("User-supplied"))
+        );
+    }
+    let mismatch = bin()
+        .args(["prove", "unsafe.c", "--path"])
+        .arg(t.path())
+        .args([
+            "--engine",
+            "esbmc",
+            "--method",
+            "bmc",
+            "--harness",
+            "harness.yaml",
+        ])
+        .output()
+        .unwrap();
+    assert_eq!(mismatch.status.code(), Some(2));
+}
+#[test]
+fn draft_misra_process_rejects_unreviewed_mapping_and_weakening() {
+    let t = fixture(false);
+    let mut config: serde_json::Value =
+        serde_yaml::from_slice(&fs::read(t.path().join("safety.yaml")).unwrap()).unwrap();
+    config["coding"] = serde_json::json!({"c":"MISRA-C:2012","registries":["registry.json"],"deviations":"deviations.json","recategorization":"grp.json"});
+    fs::write(t.path().join("safety.yaml"), config.to_string()).unwrap();
+    // Synthetic identifier tests process validation; it asserts no real MISRA mapping.
+    let mut registry = serde_json::json!({"edition":"MISRA-C:2012","inventory_complete":false,"inventory_source":"synthetic process fixture, not a MISRA guideline","original_checks":[],"rules":[{"rule_id":"TEST-ONLY","coverage":"manual","implementation":null,"automated_checks":[],"manual_review_required":true,"limitations":["synthetic test"],"validation":null}]});
+    fs::write(t.path().join("registry.json"), registry.to_string()).unwrap();
+    fs::write(t.path().join("deviations.json"),"[{\"id\":\"DEV-1\",\"edition\":\"MISRA-C:2012\",\"rule_id\":\"TEST-ONLY\",\"rationale\":\"investigation pending\",\"artifacts\":[\"safe.c\"],\"change_request\":\"CR-1\"}]").unwrap();
+    fs::write(t.path().join("grp.json"), "[]").unwrap();
+    let good = bin().arg("doctor").arg(t.path()).output().unwrap();
+    assert_ne!(
+        good.status.code(),
+        Some(2),
+        "{}",
+        String::from_utf8_lossy(&good.stdout)
+    );
+    let run: serde_json::Value = serde_json::from_slice(&good.stdout).unwrap();
+    let draft: serde_json::Value = serde_json::from_slice(
+        &fs::read(
+            t.path()
+                .join(".safety/runs")
+                .join(run["id"].as_str().unwrap())
+                .join("misra-drafts.json"),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    assert_eq!(draft["deviations"]["approved_by_tool"], false);
+    assert_eq!(draft["complete"], false);
+    registry["rules"][0]["coverage"] = "supported".into();
+    fs::write(t.path().join("registry.json"), registry.to_string()).unwrap();
+    let bad = bin().arg("doctor").arg(t.path()).output().unwrap();
+    assert_eq!(bad.status.code(), Some(2));
+    registry["rules"][0]["coverage"] = "manual".into();
+    fs::write(t.path().join("registry.json"), registry.to_string()).unwrap();
+    fs::write(t.path().join("grp.json"),"[{\"edition\":\"MISRA-C:2012\",\"rule_id\":\"TEST-ONLY\",\"original_category\":\"mandatory\",\"proposed_category\":\"advisory\",\"rationale\":\"test weakening\"}]").unwrap();
+    let bad = bin().arg("doctor").arg(t.path()).output().unwrap();
+    assert_eq!(bad.status.code(), Some(2));
 }

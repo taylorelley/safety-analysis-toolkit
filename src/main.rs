@@ -10,6 +10,7 @@ mod model;
 mod report;
 mod runner;
 mod trace;
+mod verification;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use config::Config;
@@ -61,6 +62,12 @@ enum Commands {
         engine: Engine,
         #[arg(long)]
         variant: Option<String>,
+        #[arg(long)]
+        method: Option<String>,
+        #[arg(long)]
+        harness: Option<PathBuf>,
+        #[arg(long, default_value = "main")]
+        entry: String,
         #[arg(long, default_value_t = 8)]
         unwind: u32,
         #[arg(long, default_value_t = 64)]
@@ -127,6 +134,15 @@ fn emit(run: &model::Run, format: Format) -> Result<()> {
 fn main() {
     let cli = Cli::parse();
     let is_mcp = matches!(cli.command, Commands::Mcp { .. });
+    #[cfg(unix)]
+    if !is_mcp {
+        extern "C" fn interrupt(_: libc::c_int) {
+            runner::CLI_CANCELLED.store(true, std::sync::atomic::Ordering::Relaxed);
+        }
+        unsafe {
+            libc::signal(libc::SIGINT, interrupt as *const () as libc::sighandler_t);
+        }
+    }
     let result = run(cli);
     let exit = match result {
         Ok(code) => code,
@@ -137,7 +153,7 @@ fn main() {
             } else {
                 println!("{error}")
             };
-            2
+            if runner::cancelled() { 3 } else { 2 }
         }
     };
     std::process::exit(exit)
@@ -165,18 +181,33 @@ fn run(cli: Cli) -> Result<i32> {
             path,
             engine,
             variant,
+            method,
+            harness,
+            entry,
             unwind,
             bits,
             format,
         } => {
             let root = root(path)?;
             let c = Config::load(&root)?;
-            let r = match engine {
-                Engine::Esbmc => {
-                    adapters::esbmc::prove(&root, &c, &source, variant.as_deref(), unwind, bits)?
-                }
-                Engine::FramaC => adapters::frama_c::prove(&root, &c, &source)?,
-            };
+            let r = verification::verify(
+                &root,
+                &c,
+                verification::Request {
+                    source,
+                    engine: match engine {
+                        Engine::Esbmc => "esbmc",
+                        Engine::FramaC => "frama-c",
+                    }
+                    .into(),
+                    variant,
+                    method,
+                    unwind,
+                    bits,
+                    entry,
+                    harness,
+                },
+            )?;
             emit(&r, format)?;
             Ok(r.exit_code())
         }

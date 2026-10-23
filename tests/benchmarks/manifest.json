@@ -1,0 +1,12 @@
+{
+  "version":1,
+  "cases":[
+    {"file":"null.c","engine":"scan","defect":true,"category":"null dereference"},
+    {"file":"bounds.c","engine":"scan","defect":true,"category":"array bounds"},
+    {"file":"divzero.c","engine":"scan","defect":true,"category":"division by zero"},
+    {"file":"shift.c","engine":"scan","defect":true,"category":"undefined shift"},
+    {"file":"guard.c","engine":"scan","defect":false,"category":"valid null guard"},
+    {"file":"templates.cpp","engine":"scan","defect":false,"category":"valid overload/template"},
+    {"file":"overflow.c","engine":"esbmc","defect":true,"category":"signed overflow"}
+  ]
+}

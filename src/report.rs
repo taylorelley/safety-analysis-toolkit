@@ -88,8 +88,21 @@ pub fn markdown(r: &Run) -> String {
     s
 }
 pub fn sarif(r: &Run) -> Value {
-    let results:Vec<Value>=r.findings.iter().map(|f|json!({"ruleId":f.rule_id,"level":if f.severity=="error"{"error"}else{"warning"},"message":{"text":f.message},"locations":[{"physicalLocation":{"artifactLocation":{"uri":uri(&f.file)},"region":{"startLine":f.line.max(1),"startColumn":f.column.max(1)}}}],"properties":{"buildVariant":f.build_variant,"outcome":f.outcome,"nativeReferences":f.native_references}})).collect();
+    let results:Vec<Value>=r.findings.iter().map(|f|json!({"ruleId":f.rule_id,"level":if f.severity=="error"{"error"}else{"warning"},"message":{"text":f.message},"locations":[{"physicalLocation":{"artifactLocation":{"uri":uri(&f.file)},"region":region(f)}}],"properties":{"buildVariant":f.build_variant,"outcome":f.outcome,"nativeReferences":f.native_references}})).collect();
     json!({"$schema":"https://json.schemastore.org/sarif-2.1.0.json","version":"2.1.0","runs":[{"tool":{"driver":{"name":"safety","version":env!("CARGO_PKG_VERSION")}},"results":results,"invocations":[{"executionSuccessful":r.complete}],"properties":{"status":r.status,"complete":r.complete,"limitations":r.limitations}}]})
+}
+fn region(f: &crate::model::Finding) -> Value {
+    let mut v = json!({"startLine":f.line.max(1),"startColumn":f.column.max(1)});
+    if let Some(line) = f.end_line.filter(|line| *line >= f.line.max(1)) {
+        v["endLine"] = json!(line);
+        if let Some(column) = f
+            .end_column
+            .filter(|column| *column >= 1 && (line > f.line || *column >= f.column))
+        {
+            v["endColumn"] = json!(column);
+        }
+    }
+    v
 }
 fn uri(path: &str) -> String {
     let mut out = String::new();

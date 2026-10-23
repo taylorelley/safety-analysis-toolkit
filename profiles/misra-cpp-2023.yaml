@@ -1,0 +1,17 @@
+edition: MISRA-CPP:2023
+inventory_complete: false
+inventory_source: User-supplied licensed guideline inventory required
+rules: []
+original_checks:
+  - id: safety-prohibited-goto
+    behavior: Reports direct goto statements in parsed source
+    mapping: unvalidated
+    limitations: [Indirect GNU goto is outside this check]
+  - id: safety-unsafe-library-call
+    behavior: Reports calls to named C-linkage gets and longjmp functions
+    mapping: unvalidated
+    limitations: [Calls through unresolved function pointers are outside this check]
+  - id: safety-repeated-macro-parameter
+    behavior: Reports repeated parameter identifiers in function-like macro replacement tokens
+    mapping: unvalidated
+    limitations: [Token occurrences do not establish runtime evaluation count]

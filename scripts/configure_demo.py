@@ -16,7 +16,7 @@ shutil.copyfile(repo/"examples/mixed-demo/trace.yaml", root/"trace.yaml")
 (root/"build").mkdir(exist_ok=True)
 flags = ["-fprofile-instr-generate","-fcoverage-mapping","-fcoverage-mcdc"]
 entries = []
-for name in ["navigation.c","controller.cpp","decision.c","test.c"]:
+for name in ["navigation.c","controller.cpp","decision.c","test.c","contract.c"]:
     cpp = name.endswith("cpp")
     entries.append({"directory":str(root),"file":f"src/{name}",
         "arguments":["clang++-19" if cpp else "clang-19",
@@ -47,7 +47,7 @@ def sha(name):
 provenance = {"version":1,"binary_sha256":sha("build/test"),
     "profile_sha256":sha("build/test.profdata"),
     "sources":{f"src/{name}":sha(f"src/{name}") for name in
-        ["navigation.c","controller.cpp","decision.c","test.c"]},
+        ["navigation.c","controller.cpp","decision.c","test.c","contract.c"]},
     "compile_commands_sha256":sha("build/compile_commands.json"),
     "execution_environment":"host","build_variant":"SAFETY_DEMO=1",
     "instrumentation_warnings":[],"exclusions":[],"test_ids":["T-DEC"],
