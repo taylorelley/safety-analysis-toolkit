@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "assurance": {
+      "anyOf": [
+        {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "standard": {
+                  "const": "DO-178C"
+                },
+                "level": {
+                  "enum": [
+                    "A",
+                    "B",
+                    "C",
+                    "D",
+                    "E"
+                  ]
+                }
+              },
+              "required": [
+                "standard",
+                "level"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "standard": {
+                  "const": "DO-278A"
+                },
+                "level": {
+                  "enum": [
+                    "AL1",
+                    "AL2",
+                    "AL3",
+                    "AL4",
+                    "AL5",
+                    "AL6"
+                  ]
+                }
+              },
+              "required": [
+                "standard",
+                "level"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "coding": {
+      "type": "object",
+      "properties": {
+        "c": {
+          "anyOf": [
+            {
+              "const": "MISRA-C:2012"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cpp": {
+          "anyOf": [
+            {
+              "const": "MISRA-CPP:2023"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "build": {
+      "type": "object",
+      "properties": {
+        "compile_commands": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "properties": {
+        "directory": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "tools": {
+      "type": "object",
+      "properties": {
+        "clang": {
+          "type": "boolean"
+        },
+        "frama_c": {
+          "type": "boolean"
+        },
+        "esbmc": {
+          "type": "boolean"
+        },
+        "require_filesystem_isolation": {
+          "type": "boolean"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        },
+        "memory_mb": {
+          "type": "integer",
+          "minimum": 128,
+          "maximum": 65536
+        },
+        "allowlist": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^/"
+          }
+        },
+        "clang_module": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^/"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "version",
+    "project"
+  ],
+  "additionalProperties": false
+}

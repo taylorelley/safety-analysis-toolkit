@@ -1,0 +1,5 @@
+/target/
+/build/
+.safety/
+**/compile_commands.json
+/.cache/

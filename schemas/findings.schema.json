@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string"
+      },
+      "tool": {
+        "type": "string"
+      },
+      "rule_id": {
+        "type": "string"
+      },
+      "file": {
+        "type": "string"
+      },
+      "line": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "column": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "severity": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      },
+      "build_variant": {
+        "type": "string"
+      },
+      "outcome": {
+        "const": "DIAGNOSTIC"
+      },
+      "native_references": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "id",
+      "tool",
+      "rule_id",
+      "file",
+      "line",
+      "column",
+      "severity",
+      "message",
+      "build_variant",
+      "outcome",
+      "native_references"
+    ],
+    "additionalProperties": false
+  }
+}

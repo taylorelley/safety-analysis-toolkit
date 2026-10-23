@@ -1,0 +1,43 @@
+name: validation
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  rust:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Rust
+        run: rustup toolchain install 1.99.1 --profile minimal --component clippy --component rustfmt
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      - run: cargo test --locked
+      - run: cargo build --locked --release
+  clang:
+    runs-on: ubuntu-24.04
+    container: debian:trixie-slim@sha256:62bd423aeee912639ca8ee681c2b762cb3e25137e0a92b20be455898a9f034ad
+    steps:
+      - name: Install reference dependencies
+        run: |
+          apt-get update
+          apt-get install -y clang-19 clang-tidy-19 llvm-19-dev libclang-19-dev cmake g++ python3 python3-jsonschema curl ca-certificates git
+          clang-tidy-19 --version | grep '19.1.7'
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o /tmp/rustup.sh
+          sh /tmp/rustup.sh -y --default-toolchain 1.99.1 --profile minimal --component clippy --component rustfmt
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+      - name: Cache external SARIF schema with content pin
+        run: |
+          mkdir -p .cache
+          curl -fsSL https://json.schemastore.org/sarif-2.1.0.json -o .cache/sarif-2.1.0.json
+          echo 'c96eb2d311c37b0a38cbd18c52d79a68f778bbd2d831abed7412d9850740f785  .cache/sarif-2.1.0.json' | sha256sum -c -
+      - run: make full-validation
+      - name: Preserve executed evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clang-evidence
+          path: examples/**/.safety/runs/
+          include-hidden-files: true
