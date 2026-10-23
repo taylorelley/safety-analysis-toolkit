@@ -14,15 +14,17 @@ cmake -S clang -B build/clang -DLLVM_DIR=/path/to/llvm/lib/cmake/llvm \
 cmake --build build/clang --parallel 2
 ctest --test-dir build/clang --output-on-failure
 PATH="$PWD/build/clang:$PATH" SAFETY_TEST_MODULE="$PWD/build/clang/SafetyMisra.so" \
-  cargo test --locked -- --include-ignored --skip real_esbmc_properties
+  cargo test --locked -- --include-ignored --skip real_esbmc_properties --skip real_frama_c --skip real_esbmc_induction_harness
 # With externally installed ESBMC 8.6.0:
-cargo test --locked real_esbmc_properties -- --ignored
+cargo test --locked real_esbmc -- --ignored
+# With pinned Frama-C Manganese:
+cargo test --locked real_frama_c -- --ignored
 ```
 
 Ordinary Cargo tests mark real-Clang tests ignored when not requested. They must
 be explicitly executed before declaring Clang integration validated. Full
 validation requires `clang-tidy-19`, `llvm-cov-19`, `llvm-profdata-19`, `clang-19`, `safety-source-index` and `esbmc` on PATH and all checks above. Never replace
-real integration results with mocked output. The real ESBMC suite is opt-in. Frama-C execution tests remain unavailable and its phase is incomplete.
+real integration results with mocked output. The formal suites are opt-in; missing analyzers are skipped, never reported as passed.
 
 Use `make full-validation` with installed dependencies and Python jsonschema
 4.26.0. JSON/SARIF checks use original committed schemas and an external SARIF schema cached during setup:
@@ -54,5 +56,8 @@ python3 scripts/e2e.py
 
 The setup script explicitly builds and executes a known developer coverage test.
 It is not called by the analysis engine. The end-to-end driver preserves real
-outputs under `validation/e2e` and expects incomplete results for unsupported
-Frama-C, unvalidated MISRA mappings and uncovered/incomplete source scope.
+outputs under `validation/completion/e2e` and expects scoped formal successes
+and explicit incomplete MISRA/instrumentation scope. Also run
+`python3 scripts/validate_harnesses.py` after `npm ci --prefix examples/agent-harnesses`
+with Codex installed. See [installation](docs/installation.md) for the repeatable
+offline reference container and packaging validation.

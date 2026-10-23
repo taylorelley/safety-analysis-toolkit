@@ -7,8 +7,11 @@
   "esbmc_setup_download": "https://github.com/esbmc/esbmc/releases/download/v8.6/esbmc-linux.zip",
   "esbmc_download_sha256": "07b00b4a2590fe285edb5ce063ca2e5fbb368bbe556cfe139014c173717637f6",
   "esbmc_redistribution_review": "not approved; upstream bundle contains mixed licenses",
-  "frama_c": "unavailable; Eva/WP integration NOT_CHECKED",
+  "frama_c": "25.0-beta (Manganese); Debian 20220511-manganese-3+b4",
   "mcp_sdk_rmcp": "3.7.0",
   "jsonschema_validation": "4.26.0",
-  "sarif_schema_sha256": "c96eb2d311c37b0a38cbd18c52d79a68f778bbd2d831abed7412d9850740f785"
+  "sarif_schema_sha256": "c96eb2d311c37b0a38cbd18c52d79a68f778bbd2d831abed7412d9850740f785",
+  "codex_host": "0.163.0",
+  "pi_host": "0.73.1",
+  "reference_container_base": "debian:bookworm-slim@sha256:7ff6ba31527b9e336162fa061746c366c4b2032f4d2cff2078bea43f78efe3f8"
 }

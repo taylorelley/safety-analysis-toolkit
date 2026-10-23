@@ -4,3 +4,6 @@
 **/compile_commands.json
 /.cache/
 !validation/**/compile_commands.json
+node_modules/
+
+__pycache__/

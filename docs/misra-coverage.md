@@ -1,36 +1,56 @@
 # MISRA coverage and original checks
 
-No exact MISRA guideline mapping is validated. The user authorized proceeding
-with unmapped original project-policy checks. MISRA C:2012 / C++:2023 identifiers
-are selectable metadata; licensed guideline inventories and reviewed mappings
-remain outstanding. No standard descriptions are distributed or reconstructed.
+No exact MISRA guideline mapping is validated. The user authorized unmapped
+original checks. Bundled edition manifests in `profiles/` have empty guideline
+inventories and explicitly incomplete inventory status. No proprietary standard
+text, reconstructed inventory or invented rule identifiers are distributed.
 
-The native LLVM 19.1.7 check `safety-prohibited-goto` reports direct `GotoStmt`
-AST nodes. It uses the keyword's source location and offers no automatic fix.
-It works in C and C++, including macro expansion and instantiated templates.
-GNU indirect goto is outside its behavior. This check is **not** claimed to fully
-or partially implement any specific MISRA guideline.
+| Original check | Implemented behavior | Scope limit |
+| --- | --- | --- |
+| safety-prohibited-goto | Direct Clang GotoStmt | GNU indirect goto excluded |
+| safety-unsafe-library-call | Direct global C-linkage gets/longjmp calls | Indirect calls and wrappers excluded |
+| safety-repeated-macro-parameter | Repeated parameter identifier tokens in function-like macro bodies | Syntactic repetition; does not prove runtime multiple evaluation |
 
-To enable it, configure the absolute module path and an explicit executable /
-module allowlist. Native code must be a reviewed build, not an untrusted library
-from the analyzed project:
+Checks use AST matchers/preprocessor callbacks, emit original diagnostic text
+and locations and provide no automatic fixes. CTest independently exercises
+positives, negatives, boundaries, macros, C++ overload/template behavior and
+invalid input. Select only a reviewed native module:
 
 ```yaml
 tools:
-  clang: true
-  clang_module: /trusted/SafetyMisra.so
+  clang_module: /trusted/lib/safety/SafetyMisra.so
   allowlist:
-    - /trusted/clang-tidy-19
-    - /trusted/SafetyMisra.so
+    - /trusted/bin/clang-tidy-19
+    - /trusted/lib/safety/SafetyMisra.so
 ```
 
-The manifest records module path/hash and its unvalidated mapping status. Six
-native fixtures cover positive, negative, boundary, macro, C++ overload/template
-and invalid input; a real CLI integration test also loads the module.
+`scan --profile misra-c-2012` or `misra-cpp-2023` records selected editions and
+remains incomplete when their guideline inventory/mappings are unvalidated.
+Static defect-check success is not MISRA guideline compliance.
 
-`scan --profile misra-c-2012` or `misra-cpp-2023` performs available static checks
-and records the requested profile. A selected MISRA edition forces incomplete
-status because enforcement mappings remain unvalidated. `misra-drafts.json`
-contains incomplete draft GEP/GCS information and outstanding work. It does not
-assign guideline compliance from analyzer silence, invent guideline inventories,
-approve deviations or implement GRP/deviation management.
+## Project-supplied registry and process records
+
+`coding.registries` accepts paths to reviewed edition manifests using the strict
+structure of the bundled profiles. Rule metadata distinguishes supported,
+partial, manual, not_implemented and not_applicable, with implementation,
+automated check IDs, manual-review flag and limitations. Supported/partial
+claims require supplied mapping-review source reference, reviewer, timestamp
+and existing test-evidence paths. Not-applicable needs documented project
+conditions. Unknown editions, duplicate IDs and unsupported fields are rejected.
+This validates supplied records; it cannot authenticate a licensed standards
+review or replace that review. No mapping review is fabricated by this project.
+
+`coding.deviations` accepts draft deviation records: id, edition, rule_id,
+rationale, artifacts, change_request and optional external review. Unknown rules
+and duplicates are rejected. Findings remain visible; the toolkit never approves
+or suppresses them through a deviation. `coding.recategorization` accepts draft
+GRP proposals with edition/rule, original/proposed category and rationale;
+unknown or weakened categories are rejected. `evidence.reviews` stores separate
+externally supplied reviewer/decision/rationale/timestamp/evidence/change_record
+records. These are process assertions, never toolkit-granted approval.
+
+Every relevant run generates `misra-drafts.json` with draft GEP, GRP, GCS and
+deviation summaries. GCS never derives compliance from analyzer silence. Actual
+check selection and translation-unit completeness determine whether an
+execution is recorded as performed; manual work and incomplete inventories
+remain outstanding. Review supplied registries against licensed editions.

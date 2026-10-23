@@ -12,12 +12,13 @@ import time
 repo=Path(__file__).resolve().parent.parent
 binary=repo/"target/release/safety"
 root=repo/"build/demo"
-output=repo/"validation/e2e"
+output=repo/"validation/completion/e2e"
 output.mkdir(parents=True,exist_ok=True)
-commands=[("doctor",["doctor",str(root)],3),
+commands=[("doctor",["doctor",str(root)],0),
  ("scan",["scan",str(root)],3),
- ("frama-c",["prove","src/navigation.c","--path",str(root),"--engine","frama-c"],3),
- ("esbmc-c",["prove","harness/navigation_harness.c","--path",str(root),"--engine","esbmc"],0),
+ ("frama-c",["prove","harness/navigation_harness.c","--path",str(root),"--engine","frama-c"],0),
+ ("frama-wp",["prove","src/contract.c","--path",str(root),"--engine","frama-c","--method","wp","--entry","identity"],0),
+ ("esbmc-c",["prove","harness/navigation_harness.c","--path",str(root),"--engine","esbmc","--harness","harness/navigation_harness.yaml"],0),
  ("esbmc-cpp",["prove","src/controller.cpp","--path",str(root),"--engine","esbmc"],1),
  ("trace",["trace",str(root)],1),
  ("coverage",["coverage","import","--path",str(root),"--profile","build/test.profdata",
@@ -63,6 +64,8 @@ try:
     receive(1)
     send({"method":"notifications/initialized"})
     calls=[("safety.doctor",{}),("safety.scan",{}),
+        ("safety.prove",{"source":"harness/navigation_harness.c","engine":"frama-c"}),
+        ("safety.prove",{"source":"src/contract.c","engine":"frama-c","method":"wp","entry":"identity"}),
         ("safety.prove",{"source":"harness/navigation_harness.c"}),
         ("safety.prove",{"source":"src/controller.cpp"}),
         ("safety.trace",{}),("safety.coverage",{"profile":"build/test.profdata",
@@ -83,7 +86,7 @@ report=subprocess.run([binary,"report",root,"--format","markdown"],capture_outpu
 assert report.returncode==3
 (output/"consolidated-report.md").write_bytes(report.stdout)
 (output/"summary.json").write_text(json.dumps({"status":"incomplete","complete":False,
-    "reason":"Frama-C unvalidated, MISRA mappings unvalidated, known trace and MC/DC gaps; two real agent harnesses not exercised",
+    "reason":"MISRA mappings unvalidated by user direction; intentionally seeded trace gaps, MC/DC gap and uninstrumented units remain outstanding. Actual agent-host validation is recorded separately.",
     "results":summary},indent=2)+"\n")
 # Copy only generated records, never analyzer binaries or a third-party bundle.
 (output/"runs").mkdir(exist_ok=True)

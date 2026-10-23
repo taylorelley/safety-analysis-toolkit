@@ -1,42 +1,71 @@
 # Formal verification
 
-The implemented model-checking adapter targets ESBMC **8.6.0**, selecting Z3,
-explicit 32/64-bit word width (default 64), arithmetic overflow checks and a
-finite unwind bound (default 8), with ESBMC's default unwinding assertions kept
-enabled. A source must match exactly one compilation variant, or `--variant`
-must select it. Compiler options are translated conservatively; unsupported
-semantic options fail visibly. Dropping `-c` and output selection is deliberate;
-macro values, include paths and dialect are preserved. There is no induction
-adapter, automatic harness generation or approved environment model.
+## ESBMC 8.6.0
+
+The adapter selects Z3, 32/64-bit width, overflow checking and default unwinding
+assertions. Select one compilation entry using `--variant` when necessary.
+Only reviewed argument translations are accepted; semantic options are never
+silently dropped. BMC is the default; `--method induction` selects native
+k-induction with `--max-k-step` equal to `--unwind` (default 8).
 
 ```sh
-safety prove src/harness.c --engine esbmc --unwind 8 --bits 32
-safety prove src/harness.cpp --engine esbmc --variant VAR-ID
+safety prove harness/component.c --engine esbmc --unwind 8 --bits 32
+safety prove harness/component.cpp --engine esbmc --method induction --unwind 16
 ```
 
-`PROVEN` requires successful tool exit, native successful termination, enumerated
-passed properties, no warnings, and default unwinding checks. Its scope remains
-the recorded ESBMC source/library model and finite configured bound. Passing
-unwinding checks is recorded as model completeness; it does not validate the
-model against a real target. `VIOLATED` means a counterexample in that model.
-Unwinding failures are `UNKNOWN`; timeouts/output-limit failures become `FAILED`.
-Unrecognized output never becomes proof success. No enumerated properties means
-`UNKNOWN`, not a vacuous success. Native reports and machine-readable failure
-traces are retained and integrity-bound with the run.
+`PROVEN` requires successful native termination, enumerated passed properties,
+no warnings, and no failed completeness checks. The claim is about the recorded
+sequential source/library model. BMC bounds remain explicit; successful
+unwinding checks establish completeness only in that model. Induction search
+limits and native base/forward/inductive phase logs remain attached. A bounded
+pass with incomplete unwinding is `UNKNOWN`. Solver/parser/time/output failures
+are `FAILED`; missing property enumeration cannot produce a proof. Counterexamples
+are retained as native JSON and logs; they need investigation before being
+classified as production defects. MCP `safety.get_run` returns a bounded trace
+excerpt and its full local evidence reference.
 
-Source assumptions and external/library models have not been independently
-reviewed. Harness metadata validation and per-assumption approval tracking are
-outstanding. These runs are advisory evidence. A model counterexample must be
-investigated before classifying it as a production defect.
+## Frama-C Manganese 25.0-beta
 
-`--engine frama-c` performs capability inspection and records `NOT_CHECKED` /
-incomplete. Eva/WP execution is **not implemented or validated** in this snapshot.
-The development environment's Debian snapshot has no frama-c-base package. This
-is a visible capability boundary, not a completed formal-analysis phase.
+The reference package is Debian `frama-c-base=20220511-manganese-3+b4`.
+C only; a selected complete analysis unit must contain the entry function.
+The default is Eva; WP is selected explicitly and uses Qed for supplied ACSL
+contracts. Other external prover commands are not exposed.
 
-Real integration tests cover safe assertions, violated assertions and
-insufficient unwind bounds in both C and C++. They require an external reviewed
-ESBMC installation; no ESBMC binaries are redistributed. The upstream prebuilt
-bundle's own COPYING warns about mixed solver licenses; use a reviewed open-source
-solver build before redistribution. The adapter explicitly selects Z3, but that
-does not change the contents or licensing of a prebuilt bundle.
+```sh
+safety prove harness/component.c --engine frama-c --method eva --entry main
+safety prove src/contracts.c --engine frama-c --method wp --entry identity
+```
+
+The shared runner invokes allowlisted Clang 19 to preprocess into run-local
+`analysis.i`, preserving ACSL and copyright comments. It uses the pinned
+Frama-C libc model and explicit x86_32/x86_64 machine model. Frama-C consumes
+the `.i` directly; no project-controlled shell preprocessor is executed.
+Definitions, include options and dialect are translated conservatively; other
+semantic options are incomplete. Native CSV property statuses are requested
+**after** analysis using `-then -report`. Only a native `Valid` result with clean
+termination can be `PROVEN`. `Considered valid` is an assumption, not proof;
+invalid-or-unreachable and unproved properties remain `UNKNOWN`. No selected
+properties is `NOT_CHECKED`. Native reports, WP JSON, alarms, preprocessing,
+dependency data, command arguments and model assumptions are preserved.
+
+Eva analyzes sequential C. Concurrency, interrupts, environment fidelity and
+unsupported constructs need an explicitly reviewed model; source-tool success
+never establishes those target properties. Unsupported tool versions, C++,
+flags or diagnostic/report failures are incomplete.
+
+## Harness metadata
+
+`--harness harness/component.yaml` accepts the strict format in
+[the example](../examples/mixed-demo/harness/navigation_harness.yaml). It records
+target/property, input assumptions, environment model, build configuration,
+requirements and analyzer engine/method/entry/word width/bounds. The requested
+source and configuration must match that metadata. `verification.json` is
+integrity-bound with the run, and supplied assumptions accompany properties.
+The toolkit validates structure and consistency; it does not approve assumptions
+or authenticate a reviewer. Human reviews are supplied separately through
+`evidence.reviews` and never change generated outcomes.
+
+Real integration fixtures cover C/C++ safe and violated assertions, insufficient
+bounds, induction, harness mismatch, Eva valid/unknown and WP contracts.
+External analyzers are never included in toolkit binary packages. Review the
+upstream ESBMC bundle's solver-specific licenses before redistribution.

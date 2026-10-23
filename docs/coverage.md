@@ -29,8 +29,10 @@ Provenance is user-supplied JSON with these fields:
 ```
 
 Files and supplied hashes are verified. Host/target labels and test/requirement
-IDs are recorded assertions; they are not independently authenticated or fully
-joined to the trace graph yet. Missing/inconsistent provenance, warnings,
+IDs are checked against the external trace manifest, including typed nodes and
+requirement/test reachability. Their execution meaning is a supplied assertion,
+not independently authenticated. Per-condition missing MC/DC independence pairs
+retain the decision source location and associated requirement/test IDs. Missing/inconsistent provenance, warnings,
 exclusions, missing units, corrupt profiles or decisions without MC/DC
 measurement leave the import incomplete. All compilation variants remain in
 scope; this initial importer does not establish per-variant instrumentation

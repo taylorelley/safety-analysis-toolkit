@@ -1,27 +1,35 @@
-# Implementation status
+# Implemented scope and acceptance boundaries
 
-This is a working development snapshot; **the v1 definition of done is not met**.
+The native toolkit, CLI, MCP, original Clang checks, formal adapters,
+traceability, coverage/evidence workflow and release tooling are implemented.
+MISRA guideline mapping is deliberately **unvalidated**, under the user's
+explicit instruction to proceed with unmapped checks. No licensed guideline
+inventory or exact rule mapping has been invented to close that exception.
 
-| Phase | Executed functionality | Outstanding acceptance |
+| Phase | Working implementation and real validation | Capability boundary |
 | --- | --- | --- |
-| 1 Foundation | Config, CLI, compilation databases/variants, restricted runner, tools, Git/input provenance, evidence | Wider compiler/platform support and complete external dependency fingerprints |
-| 2 Clang | Real C/C++ analysis, native diagnostics, source references, per-unit completeness, correlation, SARIF | Larger independent benchmark corpus |
-| 3 MISRA technology | Pinned module, direct-goto project check, real fixtures/CLI loading, incomplete GEP/GCS drafts | Licensed guideline inventory, validated mappings, edition registries, deviations/GRP |
-| 4 Traceability | Clang USRs, declarations/definitions, comments/templates/overloads, manifest graph and gap checking | Call edges, comprehensive specialization/annotation/build-variant reconciliation |
-| 5 Formal | ESBMC 8.6.0 C/C++ safe/violated/insufficient-bound tests, model scopes, bounds, machine counterexamples | Frama-C Eva/WP, reviewed harness metadata, induction, broader property taxonomy |
-| 6 Coverage/evidence | Real LLVM source/MC/DC import, known 50% gap, provenance checks, persisted consolidated reports | Full instrumentation/exclusion assessment and requirement/test graph joins |
-| 7 MCP/skill | SDK-backed eight-tool stdio server, strict inputs, bounded results, cancellation, reusable skill, real independent client | Two actual agent harnesses and complete end-to-end agent review |
-| 8 Packaging | Build/check targets, lockfile, CI definition, examples, dependency inventory, validation records | Fresh-machine CI execution, release license review, packaging and complete v1 validation |
+| 1 Foundation | Strict config/path validation, init/doctor, compilation variants, one runner, versions, provenance and bounded JSON | Linux x86-64 is the validated reference; proprietary compiler flags can be unsupported |
+| 2 Clang | C/C++ clang-tidy/static analyzer, normalized native ranges, per-unit completeness, SARIF and seven-case benchmark | Selected checks do not find every defect; no unvalidated result cache |
+| 3 Original checks/MISRA process | Three AST/preprocessor checks with positive/negative/boundary/macro tests, edition registries, reviewed-mapping input validation, draft GEP/GRP/GCS/deviations and separate human-record import | Exact MISRA mappings and inventories remain unvalidated by approved scope decision; no compliance/approval grant |
+| 4 Traceability | AST USRs, declarations/definitions, direct calls, templates/specializations, explicit per-build graphs, cycles/unknown/untraced/baseline gaps | Dynamic/virtual/indirect calls and ambiguous ownership remain visible investigation gaps |
+| 5 Formal | Real Frama-C Eva/WP and ESBMC C/C++ BMC/induction, validated harness metadata, property outcomes, scoped assumptions/bounds and native counterexamples | Sequential source/library models; user assumptions need authorized review; no unrestricted bounded-proof claim |
+| 6 Coverage/evidence | Native LLVM source/branch/MC/DC import, per-condition gaps, provenance and trace joins, immutable run creation, SHA checks and persisted reports | Host/target provenance is supplied; instrumentation exclusions, coupling/object/target/qualification evidence remain separate objectives |
+| 7 MCP/skill | Maintained SDK stdio, all eight tools, strict schemas, bounded pages, timeout/cancellation, real independent client and actual Codex/Pi workflows; reusable skill references upstream lifecycle policy | Host transport/workflow tests use no model inference and do not establish agent reasoning or independent review; Claude/Hermes configs are examples |
+| 8 Packaging/validation | Locked builds, CI jobs, isolated offline reference validation, original-artifact installer/archive, dependency notices and executed validation records | External analyzers are not bundled; remote GitHub Actions has not been run from this local workspace |
 
-Filesystem isolation uses Landlock where available. Its absence is explicitly
-recorded; requiring it fails closed. This host lacks Landlock, so no successful
-Landlock enforcement validation is claimed here. Seccomp networking denial,
-process timeout/cancellation and read-only analyzer invocation are tested.
+`complete` is specific to the selected operation/configuration. The intentionally
+unsafe mixed demonstration retains defects, unvalidated MISRA mappings, missing
+trace relationships and a known MC/DC gap. Its consolidated result must remain
+incomplete. Software implementation acceptance does not close those project
+assurance objectives.
 
-The user authorized unmapped custom checks while licensed MISRA validation is
-unavailable. No exact rule IDs are selected or inferred. Frama-C requests record
-NOT_CHECKED/incomplete after capability inspection; Eva/WP is not presented as an
-implemented adapter. No phase is declared complete solely from mocked outputs.
+Landlock is used when available; this host lacks it. Strict isolation fails
+closed and no successful Landlock-enforcement claim is made for this host.
+Seccomp network denial, process resource/time/output limits, MCP cancellation
+and CLI SIGINT are exercised. External toolchain/runtime reproduction requires
+the recorded reference environment; source/profile/binary inputs are archived
+for the demo. There is no certification, authentication or tamper-proof claim.
 
-See [validation](validation.md), [formal](formal-verification.md),
-[traceability](traceability.md), [coverage](coverage.md) and [MCP](mcp.md).
+See [executed validation](validation.md), [installation](installation.md),
+[formal scope](formal-verification.md), [traceability](traceability.md),
+[coverage](coverage.md) and [MCP](mcp.md).

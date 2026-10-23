@@ -36,4 +36,16 @@ completeness. Input changes during a run force incomplete status. Headers and
 other dependencies outside the workspace are not fingerprinted yet. No cached
 results are reused. Reports operate only on integrity-checked persisted records.
 
-AST traceability, ESBMC and LLVM coverage adapters use the same runner and evidence store. MCP uses rmcp stdio and calls those same operations with one fixed workspace, bounded results and cancellation. See their dedicated references for current limitations.
+AST traceability, Frama-C, ESBMC and LLVM coverage adapters use the same runner and evidence store. MCP uses rmcp stdio and calls those same operations with one fixed workspace, bounded results and cancellation. See their dedicated references for current limitations.
+
+
+Formal requests are validated by one verification module before adapters run.
+Harness metadata is a separate input artifact, never an approval. Runner output
+is retained byte-for-byte within its capture bound; manifest excerpts are capped
+at 16 KiB per stream and point to raw files. An output limit produces incomplete
+execution. Finding records preserve property/rule, build context, source range,
+certainty where meaningful and requirement/test/disposition references.
+
+MISRA edition registries, deviation/GRP drafts and externally supplied human
+reviews remain distinct from analyzer results. Validating their format cannot
+authenticate a review or infer guideline compliance. No database or cache is used.

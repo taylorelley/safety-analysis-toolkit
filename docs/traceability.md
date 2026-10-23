@@ -35,8 +35,20 @@ parents, missing implementations/tests, untraced functions, tests without known
 requirements and baseline mismatches are reported. Requirement reachability is
 transitive through valid requirement/design links.
 
-Scope limitations: call-edge extraction, comprehensive template specialization
-relationships, cross-variant annotation reconciliation and external policy's
-additional annotations are not implemented. Raw Clang comment attachment is
-used; no semantic interpretation is inferred. Trace links do not establish that
-an implementation satisfies a requirement or that a test is adequate.
+Direct function/constructor call USRs and template specialization/instantiation
+parents are retained. Virtual/indirect calls and lambda ownership remain explicit
+unresolved gaps; a static target is not represented as complete dynamic dispatch.
+Annotations that disagree for the same symbol across compilation contexts are
+flagged rather than guessed. Requirement parent cycles are reported.
+
+When a source has multiple compilation entries, configure `build.variants` as a
+map from logical build names to required preprocessor definitions. Each entry
+must match exactly one group. Graphs are resolved independently per group;
+annotations never fill another build's links. A unique-entry project defaults
+to one logical build. Native dependency paths and hashes accompany each indexed
+unit, including system headers; they are recorded observations, not a hermetic
+copy of the whole toolchain. No general-purpose call graph or parser is invented.
+
+Raw Clang comment attachment is used. Trace links do not establish that code
+satisfies a requirement or that a test is adequate. Unresolved relationships
+remain investigation work.

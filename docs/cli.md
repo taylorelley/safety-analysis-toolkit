@@ -7,7 +7,7 @@ This snapshot supports these operations:
 | `init` | `--path DIR` (default `.`) | Create config without overwriting |
 | `doctor` | `[DIR] --format json/markdown/sarif` | Tool probes and unit inventory |
 | `trace` | `[DIR] --format json/markdown/sarif` | AST relationship audit |
-| `prove` | `FILE --path DIR --engine esbmc/frama-c --variant ID --unwind N --bits 32/64` | Scoped properties or explicit unsupported status |
+| `prove` | `FILE --path DIR --engine esbmc/frama-c --variant ID --method bmc/induction/eva/wp --entry main --harness FILE --unwind N --bits 32/64` | Scoped properties or explicit unsupported status |
 | `coverage import` | `--path DIR --profile FILE --binary FILE [--provenance FILE]` | Existing LLVM coverage import |
 | `mcp` | `--path DIR` | SDK stdio server |
 | `scan` | `[DIR] --format json/markdown/sarif` | Clang analysis and evidence |
@@ -18,8 +18,7 @@ This snapshot supports these operations:
 produce incomplete GEP/GCS drafts and explicitly remain incomplete. No licensed
 mapping is validated. `report` without `--run` consolidates persisted runs in
 Markdown or JSON, retaining integrity errors and separate scopes. SARIF requires
-one `--run`. Frama-C execution remains unavailable; its prove request records
-NOT_CHECKED and incomplete status instead of fabricating success.
+one `--run`. See the formal reference for supported pinned engines and proof scope.
 
 Exit 0 means the selected operation completed without findings or policy failure.
 Exit 1 means findings remain. Exit 2 means usage/configuration/input errors,

@@ -1,0 +1,6 @@
+target
+build
+.git
+.cache
+**/node_modules
+validation

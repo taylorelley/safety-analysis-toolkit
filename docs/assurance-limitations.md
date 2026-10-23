@@ -13,7 +13,8 @@ distributed. Full guideline inventories, GRP and deviation management are pendin
 DO-178C/DO-278A lifecycle evidence, independent verification, requirements-based
 testing, MC/DC assurance completeness, data/control coupling, source/object mapping, target execution,
 DO-330 qualification assessment and human sign-off remain outside this snapshot.
-Proof outcomes are restricted to the recorded ESBMC model and bound. No proof or compliance conclusion is inferred from missing results.
+Proof outcomes are restricted to the recorded ESBMC or Frama-C model,
+entry point, assumptions and configured proof scope/bounds. No proof or compliance conclusion is inferred from missing results.
 
 The engine does not run project scripts, tests or arbitrary compiler commands.
 Its analyzer commands request no source fixes. Network sockets and io_uring
@@ -35,10 +36,13 @@ after execution. External system headers, libraries and runtime configuration
 are not fully inventoried. Reproducible replay currently requires the same tool
 installation and host environment. Hash inventories detect accidental changes;
 they do not authenticate evidence against a writer who can replace both files
-and hashes. Review decisions are not stored or impersonated by this snapshot.
+and hashes. Externally supplied review records are stored separately and are never
+authenticated, impersonated or granted by the toolkit.
 
 A SHA inventory binds all generated files except itself. Ordinary operations
 create new records and do not overwrite completed records. Loading verifies the
 inventory and rejects added, missing, altered or symlinked artifacts.
 
-Input snapshots are not fully archived by the engine: retain the exact source/baseline material matching recorded hashes for replay. Parent-process aggregate memory and malicious-input fuzzing require additional release hardening. CLI interruption behavior has not been validated; MCP cancellation and runner timeouts are tested.
+Input snapshots are not fully archived by the engine: retain the exact source/baseline material matching recorded hashes for replay. Parent-process aggregate memory and malicious-input fuzzing require additional release hardening. CLI SIGINT, MCP cancellation and runner timeouts are tested. Untrusted
+structured inputs are size-bounded and strict fields are validated; this is not
+a claim that parser libraries are formally verified.

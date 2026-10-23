@@ -15,5 +15,13 @@ repository/specification terms. Its use is separate from the license on original
 schemas in this repository.
 
 Dependency inventory generation records declared SPDX expressions; it is not a
-legal opinion or completed redistribution approval. Release redistribution
-review and license-text aggregation remain outstanding.
+legal opinion or completed redistribution approval. The packaging workflow enforces a permissive SPDX selection policy and
+aggregates license/notice texts for the reachable locked Linux Rust graph.
+Review `share/safety/license-inventory/inventory.json` and retained notices in a
+package. This review does not approve redistribution of external analyzers.
+
+Frama-C Manganese model headers appearing in executed validation evidence are
+LGPL-2.1, copyright CEA and respective contributors, with original comments
+preserved. See `validation/third-party/` for the relevant license/copyright
+notices. Those model-derived evidence artifacts are not Apache-2.0 original
+code and are not included in toolkit binary archives.

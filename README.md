@@ -1,20 +1,20 @@
 # Safety Analysis Toolkit
 
-A local Rust CLI for evidence-preserving C/C++ analysis. This development
-snapshot implements the executable foundation and real Clang Static Analyzer /
-Clang-Tidy scans. A tested out-of-tree Clang-Tidy module provides an original
-project-policy `goto` check. It has **no validated MISRA mapping**.
+A local Rust CLI and MCP server for C/C++ static analysis, scoped formal
+verification, AST traceability, LLVM source/MC/DC coverage and reproducible evidence.
+It uses Clang/LLVM 19.1.7, Frama-C Eva/WP and ESBMC rather than new analysis engines.
+The out-of-tree Clang-Tidy module implements three original policy checks.
+**MISRA mappings remain unvalidated by explicit project direction.**
 
-This is not the completed v1 specification. It also provides AST trace checks,
-scoped ESBMC verification, LLVM source/MC/DC import and an SDK-backed MCP stdio
-server. Frama-C execution, validated MISRA mappings, complete process artifacts
-and two-agent-harness acceptance remain outstanding. See [development status](docs/development-status.md).
+The same engine serves humans and agents. Real Codex and Pi host workflows,
+native integrations, packaging and offline reference validation are recorded in
+[validation](docs/validation.md). See [capability boundaries](docs/development-status.md).
 
 ## Build and use
 
 Validated reference: Linux x86-64, Rust 1.99.1, LLVM/Clang **19.1.7**.
 AArch64 runner code exists but has not been validated here. Install `clang-tidy-19`,
-`clang-19`, `llvm-19-dev`, `libclang-19-dev`, CMake >=3.25, a C++17 compiler and
+`clang-19`, `llvm-19-dev`, `libclang-19-dev`, `libclang-rt-19-dev`, CMake >=3.25, a C++17 compiler and
 Python 3. See [contributing](CONTRIBUTING.md) for validation.
 
 ```sh
@@ -75,7 +75,9 @@ Original code is Apache-2.0. MISRA standard text is not included. See
 [traceability](docs/traceability.md), [coverage](docs/coverage.md) and
 [MCP](docs/mcp.md) for capability boundaries.
 
-Executed mixed-language results: [validation report](validation/e2e/consolidated-report.md),
-[structured summary](validation/e2e/summary.json), and
-[full validation transcript](validation/full-validation.log). The independent MCP
-client is not a substitute for the outstanding two-agent-harness acceptance.
+Executed results: [mixed-project report](validation/completion/e2e/consolidated-report.md),
+[agent-host workflows](validation/completion/harnesses/summary.json), and
+[offline reference validation](validation/completion/reference-validation.log).
+These are executed tool workflows, not independent human review or an automated
+claim of certification. Installation and release commands are in
+[packaging](docs/installation.md).

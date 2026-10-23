@@ -20,7 +20,7 @@ jobs:
       - name: Install reference dependencies
         run: |
           apt-get update
-          apt-get install -y clang-19 clang-tidy-19 llvm-19-dev libclang-19-dev cmake g++ python3 python3-jsonschema curl ca-certificates git
+          apt-get install -y clang-19 clang-tidy-19 llvm-19-dev libclang-19-dev libclang-rt-19-dev cmake g++ python3 python3-jsonschema curl ca-certificates git
           clang-tidy-19 --version | grep '19.1.7'
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Install Rust
@@ -43,3 +43,25 @@ jobs:
           name: clang-evidence
           path: examples/**/.safety/runs/
           include-hidden-files: true
+  reference-formal-and-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Install externally reviewed validation analyzer (not redistributed)
+        run: |
+          mkdir -p build/external-esbmc
+          curl --proto '=https' --tlsv1.2 -fsSL https://github.com/esbmc/esbmc/releases/download/v8.6/esbmc-linux.zip -o build/esbmc.zip
+          echo '07b00b4a2590fe285edb5ce063ca2e5fbb368bbe556cfe139014c173717637f6  build/esbmc.zip' | sha256sum -c -
+          unzip -q build/esbmc.zip -d build/external-esbmc
+      - name: Fresh offline full validation and original-artifact packaging
+        run: |
+          SAFETY_ESBMC_DIR="$PWD/build/external-esbmc/release/bin" scripts/reference_validation.sh > validation-reference.log 2>&1
+      - name: Preserve executed validation
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: reference-validation-and-original-packages
+          path: |
+            validation-reference.log
+            build/reference-results/
