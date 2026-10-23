@@ -1,0 +1,5 @@
+src/navigation.c:6:16: warning: goto statement requires project policy review [safety-prohibited-goto]
+    6 |   if (enabled) goto done;
+      |                ^
+
+1 warning generated.

@@ -1,0 +1,99 @@
+cargo fmt --check
+cargo clippy --locked --all-targets -- -D warnings
+    Checking safety v0.1.0 (/workspace/safety)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.28s
+cmake -S clang -B build/clang -DCMAKE_BUILD_TYPE=Release
+-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) 
+-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) 
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /workspace/safety/build/clang
+cmake --build build/clang --parallel 2
+gmake[1]: Entering directory '/workspace/safety/build/clang'
+[ 50%] Built target SafetyMisra
+[100%] Built target safety-source-index
+gmake[1]: Leaving directory '/workspace/safety/build/clang'
+ctest --test-dir build/clang --output-on-failure
+Internal ctest changing into directory: /workspace/safety/build/clang
+Test project /workspace/safety/build/clang
+    Start 1: prohibited-goto
+1/2 Test #1: prohibited-goto ..................   Passed    0.21 sec
+    Start 2: source-index
+2/2 Test #2: source-index .....................   Passed    0.08 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.29 sec
+python3 examples/configure.py
+PATH="/workspace/safety/build/clang:$PATH" SAFETY_TEST_MODULE="/workspace/safety/build/clang/SafetyMisra.so" cargo test --locked -- --include-ignored --skip real_esbmc_properties
+   Compiling safety v0.1.0 (/workspace/safety)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.19s
+     Running unittests src/main.rs (target/debug/deps/safety-8e7babc6a4408ffa)
+
+running 21 tests
+test config::tests::traversal ... ok
+test adapters::esbmc::tests::no_false_proof ... ok
+test config::tests::validation ... ok
+test discovery::tests::flags ... ok
+test config::tests::unknown_fields ... ok
+test evidence::tests::dirty_files_hashed ... ok
+test discovery::tests::variants ... ok
+test findings::tests::empty ... ok
+test findings::tests::malformed ... ok
+test mcp::tests::strict_input ... ok
+test report::tests::escapes_uri ... ok
+test runner::tests::cancellation_kills_child ... ok
+test runner::tests::filesystem_capability_is_reported ... ok
+test evidence::tests::tamper ... ok
+test runner::tests::output_bound ... ok
+test runner::tests::real_execution ... ok
+test runner::tests::strict_isolation_fails_closed_or_blocks_writes ... ok
+test runner::tests::network_denied ... ok
+test trace::tests::gaps ... ok
+test trace::tests::tokens_only ... ok
+test runner::tests::timeout ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.15s
+
+     Running tests/integration/main.rs (target/debug/deps/integration-72c75f3932f1f5a5)
+
+running 11 tests
+{"assurance":"unconfigured; advisory analysis only","complete":true,"config":"/tmp/.tmpPESeYf/safety.yaml","status":"passed"}
+test init_does_not_overwrite ... ok
+test invalid_config ... ok
+test compiler_failure_is_incomplete ... ok
+test real_ast_trace ... ok
+test missing_database_is_explicit ... ok
+test real_c_pipeline ... ok
+test real_cpp_pipeline ... ok
+test real_custom_module ... ok
+test real_llvm_mcdc ... ok
+test rejected_semantic_flag_is_incomplete ... ok
+test real_mcp_stdio ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 2.53s
+
+cargo build --locked --release
+   Compiling safety v0.1.0 (/workspace/safety)
+    Finished `release` profile [optimized] target(s) in 19.27s
+python3 scripts/validate.py
+embedded-c: 4/4 units; 2 expected findings; JSON/SARIF/report/integrity valid
+embedded-cpp: 4/4 units; 2 expected findings; JSON/SARIF/report/integrity valid
+Offline schema and real-analysis validation passed
+esbmc --version
+ESBMC version 8.6.0 64-bit x86_64 linux
+cargo test --locked real_esbmc_properties -- --ignored
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s
+     Running unittests src/main.rs (target/debug/deps/safety-8e7babc6a4408ffa)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 21 filtered out; finished in 0.00s
+
+     Running tests/integration/main.rs (target/debug/deps/integration-72c75f3932f1f5a5)
+
+running 1 test
+test real_esbmc_properties ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 7.82s
+

@@ -1,0 +1,13 @@
+[
+  {
+    "arguments": [
+      "clang-19",
+      "-std=c11",
+      "-DSAFETY_DEMO=1",
+      "-c",
+      "harness/navigation_harness.c"
+    ],
+    "directory": "/workspace/safety/build/demo",
+    "file": "/workspace/safety/build/demo/harness/navigation_harness.c"
+  }
+]

@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "id": "RUN-1792782803459-19395-0",
+  "operation": "prove",
+  "project": "mixed-safety-demo",
+  "status": "incomplete",
+  "complete": false,
+  "completeness": {
+    "total": 1,
+    "analyzed": 0,
+    "failed": 0,
+    "excluded": 0,
+    "unsupported": 1,
+    "build_variants": []
+  },
+  "started_unix_ms": 1792782803460,
+  "completed_unix_ms": 1792782803509,
+  "inputs": {
+    "build/compile_commands.json": "aee855aa0ebc5dec3b659c82c5be8185781d828bc7965dc6209d454b5cc9a9a2",
+    "build/provenance.json": "965c38d6b6433efb3b012f3cb31a1f216c4471ad409e89466459fdafd032b3cc",
+    "build/test": "68d361ec033697cf3eb7c8618cb75e18f7cd05ba2b80ed1ef460d59ed60c493e",
+    "build/test.profdata": "238ce748fdb8206bdba393efdc79b38fafed96ad228187c3d92c20217d5f12c4",
+    "build/test.profraw": "9e66e41b2eadd570a1850fd53e36ec5f11f678e080d23837c9e961225d6271a8",
+    "harness/navigation_harness.c": "b95bfcd9df878ff96777d16417ba6937074bbe662f0737d25ea4856c185b1c8e",
+    "harness/navigation_harness.yaml": "e597a890748ca488ec20b7718ec432445be580d6203aeb875a99899fd9f05af3",
+    "safety.yaml": "2c450d61ec520c5a7432b830d1ce10b02619440b11c0a2a49e62ffc6f6c12317",
+    "src/controller.cpp": "aef7a38692b13aadcb07c235fc6614b6debff561a67154549f2b35a07e373bdd",
+    "src/decision.c": "f5bc70baa14f155ece4dc543751f752fe69aa0047d747a22da9c60d5d1faf05f",
+    "src/navigation.c": "4d4816ce57472525158bb9a951436714a9475ae6f0914a1917e810953d5d8d15",
+    "src/test.c": "290a1366331b3fbf24a04de09c4e1ed1d558cc0326bedd69f8cd306e49b01a99",
+    "trace.yaml": "9398dfdd2fcc3f562bafb5de49deebf72382d500469a7cfa9219012075218b87"
+  },
+  "executions": [
+    {
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782803459-19395-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782803459-19395-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 10,
+      "stdout": "d5f1a75d04087a334eb70f9614f60e10d41ae79e\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "--no-optional-locks",
+        "-c",
+        "core.fsmonitor=false",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782803459-19395-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782803459-19395-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 10,
+      "stdout": "?? validation/e2e/cli-doctor.json\n?? validation/e2e/cli-scan.json\n?? validation/exploratory-demo/constant-caller-scan.json\n?? validation/full-validation.log\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    }
+  ],
+  "findings": [],
+  "properties": [
+    {
+      "id": "eva-analysis",
+      "description": "Frama-C Eva verification not checked",
+      "outcome": "NOT_CHECKED",
+      "scope": "No validated Frama-C installation/output adapter is available in this release",
+      "assumptions": [],
+      "unwind_bound": null,
+      "completeness_established": false,
+      "native_references": []
+    }
+  ],
+  "limitations": [
+    "Automated evidence for human review; no certification or compliance approval.",
+    "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+    "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+    "Frama-C Eva/WP execution is unavailable pending a pinned, real integration test. No proof is inferred from installation or empty output."
+  ],
+  "git": {
+    "commit": "d5f1a75d04087a334eb70f9614f60e10d41ae79e",
+    "dirty": true
+  }
+}

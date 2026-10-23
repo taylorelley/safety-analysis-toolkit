@@ -1,0 +1,3 @@
+{"column":21,"comment":"","definition":true,"file":"src/controller.cpp","line":3,"macro_expansion":false,"name":"controller::apply","template_parent":"","usr":"c:@N@controller@FT@>1#Tapply#t0.0#S0_#"}
+{"column":5,"comment":"","definition":true,"file":"src/controller.cpp","line":4,"macro_expansion":false,"name":"controller::apply","template_parent":"","usr":"c:@N@controller@F@apply#I#I#"}
+{"column":5,"comment":"/** @req R-CTRL */","definition":true,"file":"src/controller.cpp","line":7,"macro_expansion":false,"name":"main","template_parent":"","usr":"c:@F@main#"}

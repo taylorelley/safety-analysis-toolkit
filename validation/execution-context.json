@@ -1,0 +1,12 @@
+{
+  "implementation_commit": "1c383de6faa9a147d1cc929050a52338169c9d37",
+  "toolkit_executable_sha256": "5ab38708298fce5cc4a25b259f34478b9f561c83158c1e91696eb50bffb19efe",
+  "validated_run_records": 28,
+  "rust_unit_tests": 21,
+  "rust_integration_tests": 12,
+  "native_ctest_suites": 2,
+  "frama_c": "NOT_CHECKED",
+  "misra_mappings": "unvalidated by explicit user direction",
+  "actual_agent_harnesses": "not exercised",
+  "overall_v1_acceptance": "incomplete"
+}

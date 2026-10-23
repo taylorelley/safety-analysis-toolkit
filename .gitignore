@@ -3,3 +3,4 @@
 .safety/
 **/compile_commands.json
 /.cache/
+!validation/**/compile_commands.json

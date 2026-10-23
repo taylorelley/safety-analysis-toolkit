@@ -1,0 +1,156 @@
+{
+  "status": "incomplete",
+  "complete": false,
+  "reason": "Frama-C unvalidated, MISRA mappings unvalidated, known trace and MC/DC gaps; two real agent harnesses not exercised",
+  "results": [
+    {
+      "operation": "doctor",
+      "interface": "CLI",
+      "exit_code": 3,
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792783103500-20959-0",
+      "findings": 0,
+      "properties": []
+    },
+    {
+      "operation": "scan",
+      "interface": "CLI",
+      "exit_code": 3,
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792783104169-20982-0",
+      "findings": 3,
+      "properties": []
+    },
+    {
+      "operation": "frama-c",
+      "interface": "CLI",
+      "exit_code": 3,
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792783104485-21007-0",
+      "findings": 0,
+      "properties": [
+        {
+          "id": "eva-analysis",
+          "description": "Frama-C Eva verification not checked",
+          "outcome": "NOT_CHECKED",
+          "scope": "No validated Frama-C installation/output adapter is available in this release",
+          "assumptions": [],
+          "unwind_bound": null,
+          "completeness_established": false,
+          "native_references": []
+        }
+      ]
+    },
+    {
+      "operation": "esbmc-c",
+      "interface": "CLI",
+      "exit_code": 0,
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792783104544-21014-0",
+      "findings": 0,
+      "properties": [
+        {
+          "id": "main.assertion.1",
+          "description": "line 5  assertion navigate(1) == 1",
+          "outcome": "PROVEN",
+          "scope": "ESBMC 8.6.0 sequential source model with entry main; 64-bit little-endian; Z3; finite unwind 8; default unwinding assertions enabled; source assumptions and library models apply",
+          "assumptions": [],
+          "unwind_bound": 8,
+          "completeness_established": true,
+          "native_references": [
+            "raw/esbmc.log"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "esbmc-cpp",
+      "interface": "CLI",
+      "exit_code": 1,
+      "status": "findings",
+      "complete": true,
+      "run_id": "RUN-1792783105686-21029-0",
+      "findings": 0,
+      "properties": [
+        {
+          "id": "main.assertion.1",
+          "description": "line 7  assertion x == 1",
+          "outcome": "VIOLATED",
+          "scope": "ESBMC 8.6.0 sequential source model with entry main; 64-bit little-endian; Z3; finite unwind 8; default unwinding assertions enabled; source assumptions and library models apply",
+          "assumptions": [],
+          "unwind_bound": 8,
+          "completeness_established": false,
+          "native_references": [
+            "raw/esbmc.log"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "trace",
+      "interface": "CLI",
+      "exit_code": 1,
+      "status": "findings",
+      "complete": true,
+      "run_id": "RUN-1792783106874-21044-0",
+      "findings": 6,
+      "properties": []
+    },
+    {
+      "operation": "coverage",
+      "interface": "CLI",
+      "exit_code": 3,
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792783107099-21066-0",
+      "findings": 4,
+      "properties": []
+    },
+    {
+      "operation": "safety.doctor",
+      "interface": "MCP",
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792783107232-21083-0"
+    },
+    {
+      "operation": "safety.scan",
+      "interface": "MCP",
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792783107903-21083-1"
+    },
+    {
+      "operation": "safety.prove",
+      "interface": "MCP",
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792783108254-21083-2"
+    },
+    {
+      "operation": "safety.prove",
+      "interface": "MCP",
+      "status": "findings",
+      "complete": true,
+      "run_id": "RUN-1792783109389-21083-3"
+    },
+    {
+      "operation": "safety.trace",
+      "interface": "MCP",
+      "status": "findings",
+      "complete": true,
+      "run_id": "RUN-1792783110555-21083-4"
+    },
+    {
+      "operation": "safety.coverage",
+      "interface": "MCP",
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792783110780-21083-5"
+    }
+  ]
+}

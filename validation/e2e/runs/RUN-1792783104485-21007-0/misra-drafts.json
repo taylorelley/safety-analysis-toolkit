@@ -1,0 +1,44 @@
+{
+  "artifact_status": "draft_for_human_review",
+  "complete": false,
+  "deviations": {
+    "approved_by_tool": false,
+    "records": "not_managed_by_this_release"
+  },
+  "editions": {
+    "c": "MISRA-C:2012",
+    "cpp": "MISRA-CPP:2023"
+  },
+  "gcs": {
+    "compliance": "not_established",
+    "guidelines_compliant_from_silence": false,
+    "outstanding": [
+      "Licensed guideline inventory and applicability",
+      "Validated enforcement mapping",
+      "Unimplemented and manual checks",
+      "Authorized deviation process and independent review"
+    ]
+  },
+  "gep": {
+    "automated_tools": [
+      "Clang-Tidy 19.1.7",
+      "Clang Static Analyzer 19.1.7"
+    ],
+    "manual_review": "All MISRA guidelines remain unassessed unless separately documented by the authorized project process",
+    "project_policy_checks": [
+      {
+        "behavior": "Reports direct goto statements in parsed ASTs",
+        "check": "safety-prohibited-goto",
+        "coverage": "not_established",
+        "enabled": true,
+        "limitations": [
+          "No licensed-standard validation",
+          "Indirect GNU goto is outside this project-policy check"
+        ],
+        "misra_mapping": "unvalidated"
+      }
+    ]
+  },
+  "guideline_inventory": "not_supplied; licensed-standard rule mapping review outstanding",
+  "status": "incomplete"
+}

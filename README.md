@@ -12,7 +12,8 @@ and two-agent-harness acceptance remain outstanding. See [development status](do
 
 ## Build and use
 
-Linux x86-64 or AArch64, Rust 1.99.1, LLVM/Clang **19.1.7**. Install `clang-tidy-19`,
+Validated reference: Linux x86-64, Rust 1.99.1, LLVM/Clang **19.1.7**.
+AArch64 runner code exists but has not been validated here. Install `clang-tidy-19`,
 `clang-19`, `llvm-19-dev`, `libclang-19-dev`, CMake >=3.25, a C++17 compiler and
 Python 3. See [contributing](CONTRIBUTING.md) for validation.
 
@@ -73,3 +74,8 @@ Original code is Apache-2.0. MISRA standard text is not included. See
 [dependency inventory](docs/dependencies.md) before redistributing binaries. See [formal verification](docs/formal-verification.md),
 [traceability](docs/traceability.md), [coverage](docs/coverage.md) and
 [MCP](docs/mcp.md) for capability boundaries.
+
+Executed mixed-language results: [validation report](validation/e2e/consolidated-report.md),
+[structured summary](validation/e2e/summary.json), and
+[full validation transcript](validation/full-validation.log). The independent MCP
+client is not a substitute for the outstanding two-agent-harness acceptance.

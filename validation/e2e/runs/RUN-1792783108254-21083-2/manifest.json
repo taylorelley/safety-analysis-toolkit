@@ -1,0 +1,205 @@
+{
+  "schema_version": 1,
+  "configuration": {
+    "assurance": null,
+    "build": {
+      "compile_commands": "build/compile_commands.json"
+    },
+    "coding": {
+      "c": "MISRA-C:2012",
+      "cpp": "MISRA-CPP:2023"
+    },
+    "evidence": {
+      "directory": ".safety/runs"
+    },
+    "project": {
+      "name": "mixed-safety-demo"
+    },
+    "tools": {
+      "allowlist": [
+        "/workspace/safety/build/clang/SafetyMisra.so",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang",
+        "/workspace/safety/build/clang/safety-source-index",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-cov",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-profdata",
+        "/workspace/scratch/esbmc/release/bin/esbmc",
+        "/usr/local/bin/git"
+      ],
+      "clang": true,
+      "clang_module": "/workspace/safety/build/clang/SafetyMisra.so",
+      "esbmc": true,
+      "frama_c": true,
+      "memory_mb": 2048,
+      "require_filesystem_isolation": false,
+      "timeout_seconds": 60
+    },
+    "trace": {
+      "manifest": "trace.yaml"
+    },
+    "version": 1
+  },
+  "toolkit": {
+    "executable_sha256": "5ab38708298fce5cc4a25b259f34478b9f561c83158c1e91696eb50bffb19efe",
+    "host_arch": "x86_64",
+    "version": "0.1.0"
+  },
+  "id": "RUN-1792783108254-21083-2",
+  "operation": "prove",
+  "project": "mixed-safety-demo",
+  "status": "passed",
+  "complete": true,
+  "completeness": {
+    "total": 1,
+    "analyzed": 1,
+    "failed": 0,
+    "excluded": 0,
+    "unsupported": 0,
+    "build_variants": [
+      "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+    ]
+  },
+  "started_unix_ms": 1792783108261,
+  "completed_unix_ms": 1792783109385,
+  "inputs": {
+    "build/compile_commands.json": "aee855aa0ebc5dec3b659c82c5be8185781d828bc7965dc6209d454b5cc9a9a2",
+    "build/provenance.json": "965c38d6b6433efb3b012f3cb31a1f216c4471ad409e89466459fdafd032b3cc",
+    "build/test": "68d361ec033697cf3eb7c8618cb75e18f7cd05ba2b80ed1ef460d59ed60c493e",
+    "build/test.profdata": "238ce748fdb8206bdba393efdc79b38fafed96ad228187c3d92c20217d5f12c4",
+    "build/test.profraw": "9e66e41b2eadd570a1850fd53e36ec5f11f678e080d23837c9e961225d6271a8",
+    "harness/navigation_harness.c": "b95bfcd9df878ff96777d16417ba6937074bbe662f0737d25ea4856c185b1c8e",
+    "harness/navigation_harness.yaml": "e597a890748ca488ec20b7718ec432445be580d6203aeb875a99899fd9f05af3",
+    "safety.yaml": "2c450d61ec520c5a7432b830d1ce10b02619440b11c0a2a49e62ffc6f6c12317",
+    "src/controller.cpp": "aef7a38692b13aadcb07c235fc6614b6debff561a67154549f2b35a07e373bdd",
+    "src/decision.c": "f5bc70baa14f155ece4dc543751f752fe69aa0047d747a22da9c60d5d1faf05f",
+    "src/navigation.c": "4d4816ce57472525158bb9a951436714a9475ae6f0914a1917e810953d5d8d15",
+    "src/test.c": "290a1366331b3fbf24a04de09c4e1ed1d558cc0326bedd69f8cd306e49b01a99",
+    "trace.yaml": "9398dfdd2fcc3f562bafb5de49deebf72382d500469a7cfa9219012075218b87"
+  },
+  "executions": [
+    {
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792783108254-21083-2",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792783108254-21083-2"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 10,
+      "stdout": "1c383de6faa9a147d1cc929050a52338169c9d37\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "--no-optional-locks",
+        "-c",
+        "core.fsmonitor=false",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792783108254-21083-2",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792783108254-21083-2"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 10,
+      "stdout": "?? validation/e2e/cli-coverage.json\n?? validation/e2e/cli-doctor.json\n?? validation/e2e/cli-esbmc-c.json\n?? validation/e2e/cli-esbmc-cpp.json\n?? validation/e2e/cli-frama-c.json\n?? validation/e2e/cli-scan.json\n?? validation/e2e/cli-trace.json\n?? validation/e2e/consolidated-report.md\n?? validation/e2e/mcp-2.json\n?? validation/e2e/mcp-3.json\n?? validation/e2e/mcp-4.json\n?? validation/e2e/mcp-5.json\n?? validation/e2e/mcp-6.json\n?? validation/e2e/mcp-7.json\n?? validation/e2e/runs/RUN-1792782664571-18081-0/config.json\n?? validation/e2e/runs/RUN-1792782664571-18081-0/evidence.json\n?? validation/e2e/runs/RUN-1792782664571-18081-0/findings.json\n?? validation/e2e/runs/RUN-1792782664571-18081-0/manifest.json\n?? validation/e2e/runs/RUN-1792782664571-18081-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782664571-18081-0/report.md\n?? validation/e2e/runs/RUN-1792782664571-18081-0/units.json\n?? validation/e2e/runs/RUN-1792782665270-18104-0/config.json\n?? validation/e2e/runs/RUN-1792782665270-18104-0/evidence.json\n?? validation/e2e/runs/RUN-1792782665270-18104-0/findings.json\n?? validation/e2e/runs/RUN-1792782665270-18104-0/manifest.json\n?? validation/e2e/runs/RUN-1792782665270-18104-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782665270-18104-0/module.json\n?? validation/e2e/runs/RUN-1792782665270-18104-0/raw/clang-0.log\n?? validation/e2e/runs/RUN-1792782665270-18104-0/raw/clang-1.log\n?? validation/e2e/runs/RUN-1792782665270-18104-0/raw/clang-2.log\n?? validation/e2e/runs/RUN-1792782665270-18104-0/raw/clang-3.log\n?? validation/e2e/runs/RUN-1792782665270-18104-0/report.md\n?? validation/e2e/runs/RUN-1792782665270-18104-0/unit-0/diagnostics.yaml\n?? validation/e2e/runs/RUN-1792782802511-19347-0/config.json\n?? validation/e2e/runs/RUN-1792782802511-19347-0/evidence.json\n?? validation/e2e/runs/RUN-1792782802511-19347-0/findings.json\n?? validation/e2e/runs/RUN-1792782802511-19347-0/manifest.json\n?? validation/e2e/runs/RUN-1792782802511-19347-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782802511-19347-0/report.md\n?? validation/e2e/runs/RUN-1792782802511-19347-0/units.json\n?? validation/e2e/runs/RUN-1792782803158-19370-0/config.json\n?? validation/e2e/runs/RUN-1792782803158-19370-0/evidence.json\n?? validation/e2e/runs/RUN-1792782803158-19370-0/findings.json\n?? validation/e2e/runs/RUN-1792782803158-19370-0/manifest.json\n?? validation/e2e/runs/RUN-1792782803158-19370-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782803158-19370-0/module.json\n?? validation/e2e/runs/RUN-1792782803158-19370-0/raw/clang-0.log\n?? validation/e2e/runs/RUN-1792782803158-19370-0/raw/clang-1.log\n?? validation/e2e/runs/RUN-1792782803158-19370-0/raw/clang-2.log\n?? validation/e2e/runs/RUN-1792782803158-19370-0/raw/clang-3.log\n?? validation/e2e/runs/RUN-1792782803158-19370-0/raw/clang-4.log\n?? validation/e2e/runs/RUN-1792782803158-19370-0/report.md\n?? validation/e2e/runs/RUN-1792782803158-19370-0/unit-0/diagnostics.yaml\n?? validation/e2e/runs/RUN-1792782803158-19370-0/unit-4/diagnostics.yaml\n?? validation/e2e/runs/RUN-1792782803459-19395-0/config.json\n?? validation/e2e/runs/RUN-1792782803459-19395-0/evidence.json\n?? validation/e2e/runs/RUN-1792782803459-19395-0/findings.json\n?? validation/e2e/runs/RUN-1792782803459-19395-0/manifest.json\n?? validation/e2e/runs/RUN-1792782803459-19395-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782803459-19395-0/report.md\n?? validation/e2e/runs/RUN-1792782803513-19402-0/config.json\n?? validation/e2e/runs/RUN-1792782803513-19402-0/evidence.json\n?? validation/e2e/runs/RUN-1792782803513-19402-0/findings.json\n?? validation/e2e/runs/RUN-1792782803513-19402-0/manifest.json\n?? validation/e2e/runs/RUN-1792782803513-19402-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782803513-19402-0/raw/esbmc.log\n?? validation/e2e/runs/RUN-1792782803513-19402-0/report.md\n?? validation/e2e/runs/RUN-1792782804659-19417-0/config.json\n?? validation/e2e/runs/RUN-1792782804659-19417-0/counterexamples.json\n?? validation/e2e/runs/RUN-1792782804659-19417-0/evidence.json\n?? validation/e2e/runs/RUN-1792782804659-19417-0/findings.json\n?? validation/e2e/runs/RUN-1792782804659-19417-0/manifest.json\n?? validation/e2e/runs/RUN-1792782804659-19417-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782804659-19417-0/raw/esbmc.log\n?? validation/e2e/runs/RUN-1792782804659-19417-0/report.json\n?? validation/e2e/runs/RUN-1792782804659-19417-0/report.md\n?? validation/e2e/runs/RUN-1792782805832-19432-0/config.json\n?? validation/e2e/runs/RUN-1792782805832-19432-0/evidence.json\n?? validation/e2e/runs/RUN-1792782805832-19432-0/findings.json\n?? validation/e2e/runs/RUN-1792782805832-19432-0/manifest.json\n?? validation/e2e/runs/RUN-1792782805832-19432-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-0.jsonl\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-0.log\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-1.jsonl\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-1.log\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-2.jsonl\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-2.log\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-3.jsonl\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-3.log\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-4.jsonl\n?? validation/e2e/runs/RUN-1792782805832-19432-0/raw/index-4.log\n?? validation/e2e/runs/RUN-1792782805832-19432-0/report.md\n?? validation/e2e/runs/RUN-1792782805832-19432-0/trace.json\n?? validation/e2e/runs/RUN-1792782806056-19454-0/config.json\n?? validation/e2e/runs/RUN-1792782806056-19454-0/coverage-provenance.json\n?? validation/e2e/runs/RUN-1792782806056-19454-0/coverage.json\n?? validation/e2e/runs/RUN-1792782806056-19454-0/evidence.json\n?? validation/e2e/runs/RUN-1792782806056-19454-0/findings.json\n?? validation/e2e/runs/RUN-1792782806056-19454-0/manifest.json\n?? validation/e2e/runs/RUN-1792782806056-19454-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782806056-19454-0/raw/llvm-cov.json\n?? validation/e2e/runs/RUN-1792782806056-19454-0/raw/llvm-cov.log\n?? validation/e2e/runs/RUN-1792782806056-19454-0/report.md\n?? validation/e2e/runs/RUN-1792782806187-19471-0/config.json\n?? validation/e2e/runs/RUN-1792782806187-19471-0/evidence.json\n?? validation/e2e/runs/RUN-1792782806187-19471-0/findings.json\n?? validation/e2e/runs/RUN-1792782806187-19471-0/manifest.json\n?? validation/e2e/runs/RUN-1792782806187-19471-0/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782806187-19471-0/report.md\n?? validation/e2e/runs/RUN-1792782806187-19471-0/units.json\n?? validation/e2e/runs/RUN-1792782806858-19471-1/config.json\n?? validation/e2e/runs/RUN-1792782806858-19471-1/evidence.json\n?? validation/e2e/runs/RUN-1792782806858-19471-1/findings.json\n?? validation/e2e/runs/RUN-1792782806858-19471-1/manifest.json\n?? validation/e2e/runs/RUN-1792782806858-19471-1/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782806858-19471-1/module.json\n?? validation/e2e/runs/RUN-1792782806858-19471-1/raw/clang-0.log\n?? validation/e2e/runs/RUN-1792782806858-19471-1/raw/clang-1.log\n?? validation/e2e/runs/RUN-1792782806858-19471-1/raw/clang-2.log\n?? validation/e2e/runs/RUN-1792782806858-19471-1/raw/clang-3.log\n?? validation/e2e/runs/RUN-1792782806858-19471-1/raw/clang-4.log\n?? validation/e2e/runs/RUN-1792782806858-19471-1/report.md\n?? validation/e2e/runs/RUN-1792782806858-19471-1/unit-0/diagnostics.yaml\n?? validation/e2e/runs/RUN-1792782806858-19471-1/unit-4/diagnostics.yaml\n?? validation/e2e/runs/RUN-1792782807207-19471-2/config.json\n?? validation/e2e/runs/RUN-1792782807207-19471-2/evidence.json\n?? validation/e2e/runs/RUN-1792782807207-19471-2/findings.json\n?? validation/e2e/runs/RUN-1792782807207-19471-2/manifest.json\n?? validation/e2e/runs/RUN-1792782807207-19471-2/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782807207-19471-2/raw/esbmc.log\n?? validation/e2e/runs/RUN-1792782807207-19471-2/report.md\n?? validation/e2e/runs/RUN-1792782808371-19471-3/config.json\n?? validation/e2e/runs/RUN-1792782808371-19471-3/counterexamples.json\n?? validation/e2e/runs/RUN-1792782808371-19471-3/evidence.json\n?? validation/e2e/runs/RUN-1792782808371-19471-3/findings.json\n?? validation/e2e/runs/RUN-1792782808371-19471-3/manifest.json\n?? validation/e2e/runs/RUN-1792782808371-19471-3/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782808371-19471-3/raw/esbmc.log\n?? validation/e2e/runs/RUN-1792782808371-19471-3/report.json\n?? validation/e2e/runs/RUN-1792782808371-19471-3/report.md\n?? validation/e2e/runs/RUN-1792782809598-19471-4/config.json\n?? validation/e2e/runs/RUN-1792782809598-19471-4/evidence.json\n?? validation/e2e/runs/RUN-1792782809598-19471-4/findings.json\n?? validation/e2e/runs/RUN-1792782809598-19471-4/manifest.json\n?? validation/e2e/runs/RUN-1792782809598-19471-4/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-0.jsonl\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-0.log\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-1.jsonl\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-1.log\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-2.jsonl\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-2.log\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-3.jsonl\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-3.log\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-4.jsonl\n?? validation/e2e/runs/RUN-1792782809598-19471-4/raw/index-4.log\n?? validation/e2e/runs/RUN-1792782809598-19471-4/report.md\n?? validation/e2e/runs/RUN-1792782809598-19471-4/trace.json\n?? validation/e2e/runs/RUN-1792782809820-19471-5/config.json\n?? validation/e2e/runs/RUN-1792782809820-19471-5/coverage-provenance.json\n?? validation/e2e/runs/RUN-1792782809820-19471-5/coverage.json\n?? validation/e2e/runs/RUN-1792782809820-19471-5/evidence.json\n?? validation/e2e/runs/RUN-1792782809820-19471-5/findings.json\n?? validation/e2e/runs/RUN-1792782809820-19471-5/manifest.json\n?? validation/e2e/runs/RUN-1792782809820-19471-5/misra-drafts.json\n?? validation/e2e/runs/RUN-1792782809820-19471-5/raw/llvm-cov.json\n?? validation/e2e/runs/RUN-1792782809820-19471-5/raw/llvm-cov.log\n?? validation/e2e/runs/RUN-1792782809820-19471-5/report.md\n?? validation/e2e/summary.json\n?? validation/exploratory-demo/constant-caller-scan.json\n?? validation/full-validation.log\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "executable_sha256": "4f9e846eaa56be8ba0f6b50c5c2772b1e488e82ab35e4e71e79627b6eed2ce2b",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/esbmc/release/bin/esbmc",
+      "arguments": [
+        "--version"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792783108254-21083-2",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792783108254-21083-2"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 10,
+      "stdout": "ESBMC version 8.6.0 64-bit x86_64 linux\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "executable_sha256": "4f9e846eaa56be8ba0f6b50c5c2772b1e488e82ab35e4e71e79627b6eed2ce2b",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/esbmc/release/bin/esbmc",
+      "arguments": [
+        "/workspace/safety/build/demo/harness/navigation_harness.c",
+        "--z3",
+        "--unwind",
+        "8",
+        "--64",
+        "--overflow-check",
+        "--generate-json-report",
+        "--std",
+        "c11",
+        "-DSAFETY_DEMO=1"
+      ],
+      "cwd": "/workspace/safety/build/demo/.safety/runs/RUN-1792783108254-21083-2",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792783108254-21083-2",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792783108254-21083-2"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 142,
+      "stdout": "ESBMC version 8.6.0 64-bit x86_64 linux\n",
+      "stderr": "Target: 64-bit little-endian x86_64-unknown-linux with esbmclibc\nParsing /workspace/safety/build/demo/harness/navigation_harness.c\nConverting\nGenerating GOTO Program\nGOTO program creation time: 0.125s\nGOTO program processing time: 0.000s\nStarting Bounded Model Checking\nSymex completed in: 0.000s (15 assignments)\nCaching time: 0.000s (removed 0 assertions)\nSlicing time: 0.000s (removed 14 assignments)\nGenerated 1 VCC(s), 0 remaining after simplification (1 assignments)\nBMC program time: 0.000s\n\n** Results:\n/workspace/safety/build/demo/harness/navigation_harness.c, function main\n  PASSED       [main.assertion.1]  line 5  assertion navigate(1) == 1\n\n** 0 of 1 properties failed, 1 passed\n\nVERIFICATION SUCCESSFUL\n",
+      "timeout_seconds": 60
+    }
+  ],
+  "findings": [],
+  "properties": [
+    {
+      "id": "main.assertion.1",
+      "description": "line 5  assertion navigate(1) == 1",
+      "outcome": "PROVEN",
+      "scope": "ESBMC 8.6.0 sequential source model with entry main; 64-bit little-endian; Z3; finite unwind 8; default unwinding assertions enabled; source assumptions and library models apply",
+      "assumptions": [],
+      "unwind_bound": 8,
+      "completeness_established": true,
+      "native_references": [
+        "raw/esbmc.log"
+      ]
+    }
+  ],
+  "limitations": [
+    "Automated evidence for human review; no certification or compliance approval.",
+    "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+    "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+    "Advisory source-model verification only. No independently approved harness/environment assumptions were supplied. Counterexamples are model traces, not automatically confirmed production defects. No induction-based proof is claimed."
+  ],
+  "git": {
+    "commit": "1c383de6faa9a147d1cc929050a52338169c9d37",
+    "dirty": true
+  }
+}

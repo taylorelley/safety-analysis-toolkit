@@ -89,3 +89,12 @@ verification harness. This is a real Clang interprocedural-scope limitation, not
 a claim that scanning a TU explores every possible function context. The
 standalone library scan detects the null path; the harness proves only its
 explicit fixed-input property. No broad proof is inferred from that harness.
+
+Final executed source commit: `1c383de` (toolkit identity provenance), preceded by
+`6a14068` (scoped reports), `d5f1a75` (failure/variant safeguards), `51cf372`
+(AST/ESBMC/coverage/MCP/skill) and `ae6d42a` (foundation and Clang pipeline).
+`validation/full-validation.log` records the final available-tool run. The
+mixed example also ran through native CLI and the independent MCP client, with
+its native records archived and verified. No actual agent-harness acceptance or
+Frama-C result is claimed. Next work is the outstanding acceptance items in the
+phase table, especially a validated Frama-C adapter and reviewed MISRA metadata.

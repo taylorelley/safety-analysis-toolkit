@@ -1,0 +1,62 @@
+[
+  {
+    "id": "FND-000001",
+    "tool": "llvm-cov-19",
+    "rule_id": "coverage-gap-branches",
+    "file": "src/decision.c",
+    "line": 1,
+    "column": 1,
+    "severity": "warning",
+    "message": "branches: 3/4 measured items covered; investigate linked requirements and requirements-based tests",
+    "build_variant": "coverage-artifact",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/llvm-cov.json"
+    ]
+  },
+  {
+    "id": "FND-000002",
+    "tool": "llvm-cov-19",
+    "rule_id": "coverage-gap-mcdc",
+    "file": "src/decision.c",
+    "line": 1,
+    "column": 1,
+    "severity": "warning",
+    "message": "mcdc: 1/2 measured items covered; investigate linked requirements and requirements-based tests",
+    "build_variant": "coverage-artifact",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/llvm-cov.json"
+    ]
+  },
+  {
+    "id": "FND-000003",
+    "tool": "llvm-cov-19",
+    "rule_id": "coverage-gap-branches",
+    "file": "src/test.c",
+    "line": 1,
+    "column": 1,
+    "severity": "warning",
+    "message": "branches: 1/2 measured items covered; investigate linked requirements and requirements-based tests",
+    "build_variant": "coverage-artifact",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/llvm-cov.json"
+    ]
+  },
+  {
+    "id": "FND-000004",
+    "tool": "llvm-cov-19",
+    "rule_id": "coverage-gap-regions",
+    "file": "src/test.c",
+    "line": 1,
+    "column": 1,
+    "severity": "warning",
+    "message": "regions: 3/4 measured items covered; investigate linked requirements and requirements-based tests",
+    "build_variant": "coverage-artifact",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/llvm-cov.json"
+    ]
+  }
+]
