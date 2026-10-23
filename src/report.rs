@@ -42,6 +42,7 @@ pub fn markdown(r: &Run) -> String {
         r.completeness.build_variants.join(", ")
     ));
     s.push_str("## Tools and provenance\n\n");
+    s.push_str(&format!("Toolkit identity: `{}`.\n\n", r.toolkit));
     let mut tools = std::collections::BTreeSet::new();
     for e in &r.executions {
         if tools.insert(e.executable.clone()) {

@@ -60,6 +60,8 @@ pub struct Run {
     pub schema_version: u32,
     #[serde(default)]
     pub configuration: serde_json::Value,
+    #[serde(default)]
+    pub toolkit: serde_json::Value,
     pub id: String,
     pub operation: String,
     pub project: String,

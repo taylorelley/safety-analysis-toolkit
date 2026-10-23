@@ -309,6 +309,12 @@
         "object",
         "null"
       ]
+    },
+    "toolkit": {
+      "type": [
+        "object",
+        "null"
+      ]
     }
   },
   "required": [
