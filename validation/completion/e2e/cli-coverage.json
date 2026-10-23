@@ -1,0 +1,365 @@
+{
+  "schema_version": 1,
+  "configuration": {
+    "assurance": null,
+    "build": {
+      "compile_commands": "build/compile_commands.json",
+      "variants": {}
+    },
+    "coding": {
+      "c": "MISRA-C:2012",
+      "cpp": "MISRA-CPP:2023",
+      "deviations": null,
+      "recategorization": null,
+      "registries": []
+    },
+    "evidence": {
+      "directory": ".safety/runs",
+      "reviews": null
+    },
+    "project": {
+      "name": "mixed-safety-demo"
+    },
+    "tools": {
+      "allowlist": [
+        "/workspace/safety/build/clang/SafetyMisra.so",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang",
+        "/workspace/safety/build/clang/safety-source-index",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-cov",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-profdata",
+        "/workspace/scratch/esbmc/release/bin/esbmc",
+        "/usr/local/bin/git",
+        "/workspace/scratch/bin/frama-c"
+      ],
+      "clang": true,
+      "clang_module": "/workspace/safety/build/clang/SafetyMisra.so",
+      "esbmc": true,
+      "frama_c": true,
+      "memory_mb": 2048,
+      "require_filesystem_isolation": false,
+      "timeout_seconds": 60
+    },
+    "trace": {
+      "manifest": "trace.yaml"
+    },
+    "version": 1
+  },
+  "toolkit": {
+    "executable_sha256": "74491fdf99771f19e3f392cdd9e8416984d9062d877f00e288fe2996a3d6ddae",
+    "host_arch": "x86_64",
+    "version": "0.1.0"
+  },
+  "verification": null,
+  "id": "RUN-1792791470505-72097-0",
+  "operation": "coverage",
+  "project": "mixed-safety-demo",
+  "status": "incomplete",
+  "complete": false,
+  "completeness": {
+    "total": 6,
+    "analyzed": 2,
+    "failed": 0,
+    "excluded": 4,
+    "unsupported": 0,
+    "build_variants": [
+      "VAR-59d26e56ac42efbf896ef09f1788fdd1129c016477634b0d86e449897570a99e",
+      "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e",
+      "VAR-6c61e71e5d659d81fd75c68472b6a04b5d165baafee2350d9ddb485cb3c8c31b",
+      "VAR-9ff35ff903434396903470597bbfe339f5cb6dcdd3927ada3c925391aaf00180",
+      "VAR-03fed98ba753967d5cf07a4ee49a2b95acaf802cb4c8e6c507e5ea69ea3d3d43",
+      "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+    ]
+  },
+  "started_unix_ms": 1792791470511,
+  "completed_unix_ms": 1792791470638,
+  "inputs": {
+    "build/compile_commands.json": "e32378a236a52be3332d114bec07ba6bc5b6aa72e04f935075fc6dcb1460dc6d",
+    "build/provenance.json": "62d2f672fca8d1afaa2459c02c19395c29716523332321d8f841a7935bff9246",
+    "build/test": "68d361ec033697cf3eb7c8618cb75e18f7cd05ba2b80ed1ef460d59ed60c493e",
+    "build/test.profdata": "238ce748fdb8206bdba393efdc79b38fafed96ad228187c3d92c20217d5f12c4",
+    "build/test.profraw": "5ef49bb03b8ebc0db553702e7736a32abcea58644aa7f098e57dd72e66dbb19e",
+    "harness/navigation_harness.c": "b95bfcd9df878ff96777d16417ba6937074bbe662f0737d25ea4856c185b1c8e",
+    "harness/navigation_harness.yaml": "70cc2bab7ed77c6ef5727e1d50b11d9eee81ca0852b37151fdcc124e97c4fea2",
+    "safety.yaml": "30ea1a41063d0545e5a8c5e20aaa9fcc9f7f52e69ec541e9418db21f0c7e71a3",
+    "src/contract.c": "502564330f50a1422bf9e27301b1ced791f14460b6cbfaeb23c6c8284e5c5288",
+    "src/controller.cpp": "aef7a38692b13aadcb07c235fc6614b6debff561a67154549f2b35a07e373bdd",
+    "src/decision.c": "f5bc70baa14f155ece4dc543751f752fe69aa0047d747a22da9c60d5d1faf05f",
+    "src/navigation.c": "4d4816ce57472525158bb9a951436714a9475ae6f0914a1917e810953d5d8d15",
+    "src/test.c": "290a1366331b3fbf24a04de09c4e1ed1d558cc0326bedd69f8cd306e49b01a99",
+    "trace.yaml": "9398dfdd2fcc3f562bafb5de49deebf72382d500469a7cfa9219012075218b87"
+  },
+  "executions": [
+    {
+      "output_refs": [
+        "raw/exec-0.stdout",
+        "raw/exec-0.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792791470505-72097-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792791470505-72097-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 11,
+      "stdout": "7e2405cf9326bd7d109adfdcb71423f9c19fa8f4\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "output_refs": [
+        "raw/exec-1.stdout",
+        "raw/exec-1.stderr"
+      ],
+      "metadata_output_truncated": true,
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "--no-optional-locks",
+        "-c",
+        "core.fsmonitor=false",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792791470505-72097-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792791470505-72097-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 24,
+      "stdout": "?? validation/completion/archive-validation.log\n?? validation/completion/benchmark-driver.log\n?? validation/completion/benchmark.json\n?? validation/completion/cli-cancellation.log\n?? validation/completion/e2e-driver.log\n?? validation/completion/e2e/cli-coverage.json\n?? validation/completion/e2e/cli-doctor.json\n?? validation/completion/e2e/cli-esbmc-c.json\n?? validation/completion/e2e/cli-esbmc-cpp.json\n?? validation/completion/e2e/cli-frama-c.json\n?? validation/completion/e2e/cli-frama-wp.json\n?? validation/completion/e2e/cli-scan.json\n?? validation/completion/e2e/cli-trace.json\n?? validation/completion/e2e/consolidated-report.json\n?? validation/completion/e2e/consolidated-report.md\n?? validation/completion/e2e/mcp-2.json\n?? validation/completion/e2e/mcp-3.json\n?? validation/completion/e2e/mcp-4.json\n?? validation/completion/e2e/mcp-5.json\n?? validation/completion/e2e/mcp-6.json\n?? validation/completion/e2e/mcp-7.json\n?? validation/completion/e2e/mcp-8.json\n?? validation/completion/e2e/mcp-9.json\n?? validation/completion/e2e/project-inputs/build/compile_commands.json\n?? validation/completion/e2e/project-inputs/build/provenance.json\n?? validation/completion/e2e/project-inputs/build/test\n?? validation/completion/e2e/project-inputs/build/test.profdata\n?? validation/completion/e2e/project-inputs/build/test.profraw\n?? validation/completion/e2e/project-inputs/harness/navigation_harness.c\n?? validation/completion/e2e/project-inputs/harness/navigation_harness.yaml\n?? validation/completion/e2e/project-inputs/safety.yaml\n?? validation/completion/e2e/project-inputs/src/contract.c\n?? validation/completion/e2e/project-inputs/src/controller.cpp\n?? validation/completion/e2e/project-inputs/src/decision.c\n?? validation/completion/e2e/project-inputs/src/navigation.c\n?? validation/completion/e2e/project-inputs/src/test.c\n?? validation/completion/e2e/project-inputs/trace.yaml\n?? validation/completion/e2e/runs/RUN-1792782664571-18081-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782664571-18081-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782664571-18081-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782664571-18081-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782664571-18081-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782664571-18081-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782664571-18081-0/units.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/module.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/raw/clang-0.log\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/raw/clang-1.log\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/raw/clang-2.log\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/raw/clang-3.log\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/unit-0/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/unit-0/diagnostics.yaml\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/unit-1/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/unit-2/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782665270-18104-0/unit-3/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782802511-19347-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782802511-19347-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782802511-19347-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782802511-19347-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782802511-19347-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782802511-19347-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782802511-19347-0/units.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/module.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/raw/clang-0.log\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/raw/clang-1.log\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/raw/clang-2.log\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/raw/clang-3.log\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/raw/clang-4.log\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/unit-0/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/unit-0/diagnostics.yaml\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/unit-1/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/unit-2/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/unit-3/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/unit-4/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782803158-19370-0/unit-4/diagnostics.yaml\n?? validation/completion/e2e/runs/RUN-1792782803459-19395-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782803459-19395-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782803459-19395-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782803459-19395-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782803459-19395-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782803459-19395-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782803513-19402-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782803513-19402-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782803513-19402-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782803513-19402-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782803513-19402-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782803513-19402-0/raw/esbmc.log\n?? validation/completion/e2e/runs/RUN-1792782803513-19402-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782804659-19417-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782804659-19417-0/counterexamples.json\n?? validation/completion/e2e/runs/RUN-1792782804659-19417-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782804659-19417-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782804659-19417-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782804659-19417-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782804659-19417-0/raw/esbmc.log\n?? validation/completion/e2e/runs/RUN-1792782804659-19417-0/report.json\n?? validation/completion/e2e/runs/RUN-1792782804659-19417-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-0.jsonl\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-0.log\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-1.jsonl\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-1.log\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-2.jsonl\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-2.log\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-3.jsonl\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-3.log\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-4.jsonl\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/raw/index-4.log\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/trace.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/unit-0/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/unit-1/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/unit-2/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/unit-3/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782805832-19432-0/unit-4/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/coverage-provenance.json\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/coverage.json\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/raw/llvm-cov.json\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/raw/llvm-cov.log\n?? validation/completion/e2e/runs/RUN-1792782806056-19454-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782806187-19471-0/config.json\n?? validation/completion/e2e/runs/RUN-1792782806187-19471-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782806187-19471-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792782806187-19471-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782806187-19471-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782806187-19471-0/report.md\n?? validation/completion/e2e/runs/RUN-1792782806187-19471-0/units.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/config.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/findings.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/module.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/raw/clang-0.log\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/raw/clang-1.log\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/raw/clang-2.log\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/raw/clang-3.log\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/raw/clang-4.log\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/report.md\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/unit-0/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/unit-0/diagnostics.yaml\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/unit-1/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/unit-2/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/unit-3/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/unit-4/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782806858-19471-1/unit-4/diagnostics.yaml\n?? validation/completion/e2e/runs/RUN-1792782807207-19471-2/config.json\n?? validation/completion/e2e/runs/RUN-1792782807207-19471-2/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782807207-19471-2/findings.json\n?? validation/completion/e2e/runs/RUN-1792782807207-19471-2/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782807207-19471-2/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782807207-19471-2/raw/esbmc.log\n?? validation/completion/e2e/runs/RUN-1792782807207-19471-2/report.md\n?? validation/completion/e2e/runs/RUN-1792782808371-19471-3/config.json\n?? validation/completion/e2e/runs/RUN-1792782808371-19471-3/counterexamples.json\n?? validation/completion/e2e/runs/RUN-1792782808371-19471-3/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782808371-19471-3/findings.json\n?? validation/completion/e2e/runs/RUN-1792782808371-19471-3/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782808371-19471-3/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782808371-19471-3/raw/esbmc.log\n?? validation/completion/e2e/runs/RUN-1792782808371-19471-3/report.json\n?? validation/completion/e2e/runs/RUN-1792782808371-19471-3/report.md\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/config.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/findings.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-0.jsonl\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-0.log\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-1.jsonl\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-1.log\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-2.jsonl\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-2.log\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-3.jsonl\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-3.log\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-4.jsonl\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/raw/index-4.log\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/report.md\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/trace.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/unit-0/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/unit-1/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/unit-2/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/unit-3/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782809598-19471-4/unit-4/compile_commands.json\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/config.json\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/coverage-provenance.json\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/coverage.json\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/evidence.json\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/findings.json\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/manifest.json\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/raw/llvm-cov.json\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/raw/llvm-cov.log\n?? validation/completion/e2e/runs/RUN-1792782809820-19471-5/report.md\n?? validation/completion/e2e/runs/RUN-1792783103500-20959-0/config.json\n?? validation/completion/e2e/runs/RUN-1792783103500-20959-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792783103500-20959-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792783103500-20959-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792783103500-20959-0/misra-drafts.json\n?? validation/completion/e2e/runs/RUN-1792783103500-20959-0/report.md\n?? validation/completion/e2e/runs/RUN-1792783103500-20959-0/units.json\n?? validation/completion/e2e/runs/RUN-1792783104169-20982-0/config.json\n?? validation/completion/e2e/runs/RUN-1792783104169-20982-0/evidence.json\n?? validation/completion/e2e/runs/RUN-1792783104169-20982-0/findings.json\n?? validation/completion/e2e/runs/RUN-1792783104169-20982-0/manifest.json\n?? validation/completion/e2e/runs/RUN-1792783104169-20982-0/misra-drafts.json\n?? validation/compl",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "output_refs": [
+        "raw/exec-2.stdout",
+        "raw/exec-2.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "8421a134d7c6bc9ca8dc1fb5b9ef40adc6457b78f5066b6202b2072256f83866",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-cov",
+      "arguments": [
+        "--version"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792791470505-72097-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792791470505-72097-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 31,
+      "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "output_refs": [
+        "raw/exec-3.stdout",
+        "raw/exec-3.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "8421a134d7c6bc9ca8dc1fb5b9ef40adc6457b78f5066b6202b2072256f83866",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-cov",
+      "arguments": [
+        "export",
+        "/workspace/safety/build/demo/build/test",
+        "--instr-profile=/workspace/safety/build/demo/build/test.profdata"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792791470505-72097-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792791470505-72097-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 31,
+      "stdout": "{\"data\":[{\"files\":[{\"branches\":[[2,32,2,33,1,1,0,0,6],[2,37,2,38,1,0,0,0,6]],\"expansions\":[],\"filename\":\"/workspace/safety/build/demo/src/decision.c\",\"mcdc_records\":[[2,32,2,38,0,5,[true,false]]],\"segments\":[[2,26,2,true,true,false],[2,32,2,true,true,false],[2,33,2,true,false,false],[2,37,1,true,true,false],[2,38,2,true,false,false],[2,39,1,true,false,true],[2,40,1,true,true,false],[2,48,2,true,false,false],[2,49,1,true,false,true],[2,50,1,true,true,false],[2,58,2,true,false,false],[2,61,0,false,false,false]],\"summary\":{\"branches\":{\"count\":4,\"covered\":3,\"notcovered\":1,\"percent\":75},\"functions\":{\"count\":1,\"covered\":1,\"percent\":100},\"instantiations\":{\"count\":1,\"covered\":1,\"percent\":100},\"lines\":{\"count\":1,\"covered\":1,\"percent\":100},\"mcdc\":{\"count\":2,\"covered\":1,\"notcovered\":1,\"percent\":50},\"regions\":{\"count\":6,\"covered\":6,\"notcovered\":0,\"percent\":100}}},{\"branches\":[[4,25,4,55,1,0,0,0,4]],\"expansions\":[],\"filename\":\"/workspace/safety/build/demo/src/test.c\",\"mcdc_records\":[],\"segments\":[[4,16,1,true,true,false],[4,25,1,true,true,false],[4,55,1,true,false,false],[4,58,1,true,true,false],[4,59,1,true,false,false],[4,62,0,true,true,false],[4,63,1,true,false,false],[4,66,0,false,false,false]],\"summary\":{\"branches\":{\"count\":2,\"covered\":1,\"notcovered\":1,\"percent\":50},\"functions\":{\"count\":1,\"covered\":1,\"percent\":100},\"instantiations\":{\"count\":1,\"covered\":1,\"percent\":100},\"lines\":{\"count\":1,\"covered\":1,\"percent\":100},\"mcdc\":{\"count\":0,\"covered\":0,\"notcovered\":0,\"percent\":0},\"regions\":{\"count\":4,\"covered\":3,\"notcovered\":1,\"percent\":75}}}],\"functions\":[{\"branches\":[[2,32,2,33,1,1,0,0,6],[2,37,2,38,1,0,0,0,6]],\"count\":2,\"filenames\":[\"/workspace/safety/build/demo/src/decision.c\"],\"mcdc_records\":[[2,32,2,38,0,5,[true,false]]],\"name\":\"decide\",\"regions\":[[2,26,2,61,2,0,0,0],[2,32,2,33,2,0,0,0],[2,32,2,38,2,0,0,0],[2,37,2,38,1,0,0,0],[2,39,2,40,1,0,0,3],[2,40,2,48,1,0,0,0],[2,49,2,50,1,0,0,3],[2,50,2,58,1,0,0,0]]},{\"branches\":[[4,25,4,55,1,0,0,0,4]],\"count\":1,\"filenames\":[\"/workspace/safety/build/demo/src/test.c\"],\"mcdc_records\":[],\"name\":\"main\",\"regions\":[[4,16,4,66,1,0,0,0],[4,25,4,55,1,0,0,0],[4,57,4,58,1,0,0,3],[4,58,4,59,1,0,0,0],[4,62,4,63,0,0,0,0]]}],\"totals\":{\"branches\":{\"count\":6,\"covered\":4,\"notcovered\":2,\"percent\":66.666666666666657},\"functions\":{\"count\":2,\"covered\":2,\"percent\":100},\"instantiations\":{\"count\":2,\"covered\":2,\"percent\":100},\"lines\":{\"count\":2,\"covered\":2,\"percent\":100},\"mcdc\":{\"count\":2,\"covered\":1,\"notcovered\":1,\"percent\":50},\"regions\":{\"count\":10,\"covered\":9,\"notcovered\":1,\"percent\":90}}}],\"type\":\"llvm.coverage.json.export\",\"version\":\"2.0.1\"}",
+      "stderr": "",
+      "timeout_seconds": 60
+    }
+  ],
+  "findings": [
+    {
+      "schema_version": 1,
+      "run_id": "RUN-1792791470505-72097-0",
+      "category": "structural-coverage",
+      "end_line": null,
+      "end_column": null,
+      "certainty": null,
+      "requirement_ids": [
+        "R-DEC"
+      ],
+      "test_ids": [
+        "T-DEC"
+      ],
+      "related_findings": [],
+      "human_disposition_ref": null,
+      "id": "FND-000001",
+      "tool": "llvm-cov-19",
+      "rule_id": "coverage-gap-branches",
+      "file": "src/decision.c",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "branches: 3/4 measured items covered; investigate linked requirements and requirements-based tests",
+      "build_variant": "coverage-artifact",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "raw/llvm-cov.json"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "RUN-1792791470505-72097-0",
+      "category": "structural-coverage",
+      "end_line": null,
+      "end_column": null,
+      "certainty": null,
+      "requirement_ids": [
+        "R-DEC"
+      ],
+      "test_ids": [
+        "T-DEC"
+      ],
+      "related_findings": [],
+      "human_disposition_ref": null,
+      "id": "FND-000002",
+      "tool": "llvm-cov-19",
+      "rule_id": "coverage-gap-mcdc",
+      "file": "src/decision.c",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "mcdc: 1/2 measured items covered; investigate linked requirements and requirements-based tests",
+      "build_variant": "coverage-artifact",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "raw/llvm-cov.json"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "RUN-1792791470505-72097-0",
+      "category": "structural-coverage",
+      "end_line": null,
+      "end_column": null,
+      "certainty": null,
+      "requirement_ids": [
+        "R-DEC"
+      ],
+      "test_ids": [
+        "T-DEC"
+      ],
+      "related_findings": [],
+      "human_disposition_ref": null,
+      "id": "FND-000003",
+      "tool": "llvm-cov-19",
+      "rule_id": "coverage-mcdc-condition-2",
+      "file": "src/decision.c",
+      "line": 2,
+      "column": 32,
+      "severity": "warning",
+      "message": "Condition 2 has no measured MC/DC independence pair; investigate requirements-based tests, infeasibility and instrumentation scope",
+      "build_variant": "coverage-artifact",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "raw/llvm-cov.json"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "RUN-1792791470505-72097-0",
+      "category": "structural-coverage",
+      "end_line": null,
+      "end_column": null,
+      "certainty": null,
+      "requirement_ids": [
+        "R-DEC"
+      ],
+      "test_ids": [
+        "T-DEC"
+      ],
+      "related_findings": [],
+      "human_disposition_ref": null,
+      "id": "FND-000004",
+      "tool": "llvm-cov-19",
+      "rule_id": "coverage-gap-branches",
+      "file": "src/test.c",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "branches: 1/2 measured items covered; investigate linked requirements and requirements-based tests",
+      "build_variant": "coverage-artifact",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "raw/llvm-cov.json"
+      ]
+    },
+    {
+      "schema_version": 1,
+      "run_id": "RUN-1792791470505-72097-0",
+      "category": "structural-coverage",
+      "end_line": null,
+      "end_column": null,
+      "certainty": null,
+      "requirement_ids": [
+        "R-DEC"
+      ],
+      "test_ids": [
+        "T-DEC"
+      ],
+      "related_findings": [],
+      "human_disposition_ref": null,
+      "id": "FND-000005",
+      "tool": "llvm-cov-19",
+      "rule_id": "coverage-gap-regions",
+      "file": "src/test.c",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "regions: 3/4 measured items covered; investigate linked requirements and requirements-based tests",
+      "build_variant": "coverage-artifact",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "raw/llvm-cov.json"
+      ]
+    }
+  ],
+  "properties": [],
+  "limitations": [
+    "Automated evidence for human review; no certification or compliance approval.",
+    "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+    "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+    "Decisions exist without measured MC/DC conditions; MC/DC instrumentation completeness is unknown",
+    "Coverage import never executes tests. Execution environment and requirement/test links in provenance are supplied records, not independently validated claims. LLVM branch coverage is not automatically DO-178C decision coverage. Data/control coupling, object-code mapping, target execution assurance and qualification assessment remain outstanding."
+  ],
+  "git": {
+    "commit": "7e2405cf9326bd7d109adfdcb71423f9c19fa8f4",
+    "dirty": true
+  }
+}

@@ -1,0 +1,307 @@
+cargo fmt --check
+cargo clippy --locked --all-targets -- -D warnings
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling libc v0.2.191
+   Compiling serde_core v1.0.229
+   Compiling syn v3.0.9
+   Compiling zmij v1.0.23
+    Checking memchr v2.8.3
+    Checking pin-project-lite v0.2.17
+   Compiling version_check v0.9.5
+   Compiling generic-array v0.14.7
+    Checking futures-sink v0.3.34
+    Checking futures-core v0.3.34
+   Compiling serde v1.0.229
+   Compiling autocfg v1.5.1
+    Checking itoa v1.0.18
+    Checking typenum v1.20.1
+   Compiling num-traits v0.2.19
+   Compiling getrandom v0.4.3
+   Compiling strsim v0.11.1
+   Compiling ident_case v1.0.1
+    Checking cfg-if v1.0.5
+    Checking futures-channel v0.3.34
+    Checking errno v0.3.14
+    Checking utf8parse v0.2.2
+    Checking futures-task v0.3.34
+    Checking futures-io v0.3.34
+    Checking slab v0.4.12
+   Compiling serde_json v1.0.154
+   Compiling ref-cast v1.0.27
+    Checking once_cell v1.21.4
+   Compiling darling_core v0.24.1
+   Compiling serde_derive_internals v0.30.0
+    Checking anstyle-parse v1.0.0
+    Checking signal-hook-registry v1.4.8
+   Compiling serde_derive v1.0.229
+   Compiling futures-macro v0.3.34
+    Checking futures-util v0.3.34
+   Compiling darling_macro v0.24.1
+   Compiling ref-cast-impl v1.0.27
+   Compiling tokio-macros v2.7.2
+    Checking mio v1.2.4
+    Checking socket2 v0.6.5
+   Compiling syn v2.0.119
+    Checking bytes v1.12.1
+    Checking anstyle-query v1.1.5
+    Checking anstyle v1.0.14
+   Compiling thiserror v2.0.21
+    Checking is_terminal_polyfill v1.70.2
+    Checking hashbrown v0.17.1
+    Checking colorchoice v1.0.5
+    Checking equivalent v1.0.3
+    Checking indexmap v2.14.2
+    Checking anstream v1.0.0
+    Checking tokio v1.54.1
+    Checking chrono v0.4.45
+    Checking futures-executor v0.3.34
+   Compiling darling v0.24.1
+   Compiling schemars_derive v1.2.3
+   Compiling tracing-attributes v0.1.31
+   Compiling thiserror-impl v2.0.21
+    Checking tracing-core v0.1.36
+    Checking crypto-common v0.1.7
+    Checking block-buffer v0.10.4
+    Checking ryu v1.0.23
+    Checking clap_lex v1.1.1
+   Compiling rmcp v3.7.0
+   Compiling rustix v1.1.5
+   Compiling heck v0.5.0
+   Compiling anyhow v1.0.104
+    Checking dyn-clone v1.0.20
+    Checking schemars v1.2.3
+   Compiling clap_derive v4.6.7
+    Checking clap_builder v4.6.7
+    Checking tracing v0.1.44
+    Checking digest v0.10.7
+    Checking tokio-util v0.7.20
+   Compiling rmcp-macros v3.7.0
+    Checking futures v0.3.34
+    Checking uuid v1.29.0
+    Checking csv-core v0.1.13
+   Compiling pastey v0.2.3
+    Checking linux-raw-sys v0.12.1
+    Checking cpufeatures v0.2.17
+    Checking unsafe-libyaml v0.2.11
+    Checking bitflags v2.13.2
+    Checking serde_yaml v0.9.34+deprecated
+    Checking sha2 v0.10.9
+    Checking csv v1.4.0
+    Checking clap v4.6.7
+    Checking shlex v1.3.0
+    Checking fastrand v2.5.0
+    Checking tempfile v3.27.0
+    Checking safety v0.1.0 (/work/safety)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 27.48s
+cmake -S clang -B build/clang -DCMAKE_BUILD_TYPE=Release
+-- The C compiler identification is GNU 12.2.0
+-- The CXX compiler identification is GNU 12.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Performing Test HAVE_FFI_CALL
+-- Performing Test HAVE_FFI_CALL - Success
+-- Found FFI: /usr/lib/x86_64-linux-gnu/libffi.so  
+-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) 
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.2.13") 
+-- Could NOT find zstd (missing: zstd_LIBRARY zstd_INCLUDE_DIR) 
+-- Found LibXml2: /usr/lib/x86_64-linux-gnu/libxml2.so (found version "2.9.14") 
+-- Could NOT find CURL (missing: CURL_LIBRARY CURL_INCLUDE_DIR) 
+-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) 
+-- Could NOT find zstd (missing: zstd_LIBRARY zstd_INCLUDE_DIR) 
+-- Could NOT find CURL (missing: CURL_LIBRARY CURL_INCLUDE_DIR) 
+-- Found Python3: /usr/bin/python3 (found version "3.11.2") found components: Interpreter 
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /work/safety/build/clang
+cmake --build build/clang --parallel 2
+gmake[1]: Entering directory '/work/safety/build/clang'
+gmake[2]: Entering directory '/work/safety/build/clang'
+gmake[3]: Entering directory '/work/safety/build/clang'
+gmake[3]: Entering directory '/work/safety/build/clang'
+gmake[3]: Leaving directory '/work/safety/build/clang'
+gmake[3]: Leaving directory '/work/safety/build/clang'
+gmake[3]: Entering directory '/work/safety/build/clang'
+gmake[3]: Entering directory '/work/safety/build/clang'
+[ 50%] Building CXX object CMakeFiles/safety-source-index.dir/src/SourceIndex.cpp.o
+[ 50%] Building CXX object CMakeFiles/SafetyMisra.dir/src/MisraModule.cpp.o
+[ 75%] Linking CXX shared module SafetyMisra.so
+gmake[3]: Leaving directory '/work/safety/build/clang'
+[ 75%] Built target SafetyMisra
+[100%] Linking CXX executable safety-source-index
+gmake[3]: Leaving directory '/work/safety/build/clang'
+[100%] Built target safety-source-index
+gmake[2]: Leaving directory '/work/safety/build/clang'
+gmake[1]: Leaving directory '/work/safety/build/clang'
+ctest --test-dir build/clang --output-on-failure
+Internal ctest changing into directory: /work/safety/build/clang
+Test project /work/safety/build/clang
+    Start 1: prohibited-goto
+1/3 Test #1: prohibited-goto ..................   Passed    0.27 sec
+    Start 2: source-index
+2/3 Test #2: source-index .....................   Passed    0.11 sec
+    Start 3: original-policies
+3/3 Test #3: original-policies ................   Passed    0.11 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   0.49 sec
+python3 examples/configure.py
+PATH="/work/safety/build/clang:$PATH" SAFETY_TEST_MODULE="/work/safety/build/clang/SafetyMisra.so" cargo test --locked -- --include-ignored --skip real_esbmc_properties --skip real_frama_c --skip real_esbmc_induction_harness
+   Compiling libc v0.2.191
+   Compiling serde_core v1.0.229
+   Compiling memchr v2.8.3
+   Compiling pin-project-lite v0.2.17
+   Compiling strsim v0.11.1
+   Compiling itoa v1.0.18
+   Compiling futures-sink v0.3.34
+   Compiling futures-core v0.3.34
+   Compiling zmij v1.0.23
+   Compiling typenum v1.20.1
+   Compiling cfg-if v1.0.5
+   Compiling darling_core v0.24.1
+   Compiling generic-array v0.14.7
+   Compiling serde v1.0.229
+   Compiling futures-channel v0.3.34
+   Compiling errno v0.3.14
+   Compiling futures-io v0.3.34
+   Compiling slab v0.4.12
+   Compiling utf8parse v0.2.2
+   Compiling once_cell v1.21.4
+   Compiling futures-task v0.3.34
+   Compiling futures-util v0.3.34
+   Compiling anstyle-parse v1.0.0
+   Compiling signal-hook-registry v1.4.8
+   Compiling num-traits v0.2.19
+   Compiling getrandom v0.4.3
+   Compiling mio v1.2.4
+   Compiling socket2 v0.6.5
+   Compiling darling_macro v0.24.1
+   Compiling bytes v1.12.1
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling anstyle-query v1.1.5
+   Compiling hashbrown v0.17.1
+   Compiling equivalent v1.0.3
+   Compiling colorchoice v1.0.5
+   Compiling anstyle v1.0.14
+   Compiling indexmap v2.14.2
+   Compiling futures-executor v0.3.34
+   Compiling anstream v1.0.0
+   Compiling tokio v1.54.1
+   Compiling serde_json v1.0.154
+   Compiling ref-cast v1.0.27
+   Compiling darling v0.24.1
+   Compiling chrono v0.4.45
+   Compiling tracing-core v0.1.36
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling dyn-clone v1.0.20
+   Compiling clap_lex v1.1.1
+   Compiling ryu v1.0.23
+   Compiling clap_builder v4.6.7
+   Compiling schemars v1.2.3
+   Compiling tokio-util v0.7.20
+   Compiling thiserror v2.0.21
+   Compiling digest v0.10.7
+   Compiling tracing v0.1.44
+   Compiling rmcp-macros v3.7.0
+   Compiling futures v0.3.34
+   Compiling uuid v1.29.0
+   Compiling csv-core v0.1.13
+   Compiling unsafe-libyaml v0.2.11
+   Compiling linux-raw-sys v0.12.1
+   Compiling cpufeatures v0.2.17
+   Compiling bitflags v2.13.2
+   Compiling rmcp v3.7.0
+   Compiling rustix v1.1.5
+   Compiling serde_yaml v0.9.34+deprecated
+   Compiling sha2 v0.10.9
+   Compiling csv v1.4.0
+   Compiling clap v4.6.7
+   Compiling anyhow v1.0.104
+   Compiling fastrand v2.5.0
+   Compiling shlex v1.3.0
+   Compiling tempfile v3.27.0
+   Compiling safety v0.1.0 (/work/safety)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 33.90s
+     Running unittests src/main.rs (target/debug/deps/safety-fccdcb566f4910e5)
+
+running 23 tests
+test config::tests::traversal ... ok
+test adapters::esbmc::tests::no_false_proof ... ok
+test adapters::frama_c::tests::external_assumptions_are_not_proofs ... ok
+test config::tests::validation ... ok
+test discovery::tests::flags ... ok
+test config::tests::unknown_fields ... ok
+test discovery::tests::variants ... ok
+test findings::tests::empty ... ok
+test findings::tests::malformed ... ok
+test mcp::tests::strict_input ... ok
+test evidence::tests::dirty_files_hashed ... ok
+test misra::tests::builtins_do_not_invent_mappings ... ok
+test report::tests::escapes_uri ... ok
+test runner::tests::filesystem_capability_is_reported ... ok
+test runner::tests::network_denied ... ok
+test runner::tests::output_bound ... ok
+test runner::tests::real_execution ... ok
+test runner::tests::strict_isolation_fails_closed_or_blocks_writes ... ok
+test evidence::tests::tamper ... ok
+test trace::tests::gaps ... ok
+test trace::tests::tokens_only ... ok
+test runner::tests::cancellation_kills_child ... ok
+test runner::tests::timeout ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.07s
+
+     Running tests/integration/main.rs (target/debug/deps/integration-9ed502f03fb02d51)
+
+running 13 tests
+{"assurance":"unconfigured; advisory analysis only","complete":true,"config":"/tmp/.tmpMzvfxh/safety.yaml","status":"passed"}
+test init_does_not_overwrite ... ok
+test invalid_config ... ok
+test malformed_harness_and_oversized_config_rejected ... ok
+test compiler_failure_is_incomplete ... ok
+test real_ast_trace ... ok
+test missing_database_is_explicit ... ok
+test real_c_pipeline ... ok
+test draft_misra_process_rejects_unreviewed_mapping_and_weakening ... ok
+test real_llvm_mcdc ... FAILED
+test real_cpp_pipeline ... ok
+test real_custom_module ... ok
+test rejected_semantic_flag_is_incomplete ... ok
+test real_mcp_stdio ... ok
+
+failures:
+
+---- real_llvm_mcdc stdout ----
+
+thread 'real_llvm_mcdc' (2113) panicked at tests/integration/main.rs:358:5:
+
+/usr/bin/ld: cannot find /usr/lib/llvm-19/lib/clang/19/lib/x86_64-pc-linux-gnu/libclang_rt.profile.a: No such file or directory
+clang-19: error: linker command failed with exit code 1 (use -v to see invocation)
+Traceback (most recent call last):
+  File "/work/safety/tests/integration/coverage_fixture.py", line 18, in <module>
+    subprocess.run(args, check=True, timeout=30)
+  File "/usr/lib/python3.11/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['clang-19', '-std=c11', '-fprofile-instr-generate', '-fcoverage-mapping', '-fcoverage-mcdc', '/tmp/tmp8jisc84t/decision.c', '-o', '/tmp/tmp8jisc84t/test']' returned non-zero exit status 1.
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    real_llvm_mcdc
+
+test result: FAILED. 12 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 2.98s
+
+error: test failed, to rerun pass `--test integration`
+make: *** [Makefile:16: validation] Error 101

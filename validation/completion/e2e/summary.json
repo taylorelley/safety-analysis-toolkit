@@ -1,0 +1,216 @@
+{
+  "status": "incomplete",
+  "complete": false,
+  "reason": "MISRA mappings unvalidated by user direction; intentionally seeded trace gaps, MC/DC gap and uninstrumented units remain outstanding. Actual agent-host validation is recorded separately.",
+  "results": [
+    {
+      "operation": "doctor",
+      "interface": "CLI",
+      "exit_code": 0,
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792791465619-71950-0",
+      "findings": 0,
+      "properties": []
+    },
+    {
+      "operation": "scan",
+      "interface": "CLI",
+      "exit_code": 3,
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792791466384-71976-0",
+      "findings": 3,
+      "properties": []
+    },
+    {
+      "operation": "frama-c",
+      "interface": "CLI",
+      "exit_code": 0,
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792791466822-72004-0",
+      "findings": 0,
+      "properties": [
+        {
+          "id": "FC-6437020dc46f84c8b657",
+          "description": "/workspace/safety/build/demo/harness/navigation_harness.c:5 main precondition of __FC_assert: nonnull_c: c \u2262 0 [native status: Valid]",
+          "outcome": "PROVEN",
+          "scope": "Frama-C 25.0-beta (Debian Manganese), eva, entry main, x86 64-bit model; reachable sequential C states; alarms and native assumptions apply",
+          "assumptions": [
+            "Native model premise (Valid): /workspace/safety/build/demo/.safety/runs/RUN-1792791466822-72004-0/FRAMAC_SHARE/libc/assert.h:31 __FC_assert precondition: nonnull_c: c \u2262 0",
+            "Native model premise (Considered valid): /workspace/safety/build/demo/.safety/runs/RUN-1792791466822-72004-0/FRAMAC_SHARE/libc/assert.h:32 __FC_assert termination clause: c \u2262 0",
+            "Native model premise (Considered valid): /workspace/safety/build/demo/.safety/runs/RUN-1792791466822-72004-0/FRAMAC_SHARE/libc/assert.h:35 __FC_assert assigns clause: assigns \\nothing;"
+          ],
+          "unwind_bound": null,
+          "completeness_established": true,
+          "native_references": [
+            "raw/frama-c.log",
+            "raw/frama-c-properties.tsv"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "frama-wp",
+      "interface": "CLI",
+      "exit_code": 0,
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792791467167-72023-0",
+      "findings": 0,
+      "properties": [
+        {
+          "id": "FC-40d3208700e67686b11f",
+          "description": "/workspace/safety/build/demo/src/contract.c:3 identity postcondition: \\result \u2261 \\old(x) [native status: Valid]",
+          "outcome": "PROVEN",
+          "scope": "Frama-C 25.0-beta (Debian Manganese), wp, entry identity, x86 64-bit model; supplied ACSL contracts; WP typed memory model, RTE obligations and Qed only",
+          "assumptions": [],
+          "unwind_bound": null,
+          "completeness_established": true,
+          "native_references": [
+            "raw/frama-c.log",
+            "raw/frama-c-properties.tsv"
+          ]
+        },
+        {
+          "id": "FC-7ff603969eb560de72c3",
+          "description": "/workspace/safety/build/demo/src/contract.c:4 identity assigns clause: assigns \\nothing; [native status: Valid]",
+          "outcome": "PROVEN",
+          "scope": "Frama-C 25.0-beta (Debian Manganese), wp, entry identity, x86 64-bit model; supplied ACSL contracts; WP typed memory model, RTE obligations and Qed only",
+          "assumptions": [],
+          "unwind_bound": null,
+          "completeness_established": true,
+          "native_references": [
+            "raw/frama-c.log",
+            "raw/frama-c-properties.tsv"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "esbmc-c",
+      "interface": "CLI",
+      "exit_code": 0,
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792791467683-72042-0",
+      "findings": 0,
+      "properties": [
+        {
+          "id": "main.assertion.1",
+          "description": "line 5  assertion navigate(1) == 1",
+          "outcome": "PROVEN",
+          "scope": "ESBMC 8.6.0 sequential source model with entry main; 64-bit little-endian; Z3; finite unwind 8; default unwinding assertions enabled; source assumptions and library models apply",
+          "assumptions": [
+            "User-supplied harness assumption (not approved by this tool): enabled is fixed to one by this harness; other inputs are outside its scope"
+          ],
+          "unwind_bound": 8,
+          "completeness_established": true,
+          "native_references": [
+            "raw/esbmc.log"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "esbmc-cpp",
+      "interface": "CLI",
+      "exit_code": 1,
+      "status": "findings",
+      "complete": true,
+      "run_id": "RUN-1792791468951-72057-0",
+      "findings": 0,
+      "properties": [
+        {
+          "id": "main.assertion.1",
+          "description": "line 7  assertion x == 1",
+          "outcome": "VIOLATED",
+          "scope": "ESBMC 8.6.0 sequential source model with entry main; 64-bit little-endian; Z3; finite unwind 8; default unwinding assertions enabled; source assumptions and library models apply",
+          "assumptions": [],
+          "unwind_bound": 8,
+          "completeness_established": false,
+          "native_references": [
+            "raw/esbmc.log"
+          ]
+        }
+      ]
+    },
+    {
+      "operation": "trace",
+      "interface": "CLI",
+      "exit_code": 1,
+      "status": "findings",
+      "complete": true,
+      "run_id": "RUN-1792791470225-72072-0",
+      "findings": 8,
+      "properties": []
+    },
+    {
+      "operation": "coverage",
+      "interface": "CLI",
+      "exit_code": 3,
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792791470505-72097-0",
+      "findings": 5,
+      "properties": []
+    },
+    {
+      "operation": "safety.doctor",
+      "interface": "MCP",
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792791470643-72114-0"
+    },
+    {
+      "operation": "safety.scan",
+      "interface": "MCP",
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792791471375-72114-1"
+    },
+    {
+      "operation": "safety.prove",
+      "interface": "MCP",
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792791471791-72114-2"
+    },
+    {
+      "operation": "safety.prove",
+      "interface": "MCP",
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792791472132-72114-3"
+    },
+    {
+      "operation": "safety.prove",
+      "interface": "MCP",
+      "status": "passed",
+      "complete": true,
+      "run_id": "RUN-1792791472557-72114-4"
+    },
+    {
+      "operation": "safety.prove",
+      "interface": "MCP",
+      "status": "findings",
+      "complete": true,
+      "run_id": "RUN-1792791473735-72114-5"
+    },
+    {
+      "operation": "safety.trace",
+      "interface": "MCP",
+      "status": "findings",
+      "complete": true,
+      "run_id": "RUN-1792791474948-72114-6"
+    },
+    {
+      "operation": "safety.coverage",
+      "interface": "MCP",
+      "status": "incomplete",
+      "complete": false,
+      "run_id": "RUN-1792791475249-72114-7"
+    }
+  ]
+}

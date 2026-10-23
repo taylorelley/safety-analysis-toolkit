@@ -1,0 +1,10 @@
+{
+  "checks": [
+    "safety-prohibited-goto",
+    "safety-unsafe-library-call",
+    "safety-repeated-macro-parameter"
+  ],
+  "misra_mapping": "unvalidated",
+  "path": "/workspace/safety/build/clang/SafetyMisra.so",
+  "sha256": "581d67baba0097d8b6d62a64ac36d1783965390a0e0ac839adc9b7ad97925681"
+}

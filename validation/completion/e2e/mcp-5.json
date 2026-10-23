@@ -1,0 +1,65 @@
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"complete\":true,\"completeness\":{\"analyzed\":1,\"build_variants\":[\"VAR-03fed98ba753967d5cf07a4ee49a2b95acaf802cb4c8e6c507e5ea69ea3d3d43\"],\"excluded\":0,\"failed\":0,\"total\":1,\"unsupported\":0},\"evidence_ref\":\"RUN-1792791472132-72114-3/manifest.json\",\"finding_count\":0,\"limitations\":[\"Automated evidence for human review; no certification or compliance approval.\",\"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.\",\"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.\",\"Results are scoped to the selected entry, C data model, supplied contracts and preserved native assumptions. Sequential models only; concurrency and unmodeled environment behavior are not verified. No human approval of assumptions is inferred.\"],\"properties\":[{\"assumptions\":[],\"completeness_established\":true,\"description\":\"/workspace/safety/build/demo/src/contract.c:3 identity postcondition: \\\\result \u2261 \\\\old(x) [native status: Valid]\",\"id\":\"FC-40d3208700e67686b11f\",\"native_references\":[\"raw/frama-c.log\",\"raw/frama-c-properties.tsv\"],\"outcome\":\"PROVEN\",\"scope\":\"Frama-C 25.0-beta (Debian Manganese), wp, entry identity, x86 64-bit model; supplied ACSL contracts; WP typed memory model, RTE obligations and Qed only\",\"unwind_bound\":null},{\"assumptions\":[],\"completeness_established\":true,\"description\":\"/workspace/safety/build/demo/src/contract.c:4 identity assigns clause: assigns \\\\nothing; [native status: Valid]\",\"id\":\"FC-7ff603969eb560de72c3\",\"native_references\":[\"raw/frama-c.log\",\"raw/frama-c-properties.tsv\"],\"outcome\":\"PROVEN\",\"scope\":\"Frama-C 25.0-beta (Debian Manganese), wp, entry identity, x86 64-bit model; supplied ACSL contracts; WP typed memory model, RTE obligations and Qed only\",\"unwind_bound\":null}],\"run_id\":\"RUN-1792791472132-72114-3\",\"schema_version\":1,\"status\":\"passed\"}"
+      }
+    ],
+    "structuredContent": {
+      "complete": true,
+      "completeness": {
+        "analyzed": 1,
+        "build_variants": [
+          "VAR-03fed98ba753967d5cf07a4ee49a2b95acaf802cb4c8e6c507e5ea69ea3d3d43"
+        ],
+        "excluded": 0,
+        "failed": 0,
+        "total": 1,
+        "unsupported": 0
+      },
+      "evidence_ref": "RUN-1792791472132-72114-3/manifest.json",
+      "finding_count": 0,
+      "limitations": [
+        "Automated evidence for human review; no certification or compliance approval.",
+        "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+        "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+        "Results are scoped to the selected entry, C data model, supplied contracts and preserved native assumptions. Sequential models only; concurrency and unmodeled environment behavior are not verified. No human approval of assumptions is inferred."
+      ],
+      "properties": [
+        {
+          "assumptions": [],
+          "completeness_established": true,
+          "description": "/workspace/safety/build/demo/src/contract.c:3 identity postcondition: \\result \u2261 \\old(x) [native status: Valid]",
+          "id": "FC-40d3208700e67686b11f",
+          "native_references": [
+            "raw/frama-c.log",
+            "raw/frama-c-properties.tsv"
+          ],
+          "outcome": "PROVEN",
+          "scope": "Frama-C 25.0-beta (Debian Manganese), wp, entry identity, x86 64-bit model; supplied ACSL contracts; WP typed memory model, RTE obligations and Qed only",
+          "unwind_bound": null
+        },
+        {
+          "assumptions": [],
+          "completeness_established": true,
+          "description": "/workspace/safety/build/demo/src/contract.c:4 identity assigns clause: assigns \\nothing; [native status: Valid]",
+          "id": "FC-7ff603969eb560de72c3",
+          "native_references": [
+            "raw/frama-c.log",
+            "raw/frama-c-properties.tsv"
+          ],
+          "outcome": "PROVEN",
+          "scope": "Frama-C 25.0-beta (Debian Manganese), wp, entry identity, x86 64-bit model; supplied ACSL contracts; WP typed memory model, RTE obligations and Qed only",
+          "unwind_bound": null
+        }
+      ],
+      "run_id": "RUN-1792791472132-72114-3",
+      "schema_version": 1,
+      "status": "passed"
+    },
+    "isError": false
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "harness": null,
+  "human_approval": "not_granted_by_tool",
+  "request": {
+    "bits": 64,
+    "engine": "frama-c",
+    "entry": "identity",
+    "harness": null,
+    "method": "wp",
+    "source": "src/contract.c",
+    "unwind": 8,
+    "variant": null
+  }
+}

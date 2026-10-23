@@ -1,0 +1,14 @@
+{
+  "harness": null,
+  "human_approval": "not_granted_by_tool",
+  "request": {
+    "bits": 64,
+    "engine": "esbmc",
+    "entry": "main",
+    "harness": null,
+    "method": "bmc",
+    "source": "src/controller.cpp",
+    "unwind": 8,
+    "variant": null
+  }
+}

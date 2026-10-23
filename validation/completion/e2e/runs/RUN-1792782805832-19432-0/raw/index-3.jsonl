@@ -1,0 +1,2 @@
+{"column":5,"comment":"","definition":false,"file":"src/test.c","line":1,"macro_expansion":false,"name":"decide","template_parent":"","usr":"c:@F@decide"}
+{"column":5,"comment":"/** @test T-DEC\n * @req R-DEC */","definition":true,"file":"src/test.c","line":4,"macro_expansion":false,"name":"main","template_parent":"","usr":"c:@F@main"}

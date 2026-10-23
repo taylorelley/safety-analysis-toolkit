@@ -1,0 +1,2 @@
+{"calls":[],"column":5,"comment":"/** @req R-NAV\n * @baseline BL-DEMO-1 */","definition":true,"file":"harness/../src/navigation.c","line":3,"macro_expansion":false,"name":"navigate","template_kind":"none","template_parent":"","unresolved_calls":0,"usr":"c:@F@navigate"}
+{"calls":["c:@F@__assert_fail","c:@F@navigate"],"column":5,"comment":"/** @test T-NAV\n * @req R-NAV */","definition":true,"file":"harness/navigation_harness.c","line":5,"macro_expansion":false,"name":"main","template_kind":"none","template_parent":"","unresolved_calls":0,"usr":"c:@F@main"}

@@ -1,0 +1,43 @@
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"complete\":true,\"completeness\":{\"analyzed\":6,\"build_variants\":[\"VAR-59d26e56ac42efbf896ef09f1788fdd1129c016477634b0d86e449897570a99e\",\"VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e\",\"VAR-6c61e71e5d659d81fd75c68472b6a04b5d165baafee2350d9ddb485cb3c8c31b\",\"VAR-9ff35ff903434396903470597bbfe339f5cb6dcdd3927ada3c925391aaf00180\",\"VAR-03fed98ba753967d5cf07a4ee49a2b95acaf802cb4c8e6c507e5ea69ea3d3d43\",\"VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f\"],\"excluded\":0,\"failed\":0,\"total\":6,\"unsupported\":0},\"evidence_ref\":\"RUN-1792791474948-72114-6/manifest.json\",\"finding_count\":8,\"limitations\":[\"Automated evidence for human review; no certification or compliance approval.\",\"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.\",\"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.\",\"Trace links establish recorded relationships only, not semantic requirements satisfaction. Direct call edges and template identities are retained; indirect calls/lambda ownership are explicitly unresolved and require review.\"],\"properties\":[],\"run_id\":\"RUN-1792791474948-72114-6\",\"schema_version\":1,\"status\":\"findings\"}"
+      }
+    ],
+    "structuredContent": {
+      "complete": true,
+      "completeness": {
+        "analyzed": 6,
+        "build_variants": [
+          "VAR-59d26e56ac42efbf896ef09f1788fdd1129c016477634b0d86e449897570a99e",
+          "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e",
+          "VAR-6c61e71e5d659d81fd75c68472b6a04b5d165baafee2350d9ddb485cb3c8c31b",
+          "VAR-9ff35ff903434396903470597bbfe339f5cb6dcdd3927ada3c925391aaf00180",
+          "VAR-03fed98ba753967d5cf07a4ee49a2b95acaf802cb4c8e6c507e5ea69ea3d3d43",
+          "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+        ],
+        "excluded": 0,
+        "failed": 0,
+        "total": 6,
+        "unsupported": 0
+      },
+      "evidence_ref": "RUN-1792791474948-72114-6/manifest.json",
+      "finding_count": 8,
+      "limitations": [
+        "Automated evidence for human review; no certification or compliance approval.",
+        "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+        "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+        "Trace links establish recorded relationships only, not semantic requirements satisfaction. Direct call edges and template identities are retained; indirect calls/lambda ownership are explicitly unresolved and require review."
+      ],
+      "properties": [],
+      "run_id": "RUN-1792791474948-72114-6",
+      "schema_version": 1,
+      "status": "findings"
+    },
+    "isError": false
+  }
+}

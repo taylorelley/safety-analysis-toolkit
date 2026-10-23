@@ -1,0 +1,36 @@
+Target: 64-bit little-endian x86_64-unknown-linux with esbmclibc
+Parsing /workspace/safety/build/demo/src/controller.cpp
+Converting
+Generating GOTO Program
+GOTO program creation time: 0.143s
+GOTO program processing time: 0.000s
+Starting Bounded Model Checking
+Symex completed in: 0.001s (30 assignments)
+Caching time: 0.000s (removed 0 assertions)
+Slicing time: 0.000s (removed 28 assignments)
+Generated 1 VCC(s), 1 remaining after simplification (2 assignments)
+Encoding remaining VCC(s) using bit-vector/floating-point arithmetic
+Encoding to solver time: 0.000s
+Solving with solver Z3 v4.13.3
+Runtime decision procedure: 0.001s
+Building error trace
+Generating JSON report for trace: 1
+
+[Counterexample]
+
+
+State 1 file /workspace/safety/build/demo/src/controller.cpp line 7 column 44 function main thread 0
+----------------------------------------------------
+Violated property:
+  file /workspace/safety/build/demo/src/controller.cpp line 7 column 44 function main
+  assertion x == 1
+  x == 1
+
+
+** Results:
+/workspace/safety/build/demo/src/controller.cpp, function main
+  FAILED       [main.assertion.1]  line 7  assertion x == 1
+
+** 1 of 1 properties failed
+
+VERIFICATION FAILED

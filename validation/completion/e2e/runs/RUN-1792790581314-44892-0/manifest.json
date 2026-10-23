@@ -1,0 +1,320 @@
+{
+  "schema_version": 1,
+  "configuration": {
+    "assurance": null,
+    "build": {
+      "compile_commands": "build/compile_commands.json",
+      "variants": {}
+    },
+    "coding": {
+      "c": "MISRA-C:2012",
+      "cpp": "MISRA-CPP:2023",
+      "deviations": null,
+      "recategorization": null,
+      "registries": []
+    },
+    "evidence": {
+      "directory": ".safety/runs",
+      "reviews": null
+    },
+    "project": {
+      "name": "mixed-safety-demo"
+    },
+    "tools": {
+      "allowlist": [
+        "/workspace/safety/build/clang/SafetyMisra.so",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang",
+        "/workspace/safety/build/clang/safety-source-index",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-cov",
+        "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-profdata",
+        "/workspace/scratch/esbmc/release/bin/esbmc",
+        "/usr/local/bin/git",
+        "/workspace/scratch/bin/frama-c"
+      ],
+      "clang": true,
+      "clang_module": "/workspace/safety/build/clang/SafetyMisra.so",
+      "esbmc": true,
+      "frama_c": true,
+      "memory_mb": 2048,
+      "require_filesystem_isolation": false,
+      "timeout_seconds": 60
+    },
+    "trace": {
+      "manifest": "trace.yaml"
+    },
+    "version": 1
+  },
+  "toolkit": {
+    "executable_sha256": "6f51485dc8ef87a2baaffc06c830a2ddc349d07770405a02afe9ce0527e99837",
+    "host_arch": "x86_64",
+    "version": "0.1.0"
+  },
+  "verification": null,
+  "id": "RUN-1792790581314-44892-0",
+  "operation": "doctor",
+  "project": "mixed-safety-demo",
+  "status": "passed",
+  "complete": true,
+  "completeness": {
+    "total": 6,
+    "analyzed": 6,
+    "failed": 0,
+    "excluded": 0,
+    "unsupported": 0,
+    "build_variants": [
+      "VAR-59d26e56ac42efbf896ef09f1788fdd1129c016477634b0d86e449897570a99e",
+      "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e",
+      "VAR-6c61e71e5d659d81fd75c68472b6a04b5d165baafee2350d9ddb485cb3c8c31b",
+      "VAR-9ff35ff903434396903470597bbfe339f5cb6dcdd3927ada3c925391aaf00180",
+      "VAR-03fed98ba753967d5cf07a4ee49a2b95acaf802cb4c8e6c507e5ea69ea3d3d43",
+      "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+    ]
+  },
+  "started_unix_ms": 1792790581321,
+  "completed_unix_ms": 1792790582030,
+  "inputs": {
+    "build/compile_commands.json": "e32378a236a52be3332d114bec07ba6bc5b6aa72e04f935075fc6dcb1460dc6d",
+    "build/provenance.json": "62d2f672fca8d1afaa2459c02c19395c29716523332321d8f841a7935bff9246",
+    "build/test": "68d361ec033697cf3eb7c8618cb75e18f7cd05ba2b80ed1ef460d59ed60c493e",
+    "build/test.profdata": "238ce748fdb8206bdba393efdc79b38fafed96ad228187c3d92c20217d5f12c4",
+    "build/test.profraw": "5ef49bb03b8ebc0db553702e7736a32abcea58644aa7f098e57dd72e66dbb19e",
+    "harness/navigation_harness.c": "b95bfcd9df878ff96777d16417ba6937074bbe662f0737d25ea4856c185b1c8e",
+    "harness/navigation_harness.yaml": "70cc2bab7ed77c6ef5727e1d50b11d9eee81ca0852b37151fdcc124e97c4fea2",
+    "safety.yaml": "30ea1a41063d0545e5a8c5e20aaa9fcc9f7f52e69ec541e9418db21f0c7e71a3",
+    "src/contract.c": "502564330f50a1422bf9e27301b1ced791f14460b6cbfaeb23c6c8284e5c5288",
+    "src/controller.cpp": "aef7a38692b13aadcb07c235fc6614b6debff561a67154549f2b35a07e373bdd",
+    "src/decision.c": "f5bc70baa14f155ece4dc543751f752fe69aa0047d747a22da9c60d5d1faf05f",
+    "src/navigation.c": "4d4816ce57472525158bb9a951436714a9475ae6f0914a1917e810953d5d8d15",
+    "src/test.c": "290a1366331b3fbf24a04de09c4e1ed1d558cc0326bedd69f8cd306e49b01a99",
+    "trace.yaml": "9398dfdd2fcc3f562bafb5de49deebf72382d500469a7cfa9219012075218b87"
+  },
+  "executions": [
+    {
+      "output_refs": [
+        "raw/exec-0.stdout",
+        "raw/exec-0.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 11,
+      "stdout": "eacb5f92a21800e931fd5d14147597a5a084fc54\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "output_refs": [
+        "raw/exec-1.stdout",
+        "raw/exec-1.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "--no-optional-locks",
+        "-c",
+        "core.fsmonitor=false",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 11,
+      "stdout": " M .gitignore\n M README.md\n M docs/cli.md\n M docs/coverage.md\n M docs/formal-verification.md\n M docs/mcp.md\n M docs/misra-coverage.md\n M docs/tool-versions.json\n M docs/traceability.md\n M scripts/e2e.py\n M skills/safety-analysis/SKILL.md\n?? .dockerignore\n?? examples/agent-harnesses/package-lock.json\n?? examples/agent-harnesses/package.json\n?? examples/agent-harnesses/pi-safety.mjs\n?? packaging/reference.Dockerfile\n?? scripts/benchmark.py\n?? scripts/install.sh\n?? scripts/license_inventory.py\n?? scripts/package.py\n?? scripts/validate_harnesses.py\n?? validation/completion/e2e-driver.log\n?? validation/completion/e2e/cli-coverage.json\n?? validation/completion/e2e/cli-doctor.json\n?? validation/completion/e2e/cli-esbmc-c.json\n?? validation/completion/e2e/cli-esbmc-cpp.json\n?? validation/completion/e2e/cli-frama-c.json\n?? validation/completion/e2e/cli-frama-wp.json\n?? validation/completion/e2e/cli-scan.json\n?? validation/completion/e2e/cli-trace.json\n?? validation/completion/full-validation.log\n?? validation/completion/reference-validation.log\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "output_refs": [
+        "raw/exec-2.stdout",
+        "raw/exec-2.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+      "arguments": [
+        "--version"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 31,
+      "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "output_refs": [
+        "raw/exec-3.stdout",
+        "raw/exec-3.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "b8cbb52c887ed115396131d97cd0e7a7a64dfb98d0c8d37c135f8853a6999682",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang",
+      "arguments": [
+        "--version"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 31,
+      "stdout": "Debian clang version 19.1.7 (3+b1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /workspace/scratch/llvm/usr/lib/llvm-19/bin\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "output_refs": [
+        "raw/exec-4.stdout",
+        "raw/exec-4.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "8421a134d7c6bc9ca8dc1fb5b9ef40adc6457b78f5066b6202b2072256f83866",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-cov",
+      "arguments": [
+        "--version"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 31,
+      "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "output_refs": [
+        "raw/exec-5.stdout",
+        "raw/exec-5.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "37768e7a46a090f7af39a1490d14f6f1c7b2567c31030069b3caa74d5c429531",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-profdata",
+      "arguments": [
+        "--version"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 21,
+      "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "output_refs": [
+        "raw/exec-6.stdout",
+        "raw/exec-6.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "11104c8b2a159a065f689b3bc0406b0f992ba0eb7323eaadf2dc4a1f0a628bc6",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/bin/frama-c",
+      "arguments": [
+        "-version"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 31,
+      "stdout": "25.0-beta (Manganese)",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "output_refs": [
+        "raw/exec-7.stdout",
+        "raw/exec-7.stderr"
+      ],
+      "metadata_output_truncated": false,
+      "executable_sha256": "4f9e846eaa56be8ba0f6b50c5c2772b1e488e82ab35e4e71e79627b6eed2ce2b",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/esbmc/release/bin/esbmc",
+      "arguments": [
+        "--version"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792790581314-44892-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 12,
+      "stdout": "ESBMC version 8.6.0 64-bit x86_64 linux\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    }
+  ],
+  "findings": [],
+  "properties": [],
+  "limitations": [
+    "Automated evidence for human review; no certification or compliance approval.",
+    "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+    "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+    "Doctor establishes discovery only; it does not analyze source."
+  ],
+  "git": {
+    "commit": "eacb5f92a21800e931fd5d14147597a5a084fc54",
+    "dirty": true
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "check": "safety-prohibited-goto",
+  "misra_mapping": "unvalidated",
+  "path": "/workspace/safety/build/clang/SafetyMisra.so",
+  "sha256": "262a54e5a1c1202dfb10c8a33d77ad9bcf2df571ba0ea9a87a2e4dfddbf0d33c"
+}

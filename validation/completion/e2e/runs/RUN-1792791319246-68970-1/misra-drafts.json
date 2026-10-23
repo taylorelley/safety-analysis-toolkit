@@ -1,0 +1,93 @@
+{
+  "artifact_status": "draft_for_human_review",
+  "complete": false,
+  "deviations": {
+    "approved_by_tool": false,
+    "external_reviews": "supplied process assertions, not authenticated by toolkit",
+    "records": []
+  },
+  "gcs": {
+    "compliance": "not_established",
+    "guidelines": [],
+    "outstanding": [
+      "Verify licensed inventory and applicability",
+      "Complete manual checks and independent review",
+      "Resolve tool failures and incomplete scope"
+    ]
+  },
+  "gep": {
+    "guidelines": [],
+    "original_check_mapping": "unvalidated unless externally reviewed mapping is supplied"
+  },
+  "grp": {
+    "approval": "not_granted_by_tool",
+    "proposals": []
+  },
+  "profiles": [
+    {
+      "edition": "MISRA-C:2012",
+      "inventory_complete": false,
+      "inventory_source": "User-supplied licensed guideline inventory required",
+      "original_checks": [
+        {
+          "behavior": "Reports direct goto statements in parsed source",
+          "id": "safety-prohibited-goto",
+          "limitations": [
+            "Indirect GNU goto is outside this check"
+          ],
+          "mapping": "unvalidated"
+        },
+        {
+          "behavior": "Reports calls to named C-linkage gets and longjmp functions",
+          "id": "safety-unsafe-library-call",
+          "limitations": [
+            "Calls through unresolved function pointers are outside this check"
+          ],
+          "mapping": "unvalidated"
+        },
+        {
+          "behavior": "Reports repeated parameter identifiers in function-like macro replacement tokens",
+          "id": "safety-repeated-macro-parameter",
+          "limitations": [
+            "Token occurrences do not establish runtime evaluation count"
+          ],
+          "mapping": "unvalidated"
+        }
+      ],
+      "rules": []
+    },
+    {
+      "edition": "MISRA-CPP:2023",
+      "inventory_complete": false,
+      "inventory_source": "User-supplied licensed guideline inventory required",
+      "original_checks": [
+        {
+          "behavior": "Reports direct goto statements in parsed source",
+          "id": "safety-prohibited-goto",
+          "limitations": [
+            "Indirect GNU goto is outside this check"
+          ],
+          "mapping": "unvalidated"
+        },
+        {
+          "behavior": "Reports calls to named C-linkage gets and longjmp functions",
+          "id": "safety-unsafe-library-call",
+          "limitations": [
+            "Calls through unresolved function pointers are outside this check"
+          ],
+          "mapping": "unvalidated"
+        },
+        {
+          "behavior": "Reports repeated parameter identifiers in function-like macro replacement tokens",
+          "id": "safety-repeated-macro-parameter",
+          "limitations": [
+            "Token occurrences do not establish runtime evaluation count"
+          ],
+          "mapping": "unvalidated"
+        }
+      ],
+      "rules": []
+    }
+  ],
+  "status": "incomplete"
+}

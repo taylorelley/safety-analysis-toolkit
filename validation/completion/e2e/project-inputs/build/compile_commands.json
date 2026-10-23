@@ -1,0 +1,74 @@
+[
+  {
+    "directory": "/workspace/safety/build/demo",
+    "file": "src/navigation.c",
+    "arguments": [
+      "clang-19",
+      "-std=c11",
+      "-DSAFETY_DEMO=1",
+      "-c",
+      "src/navigation.c"
+    ]
+  },
+  {
+    "directory": "/workspace/safety/build/demo",
+    "file": "src/controller.cpp",
+    "arguments": [
+      "clang++-19",
+      "-std=c++17",
+      "-DSAFETY_DEMO=1",
+      "-c",
+      "src/controller.cpp"
+    ]
+  },
+  {
+    "directory": "/workspace/safety/build/demo",
+    "file": "src/decision.c",
+    "arguments": [
+      "clang-19",
+      "-std=c11",
+      "-DSAFETY_DEMO=1",
+      "-fprofile-instr-generate",
+      "-fcoverage-mapping",
+      "-fcoverage-mcdc",
+      "-c",
+      "src/decision.c"
+    ]
+  },
+  {
+    "directory": "/workspace/safety/build/demo",
+    "file": "src/test.c",
+    "arguments": [
+      "clang-19",
+      "-std=c11",
+      "-DSAFETY_DEMO=1",
+      "-fprofile-instr-generate",
+      "-fcoverage-mapping",
+      "-fcoverage-mcdc",
+      "-c",
+      "src/test.c"
+    ]
+  },
+  {
+    "directory": "/workspace/safety/build/demo",
+    "file": "src/contract.c",
+    "arguments": [
+      "clang-19",
+      "-std=c11",
+      "-DSAFETY_DEMO=1",
+      "-c",
+      "src/contract.c"
+    ]
+  },
+  {
+    "directory": "/workspace/safety/build/demo",
+    "file": "harness/navigation_harness.c",
+    "arguments": [
+      "clang-19",
+      "-std=c11",
+      "-DSAFETY_DEMO=1",
+      "-c",
+      "harness/navigation_harness.c"
+    ]
+  }
+]

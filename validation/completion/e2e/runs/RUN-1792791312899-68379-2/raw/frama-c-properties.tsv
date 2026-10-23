@@ -1,0 +1,5 @@
+directory	file	line	function	property kind	status	property
+/workspace/safety/build/demo/harness	navigation_harness.c	5	main	precondition of __FC_assert	Valid	nonnull_c: c ≢ 0
+FRAMAC_SHARE/libc	assert.h	31	__FC_assert	precondition	Valid	nonnull_c: c ≢ 0
+FRAMAC_SHARE/libc	assert.h	32	__FC_assert	termination clause	Considered valid	c ≢ 0
+FRAMAC_SHARE/libc	assert.h	35	__FC_assert	assigns clause	Considered valid	assigns \nothing;

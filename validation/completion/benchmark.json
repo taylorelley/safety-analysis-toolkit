@@ -1,0 +1,1579 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "file": "null.c",
+      "engine": "scan",
+      "defect": true,
+      "category": "null dereference",
+      "detected": true,
+      "expected_defect_missed": false,
+      "false_positive": false,
+      "seconds": 0.26725227299903054,
+      "incomplete": false,
+      "successful_proofs": 0,
+      "incorrect_proof_classification": false,
+      "exit_code": 1,
+      "native_result": {
+        "schema_version": 1,
+        "configuration": {
+          "assurance": null,
+          "build": {
+            "compile_commands": "compile_commands.json",
+            "variants": {}
+          },
+          "coding": {
+            "c": null,
+            "cpp": null,
+            "deviations": null,
+            "recategorization": null,
+            "registries": []
+          },
+          "evidence": {
+            "directory": ".safety/runs",
+            "reviews": null
+          },
+          "project": {
+            "name": "known-answer-benchmark"
+          },
+          "tools": {
+            "allowlist": [],
+            "clang": true,
+            "clang_module": null,
+            "esbmc": false,
+            "frama_c": false,
+            "memory_mb": 2048,
+            "require_filesystem_isolation": false,
+            "timeout_seconds": 60
+          },
+          "trace": {
+            "manifest": "trace.yaml"
+          },
+          "version": 1
+        },
+        "toolkit": {
+          "executable_sha256": "74491fdf99771f19e3f392cdd9e8416984d9062d877f00e288fe2996a3d6ddae",
+          "host_arch": "x86_64",
+          "version": "0.1.0"
+        },
+        "verification": null,
+        "id": "RUN-1792791497801-73293-0",
+        "operation": "scan",
+        "project": "known-answer-benchmark",
+        "status": "findings",
+        "complete": true,
+        "completeness": {
+          "total": 1,
+          "analyzed": 1,
+          "failed": 0,
+          "excluded": 0,
+          "unsupported": 0,
+          "build_variants": [
+            "VAR-910d4782a223a4130471a28aaf12502a541234edabeeadbc820ee51512e13c29"
+          ]
+        },
+        "started_unix_ms": 1792791497806,
+        "completed_unix_ms": 1792791498063,
+        "inputs": {
+          "compile_commands.json": "9d817b70ada89836c8e81c4802a78d0a20adeb52a1162ccef489e3633df53d27",
+          "null.c": "e14ecbb33f1a97e72768c135ec693cffb807b2ca90074904e402bb34fc157b0f",
+          "safety.yaml": "2a52eb04a12934454075b1452ac0e62b556c7827652ea7102ac6459c07f39945"
+        },
+        "executions": [
+          {
+            "output_refs": [
+              "raw/exec-0.stdout",
+              "raw/exec-0.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "cwd": "/tmp/tmp16mb4mho",
+            "environment": {
+              "HOME": "/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 43,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-1.stdout",
+              "raw/exec-1.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "--no-optional-locks",
+              "-c",
+              "core.fsmonitor=false",
+              "status",
+              "--porcelain=v1",
+              "--untracked-files=all"
+            ],
+            "cwd": "/tmp/tmp16mb4mho",
+            "environment": {
+              "HOME": "/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 15,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-2.stdout",
+              "raw/exec-2.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "--version"
+            ],
+            "cwd": "/tmp/tmp16mb4mho",
+            "environment": {
+              "HOME": "/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 71,
+            "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+            "stderr": "",
+            "timeout_seconds": 60
+          },
+          {
+            "output_refs": [
+              "raw/exec-3.stdout",
+              "raw/exec-3.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "-p=/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0/unit-0",
+              "--checks=-*,clang-analyzer-*,bugprone-sizeof-expression,bugprone-integer-division,bugprone-suspicious-semicolon",
+              "--config={InheritParentConfig: false, HeaderFilterRegex: '.*'}",
+              "--export-fixes=/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0/unit-0/diagnostics.yaml",
+              "--quiet",
+              "/tmp/tmp16mb4mho/null.c"
+            ],
+            "cwd": "/tmp/tmp16mb4mho",
+            "environment": {
+              "HOME": "/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp16mb4mho/.safety/runs/RUN-1792791497801-73293-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 67,
+            "stdout": "null.c:1:34: warning: Dereference of null pointer (loaded from variable 'p') [clang-analyzer-core.NullDereference]\n    1 | int defect(void){int *p=0;return *p;}\n      |                                  ^~\nnull.c:1:18: note: 'p' initialized to a null pointer value\n    1 | int defect(void){int *p=0;return *p;}\n      |                  ^~~~~~\nnull.c:1:34: note: Dereference of null pointer (loaded from variable 'p')\n    1 | int defect(void){int *p=0;return *p;}\n      |                                  ^~\n",
+            "stderr": "1 warning generated.\n",
+            "timeout_seconds": 60
+          }
+        ],
+        "findings": [
+          {
+            "schema_version": 1,
+            "run_id": "RUN-1792791497801-73293-0",
+            "category": "static-diagnostic",
+            "end_line": null,
+            "end_column": null,
+            "certainty": null,
+            "requirement_ids": [],
+            "test_ids": [],
+            "related_findings": [],
+            "human_disposition_ref": null,
+            "id": "FND-000001",
+            "tool": "clang-tidy-19",
+            "rule_id": "clang-analyzer-core.NullDereference",
+            "file": "null.c",
+            "line": 1,
+            "column": 34,
+            "severity": "warning",
+            "message": "Dereference of null pointer (loaded from variable 'p')",
+            "build_variant": "VAR-910d4782a223a4130471a28aaf12502a541234edabeeadbc820ee51512e13c29",
+            "outcome": "DIAGNOSTIC",
+            "native_references": [
+              "raw/clang-0.log"
+            ]
+          }
+        ],
+        "properties": [],
+        "limitations": [
+          "Automated evidence for human review; no certification or compliance approval.",
+          "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+          "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment."
+        ],
+        "git": null
+      }
+    },
+    {
+      "file": "bounds.c",
+      "engine": "scan",
+      "defect": true,
+      "category": "array bounds",
+      "detected": true,
+      "expected_defect_missed": false,
+      "false_positive": false,
+      "seconds": 0.2332403719992726,
+      "incomplete": false,
+      "successful_proofs": 0,
+      "incorrect_proof_classification": false,
+      "exit_code": 1,
+      "native_result": {
+        "schema_version": 1,
+        "configuration": {
+          "assurance": null,
+          "build": {
+            "compile_commands": "compile_commands.json",
+            "variants": {}
+          },
+          "coding": {
+            "c": null,
+            "cpp": null,
+            "deviations": null,
+            "recategorization": null,
+            "registries": []
+          },
+          "evidence": {
+            "directory": ".safety/runs",
+            "reviews": null
+          },
+          "project": {
+            "name": "known-answer-benchmark"
+          },
+          "tools": {
+            "allowlist": [],
+            "clang": true,
+            "clang_module": null,
+            "esbmc": false,
+            "frama_c": false,
+            "memory_mb": 2048,
+            "require_filesystem_isolation": false,
+            "timeout_seconds": 60
+          },
+          "trace": {
+            "manifest": "trace.yaml"
+          },
+          "version": 1
+        },
+        "toolkit": {
+          "executable_sha256": "74491fdf99771f19e3f392cdd9e8416984d9062d877f00e288fe2996a3d6ddae",
+          "host_arch": "x86_64",
+          "version": "0.1.0"
+        },
+        "verification": null,
+        "id": "RUN-1792791498068-73310-0",
+        "operation": "scan",
+        "project": "known-answer-benchmark",
+        "status": "findings",
+        "complete": true,
+        "completeness": {
+          "total": 1,
+          "analyzed": 1,
+          "failed": 0,
+          "excluded": 0,
+          "unsupported": 0,
+          "build_variants": [
+            "VAR-b7a5d91cc6a45853bea4e1de6c6c8cf60dd5baf565ad0c1debf5785f31b8de7c"
+          ]
+        },
+        "started_unix_ms": 1792791498078,
+        "completed_unix_ms": 1792791498299,
+        "inputs": {
+          "bounds.c": "d03eb3acfcc275b9553c8f777c57edb5ca07bea0889682b3360dcd7b0e00e2af",
+          "compile_commands.json": "6e915655eb757e14b867fb652e3c026cc6aa7c97450fa5a202a70a3adc1de71e",
+          "safety.yaml": "2a52eb04a12934454075b1452ac0e62b556c7827652ea7102ac6459c07f39945"
+        },
+        "executions": [
+          {
+            "output_refs": [
+              "raw/exec-0.stdout",
+              "raw/exec-0.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "cwd": "/tmp/tmpbz4t6uvx",
+            "environment": {
+              "HOME": "/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 13,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-1.stdout",
+              "raw/exec-1.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "--no-optional-locks",
+              "-c",
+              "core.fsmonitor=false",
+              "status",
+              "--porcelain=v1",
+              "--untracked-files=all"
+            ],
+            "cwd": "/tmp/tmpbz4t6uvx",
+            "environment": {
+              "HOME": "/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 42,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-2.stdout",
+              "raw/exec-2.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "--version"
+            ],
+            "cwd": "/tmp/tmpbz4t6uvx",
+            "environment": {
+              "HOME": "/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 34,
+            "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+            "stderr": "",
+            "timeout_seconds": 60
+          },
+          {
+            "output_refs": [
+              "raw/exec-3.stdout",
+              "raw/exec-3.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "-p=/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0/unit-0",
+              "--checks=-*,clang-analyzer-*,bugprone-sizeof-expression,bugprone-integer-division,bugprone-suspicious-semicolon",
+              "--config={InheritParentConfig: false, HeaderFilterRegex: '.*'}",
+              "--export-fixes=/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0/unit-0/diagnostics.yaml",
+              "--quiet",
+              "/tmp/tmpbz4t6uvx/bounds.c"
+            ],
+            "cwd": "/tmp/tmpbz4t6uvx",
+            "environment": {
+              "HOME": "/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpbz4t6uvx/.safety/runs/RUN-1792791498068-73310-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 70,
+            "stdout": "bounds.c:1:38: warning: Undefined or garbage value returned to caller [clang-analyzer-core.uninitialized.UndefReturn]\n    1 | int defect(void){int values[2]={1,2};return values[5];}\n      |                                      ^      ~~~~~~~~~\nbounds.c:1:38: note: Undefined or garbage value returned to caller\n    1 | int defect(void){int values[2]={1,2};return values[5];}\n      |                                      ^      ~~~~~~~~~\n",
+            "stderr": "2 warnings generated.\n",
+            "timeout_seconds": 60
+          }
+        ],
+        "findings": [
+          {
+            "schema_version": 1,
+            "run_id": "RUN-1792791498068-73310-0",
+            "category": "static-diagnostic",
+            "end_line": null,
+            "end_column": null,
+            "certainty": null,
+            "requirement_ids": [],
+            "test_ids": [],
+            "related_findings": [],
+            "human_disposition_ref": null,
+            "id": "FND-000001",
+            "tool": "clang-tidy-19",
+            "rule_id": "clang-analyzer-core.uninitialized.UndefReturn",
+            "file": "bounds.c",
+            "line": 1,
+            "column": 38,
+            "severity": "warning",
+            "message": "Undefined or garbage value returned to caller",
+            "build_variant": "VAR-b7a5d91cc6a45853bea4e1de6c6c8cf60dd5baf565ad0c1debf5785f31b8de7c",
+            "outcome": "DIAGNOSTIC",
+            "native_references": [
+              "raw/clang-0.log"
+            ]
+          }
+        ],
+        "properties": [],
+        "limitations": [
+          "Automated evidence for human review; no certification or compliance approval.",
+          "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+          "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment."
+        ],
+        "git": null
+      }
+    },
+    {
+      "file": "divzero.c",
+      "engine": "scan",
+      "defect": true,
+      "category": "division by zero",
+      "detected": true,
+      "expected_defect_missed": false,
+      "false_positive": false,
+      "seconds": 0.28472945199973765,
+      "incomplete": false,
+      "successful_proofs": 0,
+      "incorrect_proof_classification": false,
+      "exit_code": 1,
+      "native_result": {
+        "schema_version": 1,
+        "configuration": {
+          "assurance": null,
+          "build": {
+            "compile_commands": "compile_commands.json",
+            "variants": {}
+          },
+          "coding": {
+            "c": null,
+            "cpp": null,
+            "deviations": null,
+            "recategorization": null,
+            "registries": []
+          },
+          "evidence": {
+            "directory": ".safety/runs",
+            "reviews": null
+          },
+          "project": {
+            "name": "known-answer-benchmark"
+          },
+          "tools": {
+            "allowlist": [],
+            "clang": true,
+            "clang_module": null,
+            "esbmc": false,
+            "frama_c": false,
+            "memory_mb": 2048,
+            "require_filesystem_isolation": false,
+            "timeout_seconds": 60
+          },
+          "trace": {
+            "manifest": "trace.yaml"
+          },
+          "version": 1
+        },
+        "toolkit": {
+          "executable_sha256": "74491fdf99771f19e3f392cdd9e8416984d9062d877f00e288fe2996a3d6ddae",
+          "host_arch": "x86_64",
+          "version": "0.1.0"
+        },
+        "verification": null,
+        "id": "RUN-1792791498309-73326-0",
+        "operation": "scan",
+        "project": "known-answer-benchmark",
+        "status": "findings",
+        "complete": true,
+        "completeness": {
+          "total": 1,
+          "analyzed": 1,
+          "failed": 0,
+          "excluded": 0,
+          "unsupported": 0,
+          "build_variants": [
+            "VAR-9b3befa33e7da351201104950d934dab8db93296157790dc8394c56aa31f8ab0"
+          ]
+        },
+        "started_unix_ms": 1792791498319,
+        "completed_unix_ms": 1792791498586,
+        "inputs": {
+          "compile_commands.json": "4b8c0e378d9ea78f1433bc960bc987a92a124c16ea07df281331e564ef4c447f",
+          "divzero.c": "9e92e0f6e546b67ac0ce7442fef941cb9651865fcc1df56f354688ce30565e98",
+          "safety.yaml": "2a52eb04a12934454075b1452ac0e62b556c7827652ea7102ac6459c07f39945"
+        },
+        "executions": [
+          {
+            "output_refs": [
+              "raw/exec-0.stdout",
+              "raw/exec-0.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "cwd": "/tmp/tmpinr67hxj",
+            "environment": {
+              "HOME": "/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 10,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-1.stdout",
+              "raw/exec-1.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "--no-optional-locks",
+              "-c",
+              "core.fsmonitor=false",
+              "status",
+              "--porcelain=v1",
+              "--untracked-files=all"
+            ],
+            "cwd": "/tmp/tmpinr67hxj",
+            "environment": {
+              "HOME": "/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 7,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-2.stdout",
+              "raw/exec-2.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "--version"
+            ],
+            "cwd": "/tmp/tmpinr67hxj",
+            "environment": {
+              "HOME": "/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 70,
+            "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+            "stderr": "",
+            "timeout_seconds": 60
+          },
+          {
+            "output_refs": [
+              "raw/exec-3.stdout",
+              "raw/exec-3.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "-p=/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0/unit-0",
+              "--checks=-*,clang-analyzer-*,bugprone-sizeof-expression,bugprone-integer-division,bugprone-suspicious-semicolon",
+              "--config={InheritParentConfig: false, HeaderFilterRegex: '.*'}",
+              "--export-fixes=/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0/unit-0/diagnostics.yaml",
+              "--quiet",
+              "/tmp/tmpinr67hxj/divzero.c"
+            ],
+            "cwd": "/tmp/tmpinr67hxj",
+            "environment": {
+              "HOME": "/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpinr67hxj/.safety/runs/RUN-1792791498309-73326-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 83,
+            "stdout": "divzero.c:1:35: warning: Division by zero [clang-analyzer-core.DivideZero]\n    1 | int defect(void){int n=0;return 10/n;}\n      |                                 ~~^~\ndivzero.c:1:18: note: 'n' initialized to 0\n    1 | int defect(void){int n=0;return 10/n;}\n      |                  ^~~~~\ndivzero.c:1:35: note: Division by zero\n    1 | int defect(void){int n=0;return 10/n;}\n      |                                 ~~^~\n",
+            "stderr": "1 warning generated.\n",
+            "timeout_seconds": 60
+          }
+        ],
+        "findings": [
+          {
+            "schema_version": 1,
+            "run_id": "RUN-1792791498309-73326-0",
+            "category": "static-diagnostic",
+            "end_line": 1,
+            "end_column": 37,
+            "certainty": null,
+            "requirement_ids": [],
+            "test_ids": [],
+            "related_findings": [],
+            "human_disposition_ref": null,
+            "id": "FND-000001",
+            "tool": "clang-tidy-19",
+            "rule_id": "clang-analyzer-core.DivideZero",
+            "file": "divzero.c",
+            "line": 1,
+            "column": 35,
+            "severity": "warning",
+            "message": "Division by zero",
+            "build_variant": "VAR-9b3befa33e7da351201104950d934dab8db93296157790dc8394c56aa31f8ab0",
+            "outcome": "DIAGNOSTIC",
+            "native_references": [
+              "raw/clang-0.log"
+            ]
+          }
+        ],
+        "properties": [],
+        "limitations": [
+          "Automated evidence for human review; no certification or compliance approval.",
+          "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+          "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment."
+        ],
+        "git": null
+      }
+    },
+    {
+      "file": "shift.c",
+      "engine": "scan",
+      "defect": true,
+      "category": "undefined shift",
+      "detected": true,
+      "expected_defect_missed": false,
+      "false_positive": false,
+      "seconds": 0.3120654659996944,
+      "incomplete": false,
+      "successful_proofs": 0,
+      "incorrect_proof_classification": false,
+      "exit_code": 1,
+      "native_result": {
+        "schema_version": 1,
+        "configuration": {
+          "assurance": null,
+          "build": {
+            "compile_commands": "compile_commands.json",
+            "variants": {}
+          },
+          "coding": {
+            "c": null,
+            "cpp": null,
+            "deviations": null,
+            "recategorization": null,
+            "registries": []
+          },
+          "evidence": {
+            "directory": ".safety/runs",
+            "reviews": null
+          },
+          "project": {
+            "name": "known-answer-benchmark"
+          },
+          "tools": {
+            "allowlist": [],
+            "clang": true,
+            "clang_module": null,
+            "esbmc": false,
+            "frama_c": false,
+            "memory_mb": 2048,
+            "require_filesystem_isolation": false,
+            "timeout_seconds": 60
+          },
+          "trace": {
+            "manifest": "trace.yaml"
+          },
+          "version": 1
+        },
+        "toolkit": {
+          "executable_sha256": "74491fdf99771f19e3f392cdd9e8416984d9062d877f00e288fe2996a3d6ddae",
+          "host_arch": "x86_64",
+          "version": "0.1.0"
+        },
+        "verification": null,
+        "id": "RUN-1792791498593-73348-0",
+        "operation": "scan",
+        "project": "known-answer-benchmark",
+        "status": "findings",
+        "complete": true,
+        "completeness": {
+          "total": 1,
+          "analyzed": 1,
+          "failed": 0,
+          "excluded": 0,
+          "unsupported": 0,
+          "build_variants": [
+            "VAR-fb96cf61bffdc6b9d9cd2384bc884af4bd82cf542d68bb3f2b71dd5944cea8e2"
+          ]
+        },
+        "started_unix_ms": 1792791498602,
+        "completed_unix_ms": 1792791498899,
+        "inputs": {
+          "compile_commands.json": "868a1fd7a7c8bf856169a7872b04427d6b198533828f8a26a0da521dec52cdc3",
+          "safety.yaml": "2a52eb04a12934454075b1452ac0e62b556c7827652ea7102ac6459c07f39945",
+          "shift.c": "8d8e9ef22cd44a1eabdee2b2b0608741cf5126b1b07dd0131e3a9ed1951235fd"
+        },
+        "executions": [
+          {
+            "output_refs": [
+              "raw/exec-0.stdout",
+              "raw/exec-0.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "cwd": "/tmp/tmpj8te5xai",
+            "environment": {
+              "HOME": "/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 11,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-1.stdout",
+              "raw/exec-1.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "--no-optional-locks",
+              "-c",
+              "core.fsmonitor=false",
+              "status",
+              "--porcelain=v1",
+              "--untracked-files=all"
+            ],
+            "cwd": "/tmp/tmpj8te5xai",
+            "environment": {
+              "HOME": "/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 14,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-2.stdout",
+              "raw/exec-2.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "--version"
+            ],
+            "cwd": "/tmp/tmpj8te5xai",
+            "environment": {
+              "HOME": "/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 42,
+            "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+            "stderr": "",
+            "timeout_seconds": 60
+          },
+          {
+            "output_refs": [
+              "raw/exec-3.stdout",
+              "raw/exec-3.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "-p=/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0/unit-0",
+              "--checks=-*,clang-analyzer-*,bugprone-sizeof-expression,bugprone-integer-division,bugprone-suspicious-semicolon",
+              "--config={InheritParentConfig: false, HeaderFilterRegex: '.*'}",
+              "--export-fixes=/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0/unit-0/diagnostics.yaml",
+              "--quiet",
+              "/tmp/tmpj8te5xai/shift.c"
+            ],
+            "cwd": "/tmp/tmpj8te5xai",
+            "environment": {
+              "HOME": "/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpj8te5xai/.safety/runs/RUN-1792791498593-73348-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 78,
+            "stdout": "shift.c:1:41: warning: Left shift by '32' overflows the capacity of 'unsigned int' [clang-analyzer-core.BitwiseShift]\n    1 | int defect(void){unsigned n=32;return 1U<<n;}\n      |                                       ~~^~~\nshift.c:1:18: note: 'n' initialized to 32\n    1 | int defect(void){unsigned n=32;return 1U<<n;}\n      |                  ^~~~~~~~~~\nshift.c:1:41: note: The result of left shift is undefined because the right operand '32' is not smaller than 32, the capacity of 'unsigned int'\n    1 | int defect(void){unsigned n=32;return 1U<<n;}\n      |                                       ~~^~~\n",
+            "stderr": "1 warning generated.\n",
+            "timeout_seconds": 60
+          }
+        ],
+        "findings": [
+          {
+            "schema_version": 1,
+            "run_id": "RUN-1792791498593-73348-0",
+            "category": "static-diagnostic",
+            "end_line": 1,
+            "end_column": 44,
+            "certainty": null,
+            "requirement_ids": [],
+            "test_ids": [],
+            "related_findings": [],
+            "human_disposition_ref": null,
+            "id": "FND-000001",
+            "tool": "clang-tidy-19",
+            "rule_id": "clang-analyzer-core.BitwiseShift",
+            "file": "shift.c",
+            "line": 1,
+            "column": 41,
+            "severity": "warning",
+            "message": "Left shift by '32' overflows the capacity of 'unsigned int'",
+            "build_variant": "VAR-fb96cf61bffdc6b9d9cd2384bc884af4bd82cf542d68bb3f2b71dd5944cea8e2",
+            "outcome": "DIAGNOSTIC",
+            "native_references": [
+              "raw/clang-0.log"
+            ]
+          }
+        ],
+        "properties": [],
+        "limitations": [
+          "Automated evidence for human review; no certification or compliance approval.",
+          "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+          "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment."
+        ],
+        "git": null
+      }
+    },
+    {
+      "file": "guard.c",
+      "engine": "scan",
+      "defect": false,
+      "category": "valid null guard",
+      "detected": false,
+      "expected_defect_missed": false,
+      "false_positive": false,
+      "seconds": 0.28940726799919503,
+      "incomplete": false,
+      "successful_proofs": 0,
+      "incorrect_proof_classification": false,
+      "exit_code": 0,
+      "native_result": {
+        "schema_version": 1,
+        "configuration": {
+          "assurance": null,
+          "build": {
+            "compile_commands": "compile_commands.json",
+            "variants": {}
+          },
+          "coding": {
+            "c": null,
+            "cpp": null,
+            "deviations": null,
+            "recategorization": null,
+            "registries": []
+          },
+          "evidence": {
+            "directory": ".safety/runs",
+            "reviews": null
+          },
+          "project": {
+            "name": "known-answer-benchmark"
+          },
+          "tools": {
+            "allowlist": [],
+            "clang": true,
+            "clang_module": null,
+            "esbmc": false,
+            "frama_c": false,
+            "memory_mb": 2048,
+            "require_filesystem_isolation": false,
+            "timeout_seconds": 60
+          },
+          "trace": {
+            "manifest": "trace.yaml"
+          },
+          "version": 1
+        },
+        "toolkit": {
+          "executable_sha256": "74491fdf99771f19e3f392cdd9e8416984d9062d877f00e288fe2996a3d6ddae",
+          "host_arch": "x86_64",
+          "version": "0.1.0"
+        },
+        "verification": null,
+        "id": "RUN-1792791498903-73364-0",
+        "operation": "scan",
+        "project": "known-answer-benchmark",
+        "status": "passed",
+        "complete": true,
+        "completeness": {
+          "total": 1,
+          "analyzed": 1,
+          "failed": 0,
+          "excluded": 0,
+          "unsupported": 0,
+          "build_variants": [
+            "VAR-4ea2b44d6253c02ac6d831d4f9cf54519ee91081a3655f4f69e90da7840b5a8c"
+          ]
+        },
+        "started_unix_ms": 1792791498908,
+        "completed_unix_ms": 1792791499187,
+        "inputs": {
+          "compile_commands.json": "bfc3434e5fd7f216455235508584840a766f70e6b036334823197bdd389a8d3a",
+          "guard.c": "b4a4b618db38d0ed80e86653783e828e78c4c281c1f8630578746ba8d246371e",
+          "safety.yaml": "2a52eb04a12934454075b1452ac0e62b556c7827652ea7102ac6459c07f39945"
+        },
+        "executions": [
+          {
+            "output_refs": [
+              "raw/exec-0.stdout",
+              "raw/exec-0.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "cwd": "/tmp/tmp_lxqzsq0",
+            "environment": {
+              "HOME": "/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 14,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-1.stdout",
+              "raw/exec-1.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "--no-optional-locks",
+              "-c",
+              "core.fsmonitor=false",
+              "status",
+              "--porcelain=v1",
+              "--untracked-files=all"
+            ],
+            "cwd": "/tmp/tmp_lxqzsq0",
+            "environment": {
+              "HOME": "/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 16,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-2.stdout",
+              "raw/exec-2.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "--version"
+            ],
+            "cwd": "/tmp/tmp_lxqzsq0",
+            "environment": {
+              "HOME": "/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 39,
+            "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+            "stderr": "",
+            "timeout_seconds": 60
+          },
+          {
+            "output_refs": [
+              "raw/exec-3.stdout",
+              "raw/exec-3.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "-p=/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0/unit-0",
+              "--checks=-*,clang-analyzer-*,bugprone-sizeof-expression,bugprone-integer-division,bugprone-suspicious-semicolon",
+              "--config={InheritParentConfig: false, HeaderFilterRegex: '.*'}",
+              "--export-fixes=/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0/unit-0/diagnostics.yaml",
+              "--quiet",
+              "/tmp/tmp_lxqzsq0/guard.c"
+            ],
+            "cwd": "/tmp/tmp_lxqzsq0",
+            "environment": {
+              "HOME": "/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp_lxqzsq0/.safety/runs/RUN-1792791498903-73364-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 71,
+            "stdout": "",
+            "stderr": "",
+            "timeout_seconds": 60
+          }
+        ],
+        "findings": [],
+        "properties": [],
+        "limitations": [
+          "Automated evidence for human review; no certification or compliance approval.",
+          "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+          "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment."
+        ],
+        "git": null
+      }
+    },
+    {
+      "file": "templates.cpp",
+      "engine": "scan",
+      "defect": false,
+      "category": "valid overload/template",
+      "detected": false,
+      "expected_defect_missed": false,
+      "false_positive": false,
+      "seconds": 0.2858488269994268,
+      "incomplete": false,
+      "successful_proofs": 0,
+      "incorrect_proof_classification": false,
+      "exit_code": 0,
+      "native_result": {
+        "schema_version": 1,
+        "configuration": {
+          "assurance": null,
+          "build": {
+            "compile_commands": "compile_commands.json",
+            "variants": {}
+          },
+          "coding": {
+            "c": null,
+            "cpp": null,
+            "deviations": null,
+            "recategorization": null,
+            "registries": []
+          },
+          "evidence": {
+            "directory": ".safety/runs",
+            "reviews": null
+          },
+          "project": {
+            "name": "known-answer-benchmark"
+          },
+          "tools": {
+            "allowlist": [],
+            "clang": true,
+            "clang_module": null,
+            "esbmc": false,
+            "frama_c": false,
+            "memory_mb": 2048,
+            "require_filesystem_isolation": false,
+            "timeout_seconds": 60
+          },
+          "trace": {
+            "manifest": "trace.yaml"
+          },
+          "version": 1
+        },
+        "toolkit": {
+          "executable_sha256": "74491fdf99771f19e3f392cdd9e8416984d9062d877f00e288fe2996a3d6ddae",
+          "host_arch": "x86_64",
+          "version": "0.1.0"
+        },
+        "verification": null,
+        "id": "RUN-1792791499193-73381-0",
+        "operation": "scan",
+        "project": "known-answer-benchmark",
+        "status": "passed",
+        "complete": true,
+        "completeness": {
+          "total": 1,
+          "analyzed": 1,
+          "failed": 0,
+          "excluded": 0,
+          "unsupported": 0,
+          "build_variants": [
+            "VAR-1cb95649140a1db6499ab2aeea253cf27a6a871cea3ef49fb8ab6abacbc517d8"
+          ]
+        },
+        "started_unix_ms": 1792791499199,
+        "completed_unix_ms": 1792791499477,
+        "inputs": {
+          "compile_commands.json": "89cf9472eb8a2e047654218f29febf2c29afc743fbc177f969d25d4c46cdf2ad",
+          "safety.yaml": "2a52eb04a12934454075b1452ac0e62b556c7827652ea7102ac6459c07f39945",
+          "templates.cpp": "9979ca3af78db30c1c7be78103caf029827a7445d3642a08b34097160688b49c"
+        },
+        "executions": [
+          {
+            "output_refs": [
+              "raw/exec-0.stdout",
+              "raw/exec-0.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "cwd": "/tmp/tmp417q88pf",
+            "environment": {
+              "HOME": "/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 11,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-1.stdout",
+              "raw/exec-1.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "--no-optional-locks",
+              "-c",
+              "core.fsmonitor=false",
+              "status",
+              "--porcelain=v1",
+              "--untracked-files=all"
+            ],
+            "cwd": "/tmp/tmp417q88pf",
+            "environment": {
+              "HOME": "/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 14,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-2.stdout",
+              "raw/exec-2.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "--version"
+            ],
+            "cwd": "/tmp/tmp417q88pf",
+            "environment": {
+              "HOME": "/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 82,
+            "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+            "stderr": "",
+            "timeout_seconds": 60
+          },
+          {
+            "output_refs": [
+              "raw/exec-3.stdout",
+              "raw/exec-3.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "e4f4dd201e1e44451278c5302c687cffc7b1bf7c17102e7c58cfcdba88f5e69a",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+            "arguments": [
+              "-p=/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0/unit-0",
+              "--checks=-*,clang-analyzer-*,bugprone-sizeof-expression,bugprone-integer-division,bugprone-suspicious-semicolon",
+              "--config={InheritParentConfig: false, HeaderFilterRegex: '.*'}",
+              "--export-fixes=/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0/unit-0/diagnostics.yaml",
+              "--quiet",
+              "/tmp/tmp417q88pf/templates.cpp"
+            ],
+            "cwd": "/tmp/tmp417q88pf",
+            "environment": {
+              "HOME": "/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmp417q88pf/.safety/runs/RUN-1792791499193-73381-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 83,
+            "stdout": "",
+            "stderr": "",
+            "timeout_seconds": 60
+          }
+        ],
+        "findings": [],
+        "properties": [],
+        "limitations": [
+          "Automated evidence for human review; no certification or compliance approval.",
+          "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+          "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment."
+        ],
+        "git": null
+      }
+    },
+    {
+      "file": "overflow.c",
+      "engine": "esbmc",
+      "defect": true,
+      "category": "signed overflow",
+      "detected": true,
+      "expected_defect_missed": false,
+      "false_positive": false,
+      "seconds": 1.9127710639986617,
+      "incomplete": false,
+      "successful_proofs": 0,
+      "incorrect_proof_classification": false,
+      "exit_code": 1,
+      "native_result": {
+        "schema_version": 1,
+        "configuration": {
+          "assurance": null,
+          "build": {
+            "compile_commands": "compile_commands.json",
+            "variants": {}
+          },
+          "coding": {
+            "c": null,
+            "cpp": null,
+            "deviations": null,
+            "recategorization": null,
+            "registries": []
+          },
+          "evidence": {
+            "directory": ".safety/runs",
+            "reviews": null
+          },
+          "project": {
+            "name": "known-answer-benchmark"
+          },
+          "tools": {
+            "allowlist": [],
+            "clang": true,
+            "clang_module": null,
+            "esbmc": false,
+            "frama_c": false,
+            "memory_mb": 2048,
+            "require_filesystem_isolation": false,
+            "timeout_seconds": 60
+          },
+          "trace": {
+            "manifest": "trace.yaml"
+          },
+          "version": 1
+        },
+        "toolkit": {
+          "executable_sha256": "74491fdf99771f19e3f392cdd9e8416984d9062d877f00e288fe2996a3d6ddae",
+          "host_arch": "x86_64",
+          "version": "0.1.0"
+        },
+        "verification": {
+          "harness": null,
+          "human_approval": "not_granted_by_tool",
+          "request": {
+            "bits": 64,
+            "engine": "esbmc",
+            "entry": "main",
+            "harness": null,
+            "method": "bmc",
+            "source": "overflow.c",
+            "unwind": 8,
+            "variant": null
+          }
+        },
+        "id": "RUN-1792791499480-73406-0",
+        "operation": "prove",
+        "project": "known-answer-benchmark",
+        "status": "findings",
+        "complete": true,
+        "completeness": {
+          "total": 1,
+          "analyzed": 1,
+          "failed": 0,
+          "excluded": 0,
+          "unsupported": 0,
+          "build_variants": [
+            "VAR-24789cf8ea6f56d11231f49c92ac249bce938460ab8eeb7c3b1f13f162c9185e"
+          ]
+        },
+        "started_unix_ms": 1792791499493,
+        "completed_unix_ms": 1792791501386,
+        "inputs": {
+          "compile_commands.json": "9fc18cb867dfee79578f12d498fafb63e286555e7d7c4c538a497bfb2e9d47ea",
+          "overflow.c": "fd6b567f51e914bd55528610007dd92190d2f0e97a0165b80ae6f849114c5891",
+          "safety.yaml": "2a52eb04a12934454075b1452ac0e62b556c7827652ea7102ac6459c07f39945"
+        },
+        "executions": [
+          {
+            "output_refs": [
+              "raw/exec-0.stdout",
+              "raw/exec-0.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "rev-parse",
+              "HEAD"
+            ],
+            "cwd": "/tmp/tmpz4ox3054",
+            "environment": {
+              "HOME": "/tmp/tmpz4ox3054/.safety/runs/RUN-1792791499480-73406-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpz4ox3054/.safety/runs/RUN-1792791499480-73406-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 49,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-1.stdout",
+              "raw/exec-1.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/usr/local/bin/git",
+            "arguments": [
+              "--no-optional-locks",
+              "-c",
+              "core.fsmonitor=false",
+              "status",
+              "--porcelain=v1",
+              "--untracked-files=all"
+            ],
+            "cwd": "/tmp/tmpz4ox3054",
+            "environment": {
+              "HOME": "/tmp/tmpz4ox3054/.safety/runs/RUN-1792791499480-73406-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpz4ox3054/.safety/runs/RUN-1792791499480-73406-0"
+            },
+            "exit_code": 128,
+            "failure": "nonzero_exit",
+            "duration_ms": 12,
+            "stdout": "",
+            "stderr": "fatal: not a git repository (or any parent up to mount point /)\nStopping at filesystem boundary (GIT_DISCOVERY_ACROSS_FILESYSTEM not set).\n",
+            "timeout_seconds": 10
+          },
+          {
+            "output_refs": [
+              "raw/exec-2.stdout",
+              "raw/exec-2.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "4f9e846eaa56be8ba0f6b50c5c2772b1e488e82ab35e4e71e79627b6eed2ce2b",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/esbmc/release/bin/esbmc",
+            "arguments": [
+              "--version"
+            ],
+            "cwd": "/tmp/tmpz4ox3054",
+            "environment": {
+              "HOME": "/tmp/tmpz4ox3054/.safety/runs/RUN-1792791499480-73406-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpz4ox3054/.safety/runs/RUN-1792791499480-73406-0"
+            },
+            "exit_code": 0,
+            "failure": null,
+            "duration_ms": 12,
+            "stdout": "ESBMC version 8.6.0 64-bit x86_64 linux\n",
+            "stderr": "",
+            "timeout_seconds": 60
+          },
+          {
+            "output_refs": [
+              "raw/exec-3.stdout",
+              "raw/exec-3.stderr"
+            ],
+            "metadata_output_truncated": false,
+            "executable_sha256": "4f9e846eaa56be8ba0f6b50c5c2772b1e488e82ab35e4e71e79627b6eed2ce2b",
+            "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+            "executable": "/workspace/scratch/esbmc/release/bin/esbmc",
+            "arguments": [
+              "/tmp/tmpz4ox3054/overflow.c",
+              "--z3",
+              "--unwind",
+              "8",
+              "--64",
+              "--overflow-check",
+              "--generate-json-report",
+              "--std",
+              "c11",
+              "--function",
+              "main"
+            ],
+            "cwd": "/tmp/tmpz4ox3054/.safety/runs/RUN-1792791499480-73406-0",
+            "environment": {
+              "HOME": "/tmp/tmpz4ox3054/.safety/runs/RUN-1792791499480-73406-0",
+              "LANG": "C",
+              "LC_ALL": "C",
+              "TMPDIR": "/tmp/tmpz4ox3054/.safety/runs/RUN-1792791499480-73406-0"
+            },
+            "exit_code": 1,
+            "failure": "nonzero_exit",
+            "duration_ms": 263,
+            "stdout": "ESBMC version 8.6.0 64-bit x86_64 linux\n",
+            "stderr": "Target: 64-bit little-endian x86_64-unknown-linux with esbmclibc\nParsing /tmp/tmpz4ox3054/overflow.c\nConverting\nGenerating GOTO Program\nGOTO program creation time: 0.205s\nGOTO program processing time: 0.000s\nStarting Bounded Model Checking\nSymex completed in: 0.000s (14 assignments)\nCaching time: 0.000s (removed 0 assertions)\nSlicing time: 0.000s (removed 12 assignments)\nGenerated 1 VCC(s), 1 remaining after simplification (2 assignments)\nEncoding remaining VCC(s) using bit-vector/floating-point arithmetic\nEncoding to solver time: 0.000s\nSolving with solver Z3 v4.13.3\nRuntime decision procedure: 0.000s\nBuilding error trace\nGenerating JSON report for trace: 1\n\n[Counterexample]\n\n\nState 1 file /tmp/tmpz4ox3054/overflow.c line 2 column 34 function main thread 0\n----------------------------------------------------\nViolated property:\n  file /tmp/tmpz4ox3054/overflow.c line 2 column 34 function main\n  arithmetic overflow on add\n  CWE: CWE-190, CWE-191\n  !overflow(\"+\", value, 1)\n\n\n** Results:\n/tmp/tmpz4ox3054/overflow.c, function main\n  FAILED       [main.arithmetic-overflow.1]  line 2  arithmetic overflow on add\n\n** 1 of 1 properties failed\n\nVERIFICATION FAILED\n",
+            "timeout_seconds": 60
+          }
+        ],
+        "findings": [],
+        "properties": [
+          {
+            "id": "main.arithmetic-overflow.1",
+            "description": "line 2  arithmetic overflow on add",
+            "outcome": "VIOLATED",
+            "scope": "ESBMC 8.6.0 sequential source model with entry main; 64-bit little-endian; Z3; finite unwind 8; default unwinding assertions enabled; source assumptions and library models apply",
+            "assumptions": [],
+            "unwind_bound": 8,
+            "completeness_established": false,
+            "native_references": [
+              "raw/esbmc.log"
+            ]
+          }
+        ],
+        "limitations": [
+          "Automated evidence for human review; no certification or compliance approval.",
+          "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+          "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+          "Advisory source-model verification only. No independently approved harness/environment assumptions were supplied. Counterexamples are model traces, not automatically confirmed production defects. Proof method and induction search limits, where selected, are retained in verification.json and native phase logs."
+        ],
+        "git": null
+      }
+    }
+  ],
+  "missed": 0,
+  "false_positives": 0,
+  "incorrect_proofs": 0
+}

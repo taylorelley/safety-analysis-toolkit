@@ -1,0 +1,36 @@
+ M .gitignore
+ M README.md
+ M docs/cli.md
+ M docs/coverage.md
+ M docs/formal-verification.md
+ M docs/mcp.md
+ M docs/misra-coverage.md
+ M docs/tool-versions.json
+ M docs/traceability.md
+ M scripts/e2e.py
+ M skills/safety-analysis/SKILL.md
+?? .dockerignore
+?? examples/agent-harnesses/package-lock.json
+?? examples/agent-harnesses/package.json
+?? examples/agent-harnesses/pi-safety.mjs
+?? packaging/reference.Dockerfile
+?? scripts/benchmark.py
+?? scripts/install.sh
+?? scripts/license_inventory.py
+?? scripts/package.py
+?? scripts/validate_harnesses.py
+?? validation/completion/e2e-driver.log
+?? validation/completion/e2e/cli-coverage.json
+?? validation/completion/e2e/cli-doctor.json
+?? validation/completion/e2e/cli-esbmc-c.json
+?? validation/completion/e2e/cli-esbmc-cpp.json
+?? validation/completion/e2e/cli-frama-c.json
+?? validation/completion/e2e/cli-frama-wp.json
+?? validation/completion/e2e/cli-scan.json
+?? validation/completion/e2e/cli-trace.json
+?? validation/completion/e2e/mcp-2.json
+?? validation/completion/e2e/mcp-3.json
+?? validation/completion/e2e/mcp-4.json
+?? validation/completion/e2e/mcp-5.json
+?? validation/completion/full-validation.log
+?? validation/completion/reference-validation.log

@@ -1,0 +1,24 @@
+ M .gitignore
+ M README.md
+ M docs/cli.md
+ M docs/coverage.md
+ M docs/formal-verification.md
+ M docs/mcp.md
+ M docs/misra-coverage.md
+ M docs/tool-versions.json
+ M docs/traceability.md
+ M scripts/e2e.py
+ M skills/safety-analysis/SKILL.md
+?? .dockerignore
+?? examples/agent-harnesses/package-lock.json
+?? examples/agent-harnesses/package.json
+?? examples/agent-harnesses/pi-safety.mjs
+?? packaging/reference.Dockerfile
+?? scripts/benchmark.py
+?? scripts/install.sh
+?? scripts/license_inventory.py
+?? scripts/package.py
+?? scripts/validate_harnesses.py
+?? validation/completion/e2e-driver.log
+?? validation/completion/full-validation.log
+?? validation/completion/reference-validation.log

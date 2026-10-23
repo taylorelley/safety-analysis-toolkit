@@ -1,0 +1,12 @@
+---
+MainSourceFile:  '/workspace/safety/build/demo/harness/navigation_harness.c'
+Diagnostics:
+  - DiagnosticName:  safety-prohibited-goto
+    DiagnosticMessage:
+      Message:         goto statement requires project policy review
+      FilePath:        'harness/../src/navigation.c'
+      FileOffset:      98
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/workspace/safety/build/demo'
+...

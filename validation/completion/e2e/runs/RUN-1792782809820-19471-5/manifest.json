@@ -1,0 +1,207 @@
+{
+  "schema_version": 1,
+  "id": "RUN-1792782809820-19471-5",
+  "operation": "coverage",
+  "project": "mixed-safety-demo",
+  "status": "incomplete",
+  "complete": false,
+  "completeness": {
+    "total": 5,
+    "analyzed": 2,
+    "failed": 0,
+    "excluded": 3,
+    "unsupported": 0,
+    "build_variants": [
+      "VAR-59d26e56ac42efbf896ef09f1788fdd1129c016477634b0d86e449897570a99e",
+      "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e",
+      "VAR-6c61e71e5d659d81fd75c68472b6a04b5d165baafee2350d9ddb485cb3c8c31b",
+      "VAR-9ff35ff903434396903470597bbfe339f5cb6dcdd3927ada3c925391aaf00180",
+      "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+    ]
+  },
+  "started_unix_ms": 1792782809821,
+  "completed_unix_ms": 1792782809942,
+  "inputs": {
+    "build/compile_commands.json": "aee855aa0ebc5dec3b659c82c5be8185781d828bc7965dc6209d454b5cc9a9a2",
+    "build/provenance.json": "965c38d6b6433efb3b012f3cb31a1f216c4471ad409e89466459fdafd032b3cc",
+    "build/test": "68d361ec033697cf3eb7c8618cb75e18f7cd05ba2b80ed1ef460d59ed60c493e",
+    "build/test.profdata": "238ce748fdb8206bdba393efdc79b38fafed96ad228187c3d92c20217d5f12c4",
+    "build/test.profraw": "9e66e41b2eadd570a1850fd53e36ec5f11f678e080d23837c9e961225d6271a8",
+    "harness/navigation_harness.c": "b95bfcd9df878ff96777d16417ba6937074bbe662f0737d25ea4856c185b1c8e",
+    "harness/navigation_harness.yaml": "e597a890748ca488ec20b7718ec432445be580d6203aeb875a99899fd9f05af3",
+    "safety.yaml": "2c450d61ec520c5a7432b830d1ce10b02619440b11c0a2a49e62ffc6f6c12317",
+    "src/controller.cpp": "aef7a38692b13aadcb07c235fc6614b6debff561a67154549f2b35a07e373bdd",
+    "src/decision.c": "f5bc70baa14f155ece4dc543751f752fe69aa0047d747a22da9c60d5d1faf05f",
+    "src/navigation.c": "4d4816ce57472525158bb9a951436714a9475ae6f0914a1917e810953d5d8d15",
+    "src/test.c": "290a1366331b3fbf24a04de09c4e1ed1d558cc0326bedd69f8cd306e49b01a99",
+    "trace.yaml": "9398dfdd2fcc3f562bafb5de49deebf72382d500469a7cfa9219012075218b87"
+  },
+  "executions": [
+    {
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782809820-19471-5",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782809820-19471-5"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 10,
+      "stdout": "d5f1a75d04087a334eb70f9614f60e10d41ae79e\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "--no-optional-locks",
+        "-c",
+        "core.fsmonitor=false",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782809820-19471-5",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782809820-19471-5"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 11,
+      "stdout": "?? validation/e2e/cli-coverage.json\n?? validation/e2e/cli-doctor.json\n?? validation/e2e/cli-esbmc-c.json\n?? validation/e2e/cli-esbmc-cpp.json\n?? validation/e2e/cli-frama-c.json\n?? validation/e2e/cli-scan.json\n?? validation/e2e/cli-trace.json\n?? validation/e2e/mcp-2.json\n?? validation/e2e/mcp-3.json\n?? validation/e2e/mcp-4.json\n?? validation/e2e/mcp-5.json\n?? validation/e2e/mcp-6.json\n?? validation/exploratory-demo/constant-caller-scan.json\n?? validation/full-validation.log\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "executable_sha256": "8421a134d7c6bc9ca8dc1fb5b9ef40adc6457b78f5066b6202b2072256f83866",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-cov",
+      "arguments": [
+        "--version"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782809820-19471-5",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782809820-19471-5"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 31,
+      "stdout": "Debian LLVM version 19.1.7\n  Optimized build.\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "executable_sha256": "8421a134d7c6bc9ca8dc1fb5b9ef40adc6457b78f5066b6202b2072256f83866",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-cov",
+      "arguments": [
+        "export",
+        "/workspace/safety/build/demo/build/test",
+        "--instr-profile=/workspace/safety/build/demo/build/test.profdata"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782809820-19471-5",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782809820-19471-5"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 31,
+      "stdout": "{\"data\":[{\"files\":[{\"branches\":[[2,32,2,33,1,1,0,0,6],[2,37,2,38,1,0,0,0,6]],\"expansions\":[],\"filename\":\"/workspace/safety/build/demo/src/decision.c\",\"mcdc_records\":[[2,32,2,38,0,5,[true,false]]],\"segments\":[[2,26,2,true,true,false],[2,32,2,true,true,false],[2,33,2,true,false,false],[2,37,1,true,true,false],[2,38,2,true,false,false],[2,39,1,true,false,true],[2,40,1,true,true,false],[2,48,2,true,false,false],[2,49,1,true,false,true],[2,50,1,true,true,false],[2,58,2,true,false,false],[2,61,0,false,false,false]],\"summary\":{\"branches\":{\"count\":4,\"covered\":3,\"notcovered\":1,\"percent\":75},\"functions\":{\"count\":1,\"covered\":1,\"percent\":100},\"instantiations\":{\"count\":1,\"covered\":1,\"percent\":100},\"lines\":{\"count\":1,\"covered\":1,\"percent\":100},\"mcdc\":{\"count\":2,\"covered\":1,\"notcovered\":1,\"percent\":50},\"regions\":{\"count\":6,\"covered\":6,\"notcovered\":0,\"percent\":100}}},{\"branches\":[[4,25,4,55,1,0,0,0,4]],\"expansions\":[],\"filename\":\"/workspace/safety/build/demo/src/test.c\",\"mcdc_records\":[],\"segments\":[[4,16,1,true,true,false],[4,25,1,true,true,false],[4,55,1,true,false,false],[4,58,1,true,true,false],[4,59,1,true,false,false],[4,62,0,true,true,false],[4,63,1,true,false,false],[4,66,0,false,false,false]],\"summary\":{\"branches\":{\"count\":2,\"covered\":1,\"notcovered\":1,\"percent\":50},\"functions\":{\"count\":1,\"covered\":1,\"percent\":100},\"instantiations\":{\"count\":1,\"covered\":1,\"percent\":100},\"lines\":{\"count\":1,\"covered\":1,\"percent\":100},\"mcdc\":{\"count\":0,\"covered\":0,\"notcovered\":0,\"percent\":0},\"regions\":{\"count\":4,\"covered\":3,\"notcovered\":1,\"percent\":75}}}],\"functions\":[{\"branches\":[[2,32,2,33,1,1,0,0,6],[2,37,2,38,1,0,0,0,6]],\"count\":2,\"filenames\":[\"/workspace/safety/build/demo/src/decision.c\"],\"mcdc_records\":[[2,32,2,38,0,5,[true,false]]],\"name\":\"decide\",\"regions\":[[2,26,2,61,2,0,0,0],[2,32,2,33,2,0,0,0],[2,32,2,38,2,0,0,0],[2,37,2,38,1,0,0,0],[2,39,2,40,1,0,0,3],[2,40,2,48,1,0,0,0],[2,49,2,50,1,0,0,3],[2,50,2,58,1,0,0,0]]},{\"branches\":[[4,25,4,55,1,0,0,0,4]],\"count\":1,\"filenames\":[\"/workspace/safety/build/demo/src/test.c\"],\"mcdc_records\":[],\"name\":\"main\",\"regions\":[[4,16,4,66,1,0,0,0],[4,25,4,55,1,0,0,0],[4,57,4,58,1,0,0,3],[4,58,4,59,1,0,0,0],[4,62,4,63,0,0,0,0]]}],\"totals\":{\"branches\":{\"count\":6,\"covered\":4,\"notcovered\":2,\"percent\":66.666666666666657},\"functions\":{\"count\":2,\"covered\":2,\"percent\":100},\"instantiations\":{\"count\":2,\"covered\":2,\"percent\":100},\"lines\":{\"count\":2,\"covered\":2,\"percent\":100},\"mcdc\":{\"count\":2,\"covered\":1,\"notcovered\":1,\"percent\":50},\"regions\":{\"count\":10,\"covered\":9,\"notcovered\":1,\"percent\":90}}}],\"type\":\"llvm.coverage.json.export\",\"version\":\"2.0.1\"}",
+      "stderr": "",
+      "timeout_seconds": 60
+    }
+  ],
+  "findings": [
+    {
+      "id": "FND-000001",
+      "tool": "llvm-cov-19",
+      "rule_id": "coverage-gap-branches",
+      "file": "src/decision.c",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "branches: 3/4 measured items covered; investigate linked requirements and requirements-based tests",
+      "build_variant": "coverage-artifact",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "raw/llvm-cov.json"
+      ]
+    },
+    {
+      "id": "FND-000002",
+      "tool": "llvm-cov-19",
+      "rule_id": "coverage-gap-mcdc",
+      "file": "src/decision.c",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "mcdc: 1/2 measured items covered; investigate linked requirements and requirements-based tests",
+      "build_variant": "coverage-artifact",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "raw/llvm-cov.json"
+      ]
+    },
+    {
+      "id": "FND-000003",
+      "tool": "llvm-cov-19",
+      "rule_id": "coverage-gap-branches",
+      "file": "src/test.c",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "branches: 1/2 measured items covered; investigate linked requirements and requirements-based tests",
+      "build_variant": "coverage-artifact",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "raw/llvm-cov.json"
+      ]
+    },
+    {
+      "id": "FND-000004",
+      "tool": "llvm-cov-19",
+      "rule_id": "coverage-gap-regions",
+      "file": "src/test.c",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "regions: 3/4 measured items covered; investigate linked requirements and requirements-based tests",
+      "build_variant": "coverage-artifact",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "raw/llvm-cov.json"
+      ]
+    }
+  ],
+  "properties": [],
+  "limitations": [
+    "Automated evidence for human review; no certification or compliance approval.",
+    "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+    "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+    "Decisions exist without measured MC/DC conditions; MC/DC instrumentation completeness is unknown",
+    "Coverage import never executes tests. Execution environment and requirement/test links in provenance are supplied records, not independently validated claims. LLVM branch coverage is not automatically DO-178C decision coverage. Data/control coupling, object-code mapping, target execution assurance and qualification assessment remain outstanding."
+  ],
+  "git": {
+    "commit": "d5f1a75d04087a334eb70f9614f60e10d41ae79e",
+    "dirty": true
+  }
+}

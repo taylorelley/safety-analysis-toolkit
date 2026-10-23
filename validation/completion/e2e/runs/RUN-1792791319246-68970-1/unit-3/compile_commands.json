@@ -1,0 +1,16 @@
+[
+  {
+    "arguments": [
+      "clang-19",
+      "-std=c11",
+      "-DSAFETY_DEMO=1",
+      "-fprofile-instr-generate",
+      "-fcoverage-mapping",
+      "-fcoverage-mcdc",
+      "-c",
+      "src/test.c"
+    ],
+    "directory": "/workspace/safety/build/demo",
+    "file": "/workspace/safety/build/demo/src/test.c"
+  }
+]

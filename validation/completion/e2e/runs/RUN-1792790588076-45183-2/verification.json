@@ -1,0 +1,14 @@
+{
+  "harness": null,
+  "human_approval": "not_granted_by_tool",
+  "request": {
+    "bits": 64,
+    "engine": "frama-c",
+    "entry": "main",
+    "harness": null,
+    "method": "eva",
+    "source": "harness/navigation_harness.c",
+    "unwind": 8,
+    "variant": null
+  }
+}

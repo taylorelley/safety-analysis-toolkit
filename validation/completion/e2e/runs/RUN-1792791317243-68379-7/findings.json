@@ -1,0 +1,147 @@
+[
+  {
+    "schema_version": 1,
+    "run_id": "RUN-1792791317243-68379-7",
+    "category": "structural-coverage",
+    "end_line": null,
+    "end_column": null,
+    "certainty": null,
+    "requirement_ids": [
+      "R-DEC"
+    ],
+    "test_ids": [
+      "T-DEC"
+    ],
+    "related_findings": [],
+    "human_disposition_ref": null,
+    "id": "FND-000001",
+    "tool": "llvm-cov-19",
+    "rule_id": "coverage-gap-branches",
+    "file": "src/decision.c",
+    "line": 1,
+    "column": 1,
+    "severity": "warning",
+    "message": "branches: 3/4 measured items covered; investigate linked requirements and requirements-based tests",
+    "build_variant": "coverage-artifact",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/llvm-cov.json"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "run_id": "RUN-1792791317243-68379-7",
+    "category": "structural-coverage",
+    "end_line": null,
+    "end_column": null,
+    "certainty": null,
+    "requirement_ids": [
+      "R-DEC"
+    ],
+    "test_ids": [
+      "T-DEC"
+    ],
+    "related_findings": [],
+    "human_disposition_ref": null,
+    "id": "FND-000002",
+    "tool": "llvm-cov-19",
+    "rule_id": "coverage-gap-mcdc",
+    "file": "src/decision.c",
+    "line": 1,
+    "column": 1,
+    "severity": "warning",
+    "message": "mcdc: 1/2 measured items covered; investigate linked requirements and requirements-based tests",
+    "build_variant": "coverage-artifact",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/llvm-cov.json"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "run_id": "RUN-1792791317243-68379-7",
+    "category": "structural-coverage",
+    "end_line": null,
+    "end_column": null,
+    "certainty": null,
+    "requirement_ids": [
+      "R-DEC"
+    ],
+    "test_ids": [
+      "T-DEC"
+    ],
+    "related_findings": [],
+    "human_disposition_ref": null,
+    "id": "FND-000003",
+    "tool": "llvm-cov-19",
+    "rule_id": "coverage-mcdc-condition-2",
+    "file": "src/decision.c",
+    "line": 2,
+    "column": 32,
+    "severity": "warning",
+    "message": "Condition 2 has no measured MC/DC independence pair; investigate requirements-based tests, infeasibility and instrumentation scope",
+    "build_variant": "coverage-artifact",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/llvm-cov.json"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "run_id": "RUN-1792791317243-68379-7",
+    "category": "structural-coverage",
+    "end_line": null,
+    "end_column": null,
+    "certainty": null,
+    "requirement_ids": [
+      "R-DEC"
+    ],
+    "test_ids": [
+      "T-DEC"
+    ],
+    "related_findings": [],
+    "human_disposition_ref": null,
+    "id": "FND-000004",
+    "tool": "llvm-cov-19",
+    "rule_id": "coverage-gap-branches",
+    "file": "src/test.c",
+    "line": 1,
+    "column": 1,
+    "severity": "warning",
+    "message": "branches: 1/2 measured items covered; investigate linked requirements and requirements-based tests",
+    "build_variant": "coverage-artifact",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/llvm-cov.json"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "run_id": "RUN-1792791317243-68379-7",
+    "category": "structural-coverage",
+    "end_line": null,
+    "end_column": null,
+    "certainty": null,
+    "requirement_ids": [
+      "R-DEC"
+    ],
+    "test_ids": [
+      "T-DEC"
+    ],
+    "related_findings": [],
+    "human_disposition_ref": null,
+    "id": "FND-000005",
+    "tool": "llvm-cov-19",
+    "rule_id": "coverage-gap-regions",
+    "file": "src/test.c",
+    "line": 1,
+    "column": 1,
+    "severity": "warning",
+    "message": "regions: 3/4 measured items covered; investigate linked requirements and requirements-based tests",
+    "build_variant": "coverage-artifact",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/llvm-cov.json"
+    ]
+  }
+]

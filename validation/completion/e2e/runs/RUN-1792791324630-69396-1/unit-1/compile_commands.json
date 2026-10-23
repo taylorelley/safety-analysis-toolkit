@@ -1,0 +1,13 @@
+[
+  {
+    "arguments": [
+      "clang++-19",
+      "-std=c++17",
+      "-DSAFETY_DEMO=1",
+      "-c",
+      "src/controller.cpp"
+    ],
+    "directory": "/workspace/safety/build/demo",
+    "file": "/workspace/safety/build/demo/src/controller.cpp"
+  }
+]

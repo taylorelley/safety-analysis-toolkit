@@ -1,0 +1,13 @@
+[
+  {
+    "arguments": [
+      "clang-19",
+      "-std=c11",
+      "-DSAFETY_DEMO=1",
+      "-c",
+      "src/contract.c"
+    ],
+    "directory": "/workspace/safety/build/demo",
+    "file": "/workspace/safety/build/demo/src/contract.c"
+  }
+]

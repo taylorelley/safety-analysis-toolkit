@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "status": "passed",
+  "complete": true,
+  "scope": "Executed implementation validation on Linux x86-64; not a project assurance/compliance conclusion",
+  "engine_source_commit": "f71bb368bd0b3f80e6d3087e612ffa2b97a8d6e0",
+  "packaging_commit": "7e2405cf9326bd7d109adfdcb71423f9c19fa8f4",
+  "tests": {
+    "rust_unit": 24,
+    "integration": 17,
+    "native_ctest_suites": 3,
+    "actual_agent_hosts": {
+      "codex": "codex-cli 0.163.0",
+      "pi": "0.73.1"
+    },
+    "benchmark_cases": 7,
+    "missed_seeded_defects": 0,
+    "known_safe_false_positives": 0,
+    "incorrect_overall_proof_classifications": 0,
+    "offline_fresh_install": "passed",
+    "repeat_archive_equality": "passed",
+    "cli_and_mcp_cancellation": "passed"
+  },
+  "archived_native_runs": 134,
+  "release": {
+    "path": "build/reference-results/safety-0.1.0-linux-x86_64.tar.gz",
+    "bytes": 2543341,
+    "sha256": "d1c733fa46abbb40693723dd413f1ff99c66fd9faf8066d0db70a93d50e6179c",
+    "external_analyzers_bundled": false,
+    "locked_rust_packages_with_notices": 94
+  },
+  "reference_image": "sha256:ad6b6eacb59bf29409b70044b741c8cf9d918c8b756756b7ec2012b1213d4907",
+  "project_assurance": {
+    "status": "incomplete",
+    "complete": false,
+    "misra_mappings": "unvalidated by explicit user instruction",
+    "intentional_open_work": [
+      "seeded static defects and model counterexample",
+      "traceability gaps",
+      "MC/DC independence gap and uninstrumented units",
+      "authorized human assumption/deviation review",
+      "target/object/coupling/tool qualification evidence as applicable"
+    ]
+  },
+  "limits": [
+    "No claim of certification or independent human review",
+    "Agent-host transports tested without model inference",
+    "Remote GitHub Actions not run from this local workspace",
+    "External toolchain environment required for replay; no general filesystem sandbox claim on hosts without Landlock"
+  ]
+}

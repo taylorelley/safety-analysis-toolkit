@@ -1,0 +1,4 @@
+version: 1
+project: {name: archived-mixed-demo}
+evidence: {directory: runs}
+tools: {clang: false}

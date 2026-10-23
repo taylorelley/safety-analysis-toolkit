@@ -1,0 +1,53 @@
+---
+MainSourceFile:  '/workspace/safety/build/demo/src/navigation.c'
+Diagnostics:
+  - DiagnosticName:  safety-prohibited-goto
+    DiagnosticMessage:
+      Message:         goto statement requires project policy review
+      FilePath:        'src/navigation.c'
+      FileOffset:      98
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/workspace/safety/build/demo'
+  - DiagnosticName:  clang-analyzer-core.NullDereference
+    DiagnosticMessage:
+      Message:         'Dereference of null pointer (loaded from variable ''p'')'
+      FilePath:        'src/navigation.c'
+      FileOffset:      118
+      Replacements:    []
+      Ranges:
+        - FilePath:        'src/navigation.c'
+          FileOffset:      119
+          Length:          1
+    Notes:
+      - Message:         '''p'' initialized to a null pointer value'
+        FilePath:        'src/navigation.c'
+        FileOffset:      71
+        Replacements:    []
+        Ranges:
+          - FilePath:        'src/navigation.c'
+            FileOffset:      71
+            Length:          6
+      - Message:         'Assuming ''enabled'' is 0'
+        FilePath:        'src/navigation.c'
+        FileOffset:      89
+        Replacements:    []
+        Ranges:
+          - FilePath:        'src/navigation.c'
+            FileOffset:      89
+            Length:          7
+      - Message:         Taking false branch
+        FilePath:        'src/navigation.c'
+        FileOffset:      85
+        Replacements:    []
+      - Message:         'Dereference of null pointer (loaded from variable ''p'')'
+        FilePath:        'src/navigation.c'
+        FileOffset:      118
+        Replacements:    []
+        Ranges:
+          - FilePath:        'src/navigation.c'
+            FileOffset:      119
+            Length:          1
+    Level:           Warning
+    BuildDirectory:  '/workspace/safety/build/demo'
+...

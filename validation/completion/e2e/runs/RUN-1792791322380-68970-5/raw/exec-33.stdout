@@ -1,0 +1,1 @@
+{"calls":[],"column":5,"comment":"/** @req R-NAV\n * @baseline BL-DEMO-1 */","definition":true,"file":"src/navigation.c","line":3,"macro_expansion":false,"name":"navigate","template_kind":"none","template_parent":"","unresolved_calls":0,"usr":"c:@F@navigate"}

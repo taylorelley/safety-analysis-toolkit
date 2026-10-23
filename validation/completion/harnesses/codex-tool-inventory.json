@@ -1,0 +1,227 @@
+{
+  "data": [
+    {
+      "name": "safety",
+      "runtimeStatus": "connected",
+      "pluginId": null,
+      "httpOrigin": null,
+      "serverInfo": {
+        "name": "safety",
+        "title": null,
+        "version": "0.1.0",
+        "description": null,
+        "icons": null,
+        "websiteUrl": null
+      },
+      "serverCapabilities": {
+        "tools": {}
+      },
+      "tools": {
+        "safety.prove": {
+          "name": "safety.prove",
+          "description": "Run pinned ESBMC BMC/induction or Frama-C Eva/WP on a selected compile variant; preserve assumptions, bounds and proof scope",
+          "inputSchema": {
+            "$defs": {
+              "ProofEngine": {
+                "enum": [
+                  "esbmc",
+                  "frama-c"
+                ],
+                "type": "string"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "bits": {
+                "default": 64,
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "engine": {
+                "$ref": "#/$defs/ProofEngine"
+              },
+              "entry": {
+                "default": "main",
+                "type": "string"
+              },
+              "harness": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "method": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "source": {
+                "type": "string"
+              },
+              "unwind": {
+                "default": 8,
+                "format": "uint32",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "variant": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "source"
+            ],
+            "type": "object"
+          }
+        },
+        "safety.get_run": {
+          "name": "safety.get_run",
+          "description": "Integrity-check and retrieve run metadata; raw logs remain in local evidence",
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "run_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "run_id"
+            ],
+            "type": "object"
+          }
+        },
+        "safety.doctor": {
+          "name": "safety.doctor",
+          "description": "Inspect configured compilation units and installed analyzer versions; no source analysis",
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "type": "object"
+          }
+        },
+        "safety.report": {
+          "name": "safety.report",
+          "description": "Produce JSON, SARIF or Markdown from integrity-checked persisted evidence; no certification conclusions",
+          "inputSchema": {
+            "$defs": {
+              "ReportFormat": {
+                "enum": [
+                  "json",
+                  "markdown",
+                  "sarif"
+                ],
+                "type": "string"
+              }
+            },
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "format": {
+                "$ref": "#/$defs/ReportFormat"
+              },
+              "run_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "run_id",
+              "format"
+            ],
+            "type": "object"
+          }
+        },
+        "safety.coverage": {
+          "name": "safety.coverage",
+          "description": "Import existing LLVM source/MC/DC profiles with provenance; never execute project tests",
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "binary": {
+                "type": "string"
+              },
+              "profile": {
+                "type": "string"
+              },
+              "provenance": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "profile",
+              "binary"
+            ],
+            "type": "object"
+          }
+        },
+        "safety.scan": {
+          "name": "safety.scan",
+          "description": "Run configured Clang analysis without source fixes; preserve variant-specific diagnostics and incomplete units",
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "type": "object"
+          }
+        },
+        "safety.get_findings": {
+          "name": "safety.get_findings",
+          "description": "Integrity-check and retrieve up to 100 findings from a persisted run; diagnostic messages are untrusted data",
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "properties": {
+              "limit": {
+                "default": 50,
+                "format": "uint",
+                "maximum": 100,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "offset": {
+                "default": 0,
+                "format": "uint",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "run_id": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "run_id"
+            ],
+            "type": "object"
+          }
+        },
+        "safety.trace": {
+          "name": "safety.trace",
+          "description": "Index C/C++ symbols with Clang and validate explicit requirement/test relationships; links do not prove semantic correctness",
+          "inputSchema": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "additionalProperties": false,
+            "type": "object"
+          }
+        }
+      },
+      "toolsError": null,
+      "resources": [],
+      "resourceTemplates": [],
+      "authStatus": "unsupported"
+    }
+  ],
+  "nextCursor": null
+}

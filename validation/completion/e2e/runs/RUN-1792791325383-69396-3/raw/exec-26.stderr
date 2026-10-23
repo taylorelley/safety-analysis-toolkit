@@ -1,0 +1,20 @@
+Target: 64-bit little-endian x86_64-unknown-linux with esbmclibc
+Parsing /workspace/safety/build/demo/harness/navigation_harness.c
+Converting
+Generating GOTO Program
+GOTO program creation time: 0.113s
+GOTO program processing time: 0.001s
+Starting Bounded Model Checking
+Symex completed in: 0.000s (15 assignments)
+Caching time: 0.000s (removed 0 assertions)
+Slicing time: 0.000s (removed 14 assignments)
+Generated 1 VCC(s), 0 remaining after simplification (1 assignments)
+BMC program time: 0.000s
+
+** Results:
+/workspace/safety/build/demo/harness/navigation_harness.c, function main
+  PASSED       [main.assertion.1]  line 5  assertion navigate(1) == 1
+
+** 0 of 1 properties failed, 1 passed
+
+VERIFICATION SUCCESSFUL

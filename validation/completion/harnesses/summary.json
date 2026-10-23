@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "complete": true,
+  "scope": "Real agent-host MCP interoperability; no model inference or independent human review",
+  "hosts": {
+    "codex": "codex-cli 0.163.0",
+    "pi": "0.73.1"
+  }
+}

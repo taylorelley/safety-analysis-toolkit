@@ -1,0 +1,1 @@
+{"calls":[],"column":5,"comment":"/* SPDX-License-Identifier: Apache-2.0 */\n/** @req R-NAV */\n/*@ assigns \\nothing; ensures \\result == x; */","definition":true,"file":"src/contract.c","line":4,"macro_expansion":false,"name":"identity","template_kind":"none","template_parent":"","unresolved_calls":0,"usr":"c:@F@identity"}

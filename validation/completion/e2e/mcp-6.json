@@ -1,0 +1,51 @@
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"complete\":true,\"completeness\":{\"analyzed\":1,\"build_variants\":[\"VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f\"],\"excluded\":0,\"failed\":0,\"total\":1,\"unsupported\":0},\"evidence_ref\":\"RUN-1792791472557-72114-4/manifest.json\",\"finding_count\":0,\"limitations\":[\"Automated evidence for human review; no certification or compliance approval.\",\"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.\",\"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.\",\"Advisory source-model verification only. No independently approved harness/environment assumptions were supplied. Counterexamples are model traces, not automatically confirmed production defects. Proof method and induction search limits, where selected, are retained in verification.json and native phase logs.\"],\"properties\":[{\"assumptions\":[],\"completeness_established\":true,\"description\":\"line 5  assertion navigate(1) == 1\",\"id\":\"main.assertion.1\",\"native_references\":[\"raw/esbmc.log\"],\"outcome\":\"PROVEN\",\"scope\":\"ESBMC 8.6.0 sequential source model with entry main; 64-bit little-endian; Z3; finite unwind 8; default unwinding assertions enabled; source assumptions and library models apply\",\"unwind_bound\":8}],\"run_id\":\"RUN-1792791472557-72114-4\",\"schema_version\":1,\"status\":\"passed\"}"
+      }
+    ],
+    "structuredContent": {
+      "complete": true,
+      "completeness": {
+        "analyzed": 1,
+        "build_variants": [
+          "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+        ],
+        "excluded": 0,
+        "failed": 0,
+        "total": 1,
+        "unsupported": 0
+      },
+      "evidence_ref": "RUN-1792791472557-72114-4/manifest.json",
+      "finding_count": 0,
+      "limitations": [
+        "Automated evidence for human review; no certification or compliance approval.",
+        "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+        "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+        "Advisory source-model verification only. No independently approved harness/environment assumptions were supplied. Counterexamples are model traces, not automatically confirmed production defects. Proof method and induction search limits, where selected, are retained in verification.json and native phase logs."
+      ],
+      "properties": [
+        {
+          "assumptions": [],
+          "completeness_established": true,
+          "description": "line 5  assertion navigate(1) == 1",
+          "id": "main.assertion.1",
+          "native_references": [
+            "raw/esbmc.log"
+          ],
+          "outcome": "PROVEN",
+          "scope": "ESBMC 8.6.0 sequential source model with entry main; 64-bit little-endian; Z3; finite unwind 8; default unwinding assertions enabled; source assumptions and library models apply",
+          "unwind_bound": 8
+        }
+      ],
+      "run_id": "RUN-1792791472557-72114-4",
+      "schema_version": 1,
+      "status": "passed"
+    },
+    "isError": false
+  }
+}

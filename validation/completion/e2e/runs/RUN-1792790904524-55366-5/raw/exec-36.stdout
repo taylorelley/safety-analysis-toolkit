@@ -1,0 +1,2 @@
+{"calls":[],"column":5,"comment":"","definition":false,"file":"src/test.c","line":1,"macro_expansion":false,"name":"decide","template_kind":"none","template_parent":"","unresolved_calls":0,"usr":"c:@F@decide"}
+{"calls":["c:@F@decide"],"column":5,"comment":"/** @test T-DEC\n * @req R-DEC */","definition":true,"file":"src/test.c","line":4,"macro_expansion":false,"name":"main","template_kind":"none","template_parent":"","unresolved_calls":0,"usr":"c:@F@main"}

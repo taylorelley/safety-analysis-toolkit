@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "project": {
+    "name": "mixed-safety-demo"
+  },
+  "coding": {
+    "c": "MISRA-C:2012",
+    "cpp": "MISRA-CPP:2023"
+  },
+  "tools": {
+    "clang": true,
+    "frama_c": true,
+    "esbmc": true,
+    "clang_module": "/workspace/safety/build/clang/SafetyMisra.so",
+    "allowlist": [
+      "/workspace/safety/build/clang/SafetyMisra.so",
+      "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang-tidy",
+      "/workspace/scratch/llvm/usr/lib/llvm-19/bin/clang",
+      "/workspace/safety/build/clang/safety-source-index",
+      "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-cov",
+      "/workspace/scratch/llvm/usr/lib/llvm-19/bin/llvm-profdata",
+      "/workspace/scratch/esbmc/release/bin/esbmc",
+      "/usr/local/bin/git",
+      "/workspace/scratch/bin/frama-c"
+    ]
+  }
+}

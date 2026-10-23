@@ -1,0 +1,8 @@
+cargo fmt --check
+Diff in /work/safety/src/config.rs:296:
+         );
+     }
+ }
+-
+ 
+make: *** [Makefile:5: check] Error 1

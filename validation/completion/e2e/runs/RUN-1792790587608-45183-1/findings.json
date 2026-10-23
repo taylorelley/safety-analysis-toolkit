@@ -1,0 +1,77 @@
+[
+  {
+    "schema_version": 1,
+    "run_id": "RUN-1792790587608-45183-1",
+    "category": "static-diagnostic",
+    "end_line": null,
+    "end_column": null,
+    "certainty": null,
+    "requirement_ids": [],
+    "test_ids": [],
+    "related_findings": [],
+    "human_disposition_ref": null,
+    "id": "FND-000001",
+    "tool": "clang-tidy-19",
+    "rule_id": "safety-prohibited-goto",
+    "file": "harness/../src/navigation.c",
+    "line": 5,
+    "column": 16,
+    "severity": "warning",
+    "message": "goto statement requires project policy review",
+    "build_variant": "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/clang-5.log"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "run_id": "RUN-1792790587608-45183-1",
+    "category": "static-diagnostic",
+    "end_line": null,
+    "end_column": null,
+    "certainty": null,
+    "requirement_ids": [],
+    "test_ids": [],
+    "related_findings": [],
+    "human_disposition_ref": null,
+    "id": "FND-000002",
+    "tool": "clang-tidy-19",
+    "rule_id": "safety-prohibited-goto",
+    "file": "src/navigation.c",
+    "line": 5,
+    "column": 16,
+    "severity": "warning",
+    "message": "goto statement requires project policy review",
+    "build_variant": "VAR-59d26e56ac42efbf896ef09f1788fdd1129c016477634b0d86e449897570a99e",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/clang-0.log"
+    ]
+  },
+  {
+    "schema_version": 1,
+    "run_id": "RUN-1792790587608-45183-1",
+    "category": "static-diagnostic",
+    "end_line": null,
+    "end_column": null,
+    "certainty": null,
+    "requirement_ids": [],
+    "test_ids": [],
+    "related_findings": [],
+    "human_disposition_ref": null,
+    "id": "FND-000003",
+    "tool": "clang-tidy-19",
+    "rule_id": "clang-analyzer-core.NullDereference",
+    "file": "src/navigation.c",
+    "line": 6,
+    "column": 10,
+    "severity": "warning",
+    "message": "Dereference of null pointer (loaded from variable 'p')",
+    "build_variant": "VAR-59d26e56ac42efbf896ef09f1788fdd1129c016477634b0d86e449897570a99e",
+    "outcome": "DIAGNOSTIC",
+    "native_references": [
+      "raw/clang-0.log"
+    ]
+  }
+]

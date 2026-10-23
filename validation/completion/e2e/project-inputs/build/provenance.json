@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "binary_sha256": "68d361ec033697cf3eb7c8618cb75e18f7cd05ba2b80ed1ef460d59ed60c493e",
+  "profile_sha256": "238ce748fdb8206bdba393efdc79b38fafed96ad228187c3d92c20217d5f12c4",
+  "sources": {
+    "src/navigation.c": "4d4816ce57472525158bb9a951436714a9475ae6f0914a1917e810953d5d8d15",
+    "src/controller.cpp": "aef7a38692b13aadcb07c235fc6614b6debff561a67154549f2b35a07e373bdd",
+    "src/decision.c": "f5bc70baa14f155ece4dc543751f752fe69aa0047d747a22da9c60d5d1faf05f",
+    "src/test.c": "290a1366331b3fbf24a04de09c4e1ed1d558cc0326bedd69f8cd306e49b01a99",
+    "src/contract.c": "502564330f50a1422bf9e27301b1ced791f14460b6cbfaeb23c6c8284e5c5288",
+    "harness/navigation_harness.c": "b95bfcd9df878ff96777d16417ba6937074bbe662f0737d25ea4856c185b1c8e"
+  },
+  "compile_commands_sha256": "e32378a236a52be3332d114bec07ba6bc5b6aa72e04f935075fc6dcb1460dc6d",
+  "execution_environment": "host",
+  "build_variant": "SAFETY_DEMO=1",
+  "instrumentation_warnings": [],
+  "exclusions": [],
+  "test_ids": [
+    "T-DEC"
+  ],
+  "requirement_ids": [
+    "R-DEC"
+  ]
+}

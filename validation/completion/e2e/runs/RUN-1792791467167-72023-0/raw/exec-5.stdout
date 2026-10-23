@@ -1,0 +1,29 @@
+[kernel] Parsing analysis.i (no preprocessing)
+[wp] Running WP plugin...
+[rte:annot] annotating function identity
+[wp] 2 goals scheduled
+[wp] [Qed] Goal typed_identity_assigns : Valid
+[wp] [Qed] Goal typed_identity_ensures : Valid
+[wp] Proved goals:    2 / 2
+  Qed:             2
+[wp] Report '/workspace/safety/build/demo/.safety/runs/RUN-1792791467167-72023-0/raw/wp.json'
+[report] Dumping properties in 'raw/frama-c-properties.tsv'
+[report] Computing properties status...
+
+--------------------------------------------------------------------------------
+--- Properties of Function 'identity'
+--------------------------------------------------------------------------------
+
+[  Valid  ] Post-condition (file /workspace/safety/build/demo/src/contract.c, line 3)
+            by Wp.typed.
+[  Valid  ] Assigns nothing
+            by Wp.typed.
+[  Valid  ] Default behavior
+            by Frama-C kernel.
+
+--------------------------------------------------------------------------------
+--- Status Report Summary
+--------------------------------------------------------------------------------
+     3 Completely validated
+     3 Total
+--------------------------------------------------------------------------------

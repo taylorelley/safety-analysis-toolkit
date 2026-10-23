@@ -1,0 +1,12 @@
+---
+MainSourceFile:  '/workspace/safety/build/demo/src/navigation.c'
+Diagnostics:
+  - DiagnosticName:  safety-prohibited-goto
+    DiagnosticMessage:
+      Message:         goto statement requires project policy review
+      FilePath:        'src/navigation.c'
+      FileOffset:      118
+      Replacements:    []
+    Level:           Warning
+    BuildDirectory:  '/workspace/safety/build/demo'
+...

@@ -1,0 +1,3 @@
+harness/../src/navigation.c:5:16: warning: goto statement requires project policy review [safety-prohibited-goto]
+    5 |   if (enabled) goto done;
+      |                ^

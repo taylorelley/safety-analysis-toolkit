@@ -1,0 +1,192 @@
+{
+  "manifest": {
+    "baseline": "BL-DEMO-1",
+    "links": [
+      {
+        "from": "R-NAV",
+        "to": "T-NAV"
+      },
+      {
+        "from": "R-DEC",
+        "to": "T-DEC"
+      },
+      {
+        "from": "R-ORPHAN",
+        "to": "UNKNOWN-TEST"
+      },
+      {
+        "from": "R-NAV",
+        "to": "c:@F@navigate"
+      },
+      {
+        "from": "R-CTRL",
+        "to": "c:@F@main#"
+      },
+      {
+        "from": "R-DEC",
+        "to": "c:@F@decide"
+      },
+      {
+        "from": "R-DEC",
+        "to": "T-DEC"
+      },
+      {
+        "from": "R-NAV",
+        "to": "c:@F@navigate"
+      },
+      {
+        "from": "R-NAV",
+        "to": "T-NAV"
+      }
+    ],
+    "nodes": [
+      {
+        "baseline": null,
+        "id": "R-NAV",
+        "kind": "requirement",
+        "root": true
+      },
+      {
+        "baseline": null,
+        "id": "R-CTRL",
+        "kind": "requirement",
+        "root": true
+      },
+      {
+        "baseline": null,
+        "id": "R-DEC",
+        "kind": "requirement",
+        "root": true
+      },
+      {
+        "baseline": null,
+        "id": "R-ORPHAN",
+        "kind": "requirement",
+        "root": true
+      },
+      {
+        "baseline": null,
+        "id": "T-NAV",
+        "kind": "test",
+        "root": false
+      },
+      {
+        "baseline": null,
+        "id": "T-DEC",
+        "kind": "test",
+        "root": false
+      }
+    ],
+    "version": 1
+  },
+  "symbols": [
+    {
+      "column": 5,
+      "comment": "/** @req R-NAV\n * @baseline BL-DEMO-1 */",
+      "definition": true,
+      "file": "/workspace/safety/build/demo/src/navigation.c",
+      "line": 3,
+      "macro_expansion": false,
+      "name": "navigate",
+      "template_parent": "",
+      "usr": "c:@F@navigate",
+      "variant": "VAR-59d26e56ac42efbf896ef09f1788fdd1129c016477634b0d86e449897570a99e"
+    },
+    {
+      "column": 21,
+      "comment": "",
+      "definition": true,
+      "file": "/workspace/safety/build/demo/src/controller.cpp",
+      "line": 3,
+      "macro_expansion": false,
+      "name": "controller::apply",
+      "template_parent": "",
+      "usr": "c:@N@controller@FT@>1#Tapply#t0.0#S0_#",
+      "variant": "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e"
+    },
+    {
+      "column": 5,
+      "comment": "",
+      "definition": true,
+      "file": "/workspace/safety/build/demo/src/controller.cpp",
+      "line": 4,
+      "macro_expansion": false,
+      "name": "controller::apply",
+      "template_parent": "",
+      "usr": "c:@N@controller@F@apply#I#I#",
+      "variant": "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e"
+    },
+    {
+      "column": 5,
+      "comment": "/** @req R-CTRL */",
+      "definition": true,
+      "file": "/workspace/safety/build/demo/src/controller.cpp",
+      "line": 7,
+      "macro_expansion": false,
+      "name": "main",
+      "template_parent": "",
+      "usr": "c:@F@main#",
+      "variant": "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e"
+    },
+    {
+      "column": 5,
+      "comment": "/** @req R-DEC */",
+      "definition": true,
+      "file": "/workspace/safety/build/demo/src/decision.c",
+      "line": 2,
+      "macro_expansion": false,
+      "name": "decide",
+      "template_parent": "",
+      "usr": "c:@F@decide",
+      "variant": "VAR-6c61e71e5d659d81fd75c68472b6a04b5d165baafee2350d9ddb485cb3c8c31b"
+    },
+    {
+      "column": 5,
+      "comment": "",
+      "definition": false,
+      "file": "/workspace/safety/build/demo/src/test.c",
+      "line": 1,
+      "macro_expansion": false,
+      "name": "decide",
+      "template_parent": "",
+      "usr": "c:@F@decide",
+      "variant": "VAR-9ff35ff903434396903470597bbfe339f5cb6dcdd3927ada3c925391aaf00180"
+    },
+    {
+      "column": 5,
+      "comment": "/** @test T-DEC\n * @req R-DEC */",
+      "definition": true,
+      "file": "/workspace/safety/build/demo/src/test.c",
+      "line": 4,
+      "macro_expansion": false,
+      "name": "main",
+      "template_parent": "",
+      "usr": "c:@F@main",
+      "variant": "VAR-9ff35ff903434396903470597bbfe339f5cb6dcdd3927ada3c925391aaf00180"
+    },
+    {
+      "column": 5,
+      "comment": "/** @req R-NAV\n * @baseline BL-DEMO-1 */",
+      "definition": true,
+      "file": "/workspace/safety/build/demo/src/navigation.c",
+      "line": 3,
+      "macro_expansion": false,
+      "name": "navigate",
+      "template_parent": "",
+      "usr": "c:@F@navigate",
+      "variant": "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+    },
+    {
+      "column": 5,
+      "comment": "/** @test T-NAV\n * @req R-NAV */",
+      "definition": true,
+      "file": "/workspace/safety/build/demo/harness/navigation_harness.c",
+      "line": 5,
+      "macro_expansion": false,
+      "name": "main",
+      "template_parent": "",
+      "usr": "c:@F@main",
+      "variant": "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+    }
+  ]
+}

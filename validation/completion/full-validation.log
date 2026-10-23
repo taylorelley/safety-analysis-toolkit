@@ -1,0 +1,125 @@
+cargo fmt --check
+cargo clippy --locked --all-targets -- -D warnings
+    Checking safety v0.1.0 (/workspace/safety)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.64s
+cmake -S clang -B build/clang -DCMAKE_BUILD_TYPE=Release
+-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) 
+-- Could NOT find LibEdit (missing: LibEdit_INCLUDE_DIRS LibEdit_LIBRARIES) 
+-- Configuring done (0.6s)
+-- Generating done (0.1s)
+-- Build files have been written to: /workspace/safety/build/clang
+cmake --build build/clang --parallel 2
+gmake[1]: Entering directory '/workspace/safety/build/clang'
+[ 50%] Built target SafetyMisra
+[100%] Built target safety-source-index
+gmake[1]: Leaving directory '/workspace/safety/build/clang'
+ctest --test-dir build/clang --output-on-failure
+Internal ctest changing into directory: /workspace/safety/build/clang
+Test project /workspace/safety/build/clang
+    Start 1: prohibited-goto
+1/3 Test #1: prohibited-goto ..................   Passed    0.47 sec
+    Start 2: source-index
+2/3 Test #2: source-index .....................   Passed    0.31 sec
+    Start 3: original-policies
+3/3 Test #3: original-policies ................   Passed    0.27 sec
+
+100% tests passed, 0 tests failed out of 3
+
+Total Test time (real) =   1.05 sec
+python3 examples/configure.py
+PATH="/workspace/safety/build/clang:$PATH" SAFETY_TEST_MODULE="/workspace/safety/build/clang/SafetyMisra.so" cargo test --locked -- --include-ignored --skip real_esbmc_properties --skip real_frama_c --skip real_esbmc_induction_harness
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.14s
+     Running unittests src/main.rs (target/debug/deps/safety-f1b9e5a5efb80c0c)
+
+running 24 tests
+test adapters::esbmc::tests::no_false_proof ... ok
+test config::tests::traversal ... ok
+test config::tests::unknown_fields ... ok
+test config::tests::validation ... ok
+test discovery::tests::flags ... ok
+test discovery::tests::variants ... ok
+test evidence::tests::dirty_files_hashed ... ok
+test adapters::frama_c::tests::external_assumptions_are_not_proofs ... ok
+test findings::tests::empty ... ok
+test findings::tests::malformed ... ok
+test mcp::tests::strict_input ... ok
+test misra::tests::builtins_do_not_invent_mappings ... ok
+test report::tests::escapes_uri ... ok
+test runner::tests::cancellation_kills_child ... ok
+test runner::tests::filesystem_capability_is_reported ... ok
+test evidence::tests::tamper ... ok
+test runner::tests::output_bound ... ok
+test runner::tests::real_execution ... ok
+test runner::tests::strict_isolation_fails_closed_or_blocks_writes ... ok
+test runner::tests::network_denied ... ok
+test trace::tests::external_code_link_requires_indexed_definition ... ok
+test trace::tests::gaps ... ok
+test trace::tests::tokens_only ... ok
+test runner::tests::timeout ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.28s
+
+     Running tests/integration/main.rs (target/debug/deps/integration-5c698583c2033798)
+
+running 13 tests
+test compiler_failure_is_incomplete ... ok
+{"assurance":"unconfigured; advisory analysis only","complete":true,"config":"/tmp/.tmpOL0sbd/safety.yaml","status":"passed"}
+test init_does_not_overwrite ... ok
+test invalid_config ... ok
+test malformed_harness_and_oversized_config_rejected ... ok
+test draft_misra_process_rejects_unreviewed_mapping_and_weakening ... ok
+test missing_database_is_explicit ... ok
+test real_ast_trace ... ok
+test real_c_pipeline ... ok
+test real_cpp_pipeline ... ok
+test real_custom_module ... ok
+test real_llvm_mcdc ... ok
+test rejected_semantic_flag_is_incomplete ... ok
+test real_mcp_stdio ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 7.00s
+
+cargo build --locked --release
+   Compiling safety v0.1.0 (/workspace/safety)
+    Finished `release` profile [optimized] target(s) in 39.18s
+python3 scripts/validate.py
+embedded-c: 4/4 units; 2 expected findings; JSON/SARIF/report/integrity valid
+embedded-cpp: 4/4 units; 2 expected findings; JSON/SARIF/report/integrity valid
+Offline schema and real-analysis validation passed
+esbmc --version
+ESBMC version 8.6.0 64-bit x86_64 linux
+cargo test --locked real_esbmc -- --ignored
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.15s
+     Running unittests src/main.rs (target/debug/deps/safety-f1b9e5a5efb80c0c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+     Running tests/integration/main.rs (target/debug/deps/integration-5c698583c2033798)
+
+running 2 tests
+test real_esbmc_induction_harness ... ok
+test real_esbmc_properties ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 12.21s
+
+frama-c -version
+25.0-beta (Manganese)cargo test --locked real_frama_c -- --ignored
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running unittests src/main.rs (target/debug/deps/safety-f1b9e5a5efb80c0c)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.00s
+
+     Running tests/integration/main.rs (target/debug/deps/integration-5c698583c2033798)
+
+running 2 tests
+test real_frama_c_rejects_unreviewed_compiler ... ok
+test real_frama_c ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 1.35s
+
+python3 tests/integration/cli_cancel.py target/release/safety
+CLI SIGINT: native child cancelled; remaining units incomplete; evidence persisted

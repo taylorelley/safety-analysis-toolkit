@@ -1,0 +1,56 @@
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\"complete\":true,\"completeness\":{\"analyzed\":1,\"build_variants\":[\"VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f\"],\"excluded\":0,\"failed\":0,\"total\":1,\"unsupported\":0},\"evidence_ref\":\"RUN-1792791471791-72114-2/manifest.json\",\"finding_count\":0,\"limitations\":[\"Automated evidence for human review; no certification or compliance approval.\",\"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.\",\"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.\",\"Results are scoped to the selected entry, C data model, supplied contracts and preserved native assumptions. Sequential models only; concurrency and unmodeled environment behavior are not verified. No human approval of assumptions is inferred.\"],\"properties\":[{\"assumptions\":[\"Native model premise (Valid): /workspace/safety/build/demo/.safety/runs/RUN-1792791471791-72114-2/FRAMAC_SHARE/libc/assert.h:31 __FC_assert precondition: nonnull_c: c \u2262 0\",\"Native model premise (Considered valid): /workspace/safety/build/demo/.safety/runs/RUN-1792791471791-72114-2/FRAMAC_SHARE/libc/assert.h:32 __FC_assert termination clause: c \u2262 0\",\"Native model premise (Considered valid): /workspace/safety/build/demo/.safety/runs/RUN-1792791471791-72114-2/FRAMAC_SHARE/libc/assert.h:35 __FC_assert assigns clause: assigns \\\\nothing;\"],\"completeness_established\":true,\"description\":\"/workspace/safety/build/demo/harness/navigation_harness.c:5 main precondition of __FC_assert: nonnull_c: c \u2262 0 [native status: Valid]\",\"id\":\"FC-6437020dc46f84c8b657\",\"native_references\":[\"raw/frama-c.log\",\"raw/frama-c-properties.tsv\"],\"outcome\":\"PROVEN\",\"scope\":\"Frama-C 25.0-beta (Debian Manganese), eva, entry main, x86 64-bit model; reachable sequential C states; alarms and native assumptions apply\",\"unwind_bound\":null}],\"run_id\":\"RUN-1792791471791-72114-2\",\"schema_version\":1,\"status\":\"passed\"}"
+      }
+    ],
+    "structuredContent": {
+      "complete": true,
+      "completeness": {
+        "analyzed": 1,
+        "build_variants": [
+          "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+        ],
+        "excluded": 0,
+        "failed": 0,
+        "total": 1,
+        "unsupported": 0
+      },
+      "evidence_ref": "RUN-1792791471791-72114-2/manifest.json",
+      "finding_count": 0,
+      "limitations": [
+        "Automated evidence for human review; no certification or compliance approval.",
+        "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+        "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+        "Results are scoped to the selected entry, C data model, supplied contracts and preserved native assumptions. Sequential models only; concurrency and unmodeled environment behavior are not verified. No human approval of assumptions is inferred."
+      ],
+      "properties": [
+        {
+          "assumptions": [
+            "Native model premise (Valid): /workspace/safety/build/demo/.safety/runs/RUN-1792791471791-72114-2/FRAMAC_SHARE/libc/assert.h:31 __FC_assert precondition: nonnull_c: c \u2262 0",
+            "Native model premise (Considered valid): /workspace/safety/build/demo/.safety/runs/RUN-1792791471791-72114-2/FRAMAC_SHARE/libc/assert.h:32 __FC_assert termination clause: c \u2262 0",
+            "Native model premise (Considered valid): /workspace/safety/build/demo/.safety/runs/RUN-1792791471791-72114-2/FRAMAC_SHARE/libc/assert.h:35 __FC_assert assigns clause: assigns \\nothing;"
+          ],
+          "completeness_established": true,
+          "description": "/workspace/safety/build/demo/harness/navigation_harness.c:5 main precondition of __FC_assert: nonnull_c: c \u2262 0 [native status: Valid]",
+          "id": "FC-6437020dc46f84c8b657",
+          "native_references": [
+            "raw/frama-c.log",
+            "raw/frama-c-properties.tsv"
+          ],
+          "outcome": "PROVEN",
+          "scope": "Frama-C 25.0-beta (Debian Manganese), eva, entry main, x86 64-bit model; reachable sequential C states; alarms and native assumptions apply",
+          "unwind_bound": null
+        }
+      ],
+      "run_id": "RUN-1792791471791-72114-2",
+      "schema_version": 1,
+      "status": "passed"
+    },
+    "isError": false
+  }
+}

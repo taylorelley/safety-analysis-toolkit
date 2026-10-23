@@ -1,0 +1,18 @@
+src/navigation.c:5:16: warning: goto statement requires project policy review [safety-prohibited-goto]
+    5 |   if (enabled) goto done;
+      |                ^
+src/navigation.c:6:10: warning: Dereference of null pointer (loaded from variable 'p') [clang-analyzer-core.NullDereference]
+    6 |   return *p; /* Intentional static-analysis defect. */
+      |          ^~
+src/navigation.c:4:3: note: 'p' initialized to a null pointer value
+    4 |   int *p = 0;
+      |   ^~~~~~
+src/navigation.c:5:7: note: Assuming 'enabled' is 0
+    5 |   if (enabled) goto done;
+      |       ^~~~~~~
+src/navigation.c:5:3: note: Taking false branch
+    5 |   if (enabled) goto done;
+      |   ^
+src/navigation.c:6:10: note: Dereference of null pointer (loaded from variable 'p')
+    6 |   return *p; /* Intentional static-analysis defect. */
+      |          ^~

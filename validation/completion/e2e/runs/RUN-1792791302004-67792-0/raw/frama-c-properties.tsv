@@ -1,0 +1,3 @@
+directory	file	line	function	property kind	status	property
+/workspace/safety/build/demo/src	contract.c	3	identity	postcondition	Valid	\result ≡ \old(x)
+/workspace/safety/build/demo/src	contract.c	4	identity	assigns clause	Valid	assigns \nothing;

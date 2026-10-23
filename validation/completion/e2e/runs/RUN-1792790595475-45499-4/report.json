@@ -1,0 +1,57 @@
+[
+  {
+    "coverage": {
+      "files": {
+        "/workspace/safety/build/demo/src/controller.cpp": {
+          "coverage_stats": {
+            "covered_lines": 1,
+            "total_hits": 2
+          },
+          "covered_lines": {
+            "7": {
+              "covered": true,
+              "hits": 2,
+              "type": "violation"
+            }
+          }
+        }
+      }
+    },
+    "initial_values": {},
+    "source_files": {
+      "/workspace/safety/build/demo/src/controller.cpp": [
+        "#include <assert.h>",
+        "namespace controller {",
+        "template<class T> T apply(T value) { return value; }",
+        "int apply(int a, int b) { return a + b; }",
+        "}",
+        "/** @req R-CTRL */",
+        "int main() { int x = controller::apply(0); assert(x == 1); return 0; }"
+      ]
+    },
+    "status": "violation",
+    "steps": [
+      {
+        "assertion": {
+          "comment": "assertion x == 1",
+          "guard": "x == 1",
+          "violated": true
+        },
+        "file": "/workspace/safety/build/demo/src/controller.cpp",
+        "function": "main",
+        "line": "7",
+        "message": "assertion x == 1",
+        "step_number": 0,
+        "type": "violation"
+      },
+      {
+        "file": "/workspace/safety/build/demo/src/controller.cpp",
+        "function": "main",
+        "line": "7",
+        "message": "Assumption restriction",
+        "step_number": 1,
+        "type": "assume"
+      }
+    ]
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "harness": {
+    "analyzer": {
+      "bits": 64,
+      "engine": "esbmc",
+      "entry": "main",
+      "method": "bmc",
+      "unwind": 8
+    },
+    "build_configuration": "SAFETY_DEMO=1, C11, 64-bit model",
+    "environment_model": "ESBMC sequential source and library model",
+    "input_assumptions": [
+      "enabled is fixed to one by this harness; other inputs are outside its scope"
+    ],
+    "property": "enabled navigation returns one without a modeled memory error",
+    "requirements": [
+      "R-NAV"
+    ],
+    "source": "navigation_harness.c",
+    "target": "navigate",
+    "version": 1
+  },
+  "human_approval": "not_granted_by_tool",
+  "request": {
+    "bits": 64,
+    "engine": "esbmc",
+    "entry": "main",
+    "harness": "harness/navigation_harness.yaml",
+    "method": "bmc",
+    "source": "harness/navigation_harness.c",
+    "unwind": 8,
+    "variant": null
+  }
+}

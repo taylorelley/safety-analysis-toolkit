@@ -1,0 +1,302 @@
+{
+  "schema_version": 1,
+  "id": "RUN-1792782805832-19432-0",
+  "operation": "trace",
+  "project": "mixed-safety-demo",
+  "status": "findings",
+  "complete": true,
+  "completeness": {
+    "total": 5,
+    "analyzed": 5,
+    "failed": 0,
+    "excluded": 0,
+    "unsupported": 0,
+    "build_variants": [
+      "VAR-59d26e56ac42efbf896ef09f1788fdd1129c016477634b0d86e449897570a99e",
+      "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e",
+      "VAR-6c61e71e5d659d81fd75c68472b6a04b5d165baafee2350d9ddb485cb3c8c31b",
+      "VAR-9ff35ff903434396903470597bbfe339f5cb6dcdd3927ada3c925391aaf00180",
+      "VAR-894f317f36556005a1e7ba2065d4ad58dec7ce4de0eba4c541f626e085e5861f"
+    ]
+  },
+  "started_unix_ms": 1792782805833,
+  "completed_unix_ms": 1792782806051,
+  "inputs": {
+    "build/compile_commands.json": "aee855aa0ebc5dec3b659c82c5be8185781d828bc7965dc6209d454b5cc9a9a2",
+    "build/provenance.json": "965c38d6b6433efb3b012f3cb31a1f216c4471ad409e89466459fdafd032b3cc",
+    "build/test": "68d361ec033697cf3eb7c8618cb75e18f7cd05ba2b80ed1ef460d59ed60c493e",
+    "build/test.profdata": "238ce748fdb8206bdba393efdc79b38fafed96ad228187c3d92c20217d5f12c4",
+    "build/test.profraw": "9e66e41b2eadd570a1850fd53e36ec5f11f678e080d23837c9e961225d6271a8",
+    "harness/navigation_harness.c": "b95bfcd9df878ff96777d16417ba6937074bbe662f0737d25ea4856c185b1c8e",
+    "harness/navigation_harness.yaml": "e597a890748ca488ec20b7718ec432445be580d6203aeb875a99899fd9f05af3",
+    "safety.yaml": "2c450d61ec520c5a7432b830d1ce10b02619440b11c0a2a49e62ffc6f6c12317",
+    "src/controller.cpp": "aef7a38692b13aadcb07c235fc6614b6debff561a67154549f2b35a07e373bdd",
+    "src/decision.c": "f5bc70baa14f155ece4dc543751f752fe69aa0047d747a22da9c60d5d1faf05f",
+    "src/navigation.c": "4d4816ce57472525158bb9a951436714a9475ae6f0914a1917e810953d5d8d15",
+    "src/test.c": "290a1366331b3fbf24a04de09c4e1ed1d558cc0326bedd69f8cd306e49b01a99",
+    "trace.yaml": "9398dfdd2fcc3f562bafb5de49deebf72382d500469a7cfa9219012075218b87"
+  },
+  "executions": [
+    {
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 10,
+      "stdout": "d5f1a75d04087a334eb70f9614f60e10d41ae79e\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "executable_sha256": "9dae295c1a4ffae4ee772e6205fcf22b26e1bfeeb5ee98f278b5139bda7ca22f",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/usr/local/bin/git",
+      "arguments": [
+        "--no-optional-locks",
+        "-c",
+        "core.fsmonitor=false",
+        "status",
+        "--porcelain=v1",
+        "--untracked-files=all"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 10,
+      "stdout": "?? validation/e2e/cli-doctor.json\n?? validation/e2e/cli-esbmc-c.json\n?? validation/e2e/cli-esbmc-cpp.json\n?? validation/e2e/cli-frama-c.json\n?? validation/e2e/cli-scan.json\n?? validation/exploratory-demo/constant-caller-scan.json\n?? validation/full-validation.log\n",
+      "stderr": "",
+      "timeout_seconds": 10
+    },
+    {
+      "executable_sha256": "9019f16f0ae651d92b307985ffdb8c74e8e477c69313973c43559b09f8ade806",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/safety/build/clang/safety-source-index",
+      "arguments": [
+        "-p=/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0/unit-0",
+        "/workspace/safety/build/demo/src/navigation.c"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 30,
+      "stdout": "{\"column\":5,\"comment\":\"/** @req R-NAV\\n * @baseline BL-DEMO-1 */\",\"definition\":true,\"file\":\"src/navigation.c\",\"line\":3,\"macro_expansion\":false,\"name\":\"navigate\",\"template_parent\":\"\",\"usr\":\"c:@F@navigate\"}\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "executable_sha256": "9019f16f0ae651d92b307985ffdb8c74e8e477c69313973c43559b09f8ade806",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/safety/build/clang/safety-source-index",
+      "arguments": [
+        "-p=/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0/unit-1",
+        "/workspace/safety/build/demo/src/controller.cpp"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 30,
+      "stdout": "{\"column\":21,\"comment\":\"\",\"definition\":true,\"file\":\"src/controller.cpp\",\"line\":3,\"macro_expansion\":false,\"name\":\"controller::apply\",\"template_parent\":\"\",\"usr\":\"c:@N@controller@FT@>1#Tapply#t0.0#S0_#\"}\n{\"column\":5,\"comment\":\"\",\"definition\":true,\"file\":\"src/controller.cpp\",\"line\":4,\"macro_expansion\":false,\"name\":\"controller::apply\",\"template_parent\":\"\",\"usr\":\"c:@N@controller@F@apply#I#I#\"}\n{\"column\":5,\"comment\":\"/** @req R-CTRL */\",\"definition\":true,\"file\":\"src/controller.cpp\",\"line\":7,\"macro_expansion\":false,\"name\":\"main\",\"template_parent\":\"\",\"usr\":\"c:@F@main#\"}\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "executable_sha256": "9019f16f0ae651d92b307985ffdb8c74e8e477c69313973c43559b09f8ade806",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/safety/build/clang/safety-source-index",
+      "arguments": [
+        "-p=/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0/unit-2",
+        "/workspace/safety/build/demo/src/decision.c"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 30,
+      "stdout": "{\"column\":5,\"comment\":\"/** @req R-DEC */\",\"definition\":true,\"file\":\"src/decision.c\",\"line\":2,\"macro_expansion\":false,\"name\":\"decide\",\"template_parent\":\"\",\"usr\":\"c:@F@decide\"}\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "executable_sha256": "9019f16f0ae651d92b307985ffdb8c74e8e477c69313973c43559b09f8ade806",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/safety/build/clang/safety-source-index",
+      "arguments": [
+        "-p=/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0/unit-3",
+        "/workspace/safety/build/demo/src/test.c"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 30,
+      "stdout": "{\"column\":5,\"comment\":\"\",\"definition\":false,\"file\":\"src/test.c\",\"line\":1,\"macro_expansion\":false,\"name\":\"decide\",\"template_parent\":\"\",\"usr\":\"c:@F@decide\"}\n{\"column\":5,\"comment\":\"/** @test T-DEC\\n * @req R-DEC */\",\"definition\":true,\"file\":\"src/test.c\",\"line\":4,\"macro_expansion\":false,\"name\":\"main\",\"template_parent\":\"\",\"usr\":\"c:@F@main\"}\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    },
+    {
+      "executable_sha256": "9019f16f0ae651d92b307985ffdb8c74e8e477c69313973c43559b09f8ade806",
+      "restrictions": "network denied; filesystem isolation unavailable; trusted read-only analyzer invocation",
+      "executable": "/workspace/safety/build/clang/safety-source-index",
+      "arguments": [
+        "-p=/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0/unit-4",
+        "/workspace/safety/build/demo/harness/navigation_harness.c"
+      ],
+      "cwd": "/workspace/safety/build/demo",
+      "environment": {
+        "HOME": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TMPDIR": "/workspace/safety/build/demo/.safety/runs/RUN-1792782805832-19432-0"
+      },
+      "exit_code": 0,
+      "failure": null,
+      "duration_ms": 30,
+      "stdout": "{\"column\":5,\"comment\":\"/** @req R-NAV\\n * @baseline BL-DEMO-1 */\",\"definition\":true,\"file\":\"harness/../src/navigation.c\",\"line\":3,\"macro_expansion\":false,\"name\":\"navigate\",\"template_parent\":\"\",\"usr\":\"c:@F@navigate\"}\n{\"column\":5,\"comment\":\"/** @test T-NAV\\n * @req R-NAV */\",\"definition\":true,\"file\":\"harness/navigation_harness.c\",\"line\":5,\"macro_expansion\":false,\"name\":\"main\",\"template_parent\":\"\",\"usr\":\"c:@F@main\"}\n",
+      "stderr": "",
+      "timeout_seconds": 60
+    }
+  ],
+  "findings": [
+    {
+      "id": "FND-000001",
+      "tool": "safety-trace",
+      "rule_id": "trace-46b45d335c4ec8bb",
+      "file": "src/controller.cpp",
+      "line": 3,
+      "column": 21,
+      "severity": "warning",
+      "message": "Untraced code symbol controller::apply",
+      "build_variant": "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "trace.json"
+      ]
+    },
+    {
+      "id": "FND-000002",
+      "tool": "safety-trace",
+      "rule_id": "trace-46b45d335c4ec8bb",
+      "file": "src/controller.cpp",
+      "line": 4,
+      "column": 5,
+      "severity": "warning",
+      "message": "Untraced code symbol controller::apply",
+      "build_variant": "VAR-14293ae00cdb67bf01d89dd6357f091a59dc38a7daa885428bd03167fd741f0e",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "trace.json"
+      ]
+    },
+    {
+      "id": "FND-000003",
+      "tool": "safety-trace",
+      "rule_id": "trace-2c678235a40616be",
+      "file": "trace.yaml",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "Requirement R-ORPHAN has no linked implementation",
+      "build_variant": "manifest",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "trace.json"
+      ]
+    },
+    {
+      "id": "FND-000004",
+      "tool": "safety-trace",
+      "rule_id": "trace-370b43f8611d36ef",
+      "file": "trace.yaml",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "Broken reference R-ORPHAN -> UNKNOWN-TEST",
+      "build_variant": "manifest",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "trace.json"
+      ]
+    },
+    {
+      "id": "FND-000005",
+      "tool": "safety-trace",
+      "rule_id": "trace-d57bd5409c13e002",
+      "file": "trace.yaml",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "Requirement R-CTRL has no linked test",
+      "build_variant": "manifest",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "trace.json"
+      ]
+    },
+    {
+      "id": "FND-000006",
+      "tool": "safety-trace",
+      "rule_id": "trace-db4027b75e18935b",
+      "file": "trace.yaml",
+      "line": 1,
+      "column": 1,
+      "severity": "warning",
+      "message": "Requirement R-ORPHAN has no linked test",
+      "build_variant": "manifest",
+      "outcome": "DIAGNOSTIC",
+      "native_references": [
+        "trace.json"
+      ]
+    }
+  ],
+  "properties": [],
+  "limitations": [
+    "Automated evidence for human review; no certification or compliance approval.",
+    "MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.",
+    "System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.",
+    "Trace links establish recorded relationships only, not semantic requirements satisfaction. Call graph extraction and complete template-specialization coverage are outstanding."
+  ],
+  "git": {
+    "commit": "d5f1a75d04087a334eb70f9614f60e10d41ae79e",
+    "dirty": true
+  }
+}
