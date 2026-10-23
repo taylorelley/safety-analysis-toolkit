@@ -1,4 +1,4 @@
-.PHONY: build check test clang full-validation examples
+.PHONY: build check test clang validation full-validation examples
 build:
 	cargo build --locked --release
 check:
@@ -12,7 +12,11 @@ clang:
 	ctest --test-dir build/clang --output-on-failure
 examples:
 	python3 examples/configure.py
-full-validation: check clang examples
-	cargo test --locked -- --include-ignored
+validation: check clang examples
+	PATH="$(CURDIR)/build/clang:$$PATH" SAFETY_TEST_MODULE="$(CURDIR)/build/clang/SafetyMisra.so" cargo test --locked -- --include-ignored --skip real_esbmc_properties
 	cargo build --locked --release
 	python3 scripts/validate.py
+
+full-validation: validation
+	esbmc --version
+	cargo test --locked real_esbmc_properties -- --ignored

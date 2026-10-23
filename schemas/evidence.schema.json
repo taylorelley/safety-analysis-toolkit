@@ -12,7 +12,10 @@
     "operation": {
       "enum": [
         "scan",
-        "doctor"
+        "doctor",
+        "trace",
+        "prove",
+        "coverage"
       ]
     },
     "project": {
@@ -240,6 +243,66 @@
           "type": "null"
         }
       ]
+    },
+    "properties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "outcome": {
+            "enum": [
+              "PROVEN",
+              "VIOLATED",
+              "UNKNOWN",
+              "NOT_CHECKED",
+              "FAILED"
+            ]
+          },
+          "scope": {
+            "type": "string",
+            "minLength": 1
+          },
+          "assumptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unwind_bound": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "completeness_established": {
+            "type": "boolean"
+          },
+          "native_references": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "outcome",
+          "scope",
+          "assumptions",
+          "unwind_bound",
+          "completeness_established",
+          "native_references"
+        ]
+      }
     }
   },
   "required": [

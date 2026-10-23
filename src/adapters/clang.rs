@@ -159,10 +159,8 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     evidence::finish(root, c, &dir, run)
 }
 pub fn profile_check(profile: Option<&str>) -> Result<()> {
-    if profile.is_some() {
-        bail!(
-            "MISRA enforcement profiles are not implemented; no rule mapping has been validated against licensed standards"
-        )
+    if profile.is_some_and(|p| p != "misra-c-2012" && p != "misra-cpp-2023") {
+        bail!("unknown MISRA profile")
     };
     Ok(())
 }

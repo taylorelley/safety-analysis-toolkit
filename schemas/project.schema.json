@@ -169,6 +169,16 @@
       },
       "required": [],
       "additionalProperties": false
+    },
+    "trace": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "manifest": {
+          "type": "string",
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$"
+        }
+      }
     }
   },
   "required": [

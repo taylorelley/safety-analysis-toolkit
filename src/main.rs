@@ -1,12 +1,15 @@
 mod adapters;
 mod config;
+mod coverage;
 mod discovery;
 mod evidence;
 mod findings;
 mod mcp;
+mod misra;
 mod model;
 mod report;
 mod runner;
+mod trace;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use config::Config;
@@ -24,8 +27,53 @@ enum Format {
     Markdown,
     Sarif,
 }
+#[derive(Clone, Copy, ValueEnum)]
+enum Engine {
+    Esbmc,
+    FramaC,
+}
+#[derive(Subcommand)]
+enum CoverageCommands {
+    Import {
+        #[arg(long)]
+        profile: PathBuf,
+        #[arg(long)]
+        binary: PathBuf,
+        #[arg(long)]
+        provenance: Option<PathBuf>,
+        #[arg(long, default_value = ".")]
+        path: PathBuf,
+        #[arg(long, value_enum, default_value = "json")]
+        format: Format,
+    },
+}
 #[derive(Subcommand)]
 enum Commands {
+    Coverage {
+        #[command(subcommand)]
+        command: CoverageCommands,
+    },
+    Prove {
+        source: PathBuf,
+        #[arg(long, default_value = ".")]
+        path: PathBuf,
+        #[arg(long, value_enum)]
+        engine: Engine,
+        #[arg(long)]
+        variant: Option<String>,
+        #[arg(long, default_value_t = 8)]
+        unwind: u32,
+        #[arg(long, default_value_t = 64)]
+        bits: u32,
+        #[arg(long, value_enum, default_value = "json")]
+        format: Format,
+    },
+    Trace {
+        #[arg(default_value = ".")]
+        path: PathBuf,
+        #[arg(long, value_enum, default_value = "json")]
+        format: Format,
+    },
     Mcp {
         #[arg(long, default_value = ".")]
         path: PathBuf,
@@ -52,7 +100,7 @@ enum Commands {
         #[arg(default_value = ".")]
         path: PathBuf,
         #[arg(long)]
-        run: String,
+        run: Option<String>,
         #[arg(long, value_enum, default_value = "markdown")]
         format: Format,
     },
@@ -96,6 +144,49 @@ fn main() {
 }
 fn run(cli: Cli) -> Result<i32> {
     match cli.command {
+        Commands::Coverage {
+            command:
+                CoverageCommands::Import {
+                    profile,
+                    binary,
+                    provenance,
+                    path,
+                    format,
+                },
+        } => {
+            let root = root(path)?;
+            let c = Config::load(&root)?;
+            let r = coverage::import(&root, &c, &profile, &binary, provenance.as_deref())?;
+            emit(&r, format)?;
+            Ok(r.exit_code())
+        }
+        Commands::Prove {
+            source,
+            path,
+            engine,
+            variant,
+            unwind,
+            bits,
+            format,
+        } => {
+            let root = root(path)?;
+            let c = Config::load(&root)?;
+            let r = match engine {
+                Engine::Esbmc => {
+                    adapters::esbmc::prove(&root, &c, &source, variant.as_deref(), unwind, bits)?
+                }
+                Engine::FramaC => adapters::frama_c::prove(&root, &c, &source)?,
+            };
+            emit(&r, format)?;
+            Ok(r.exit_code())
+        }
+        Commands::Trace { path, format } => {
+            let root = root(path)?;
+            let c = Config::load(&root)?;
+            let r = trace::analyze(&root, &c)?;
+            emit(&r, format)?;
+            Ok(r.exit_code())
+        }
         Commands::Mcp { path } => {
             let root = root(path)?;
             tokio::runtime::Runtime::new()?.block_on(mcp::serve(root))?;
@@ -133,7 +224,12 @@ fn run(cli: Cli) -> Result<i32> {
         } => {
             adapters::clang::profile_check(profile.as_deref())?;
             let root = root(path)?;
-            let c = Config::load(&root)?;
+            let mut c = Config::load(&root)?;
+            match profile.as_deref() {
+                Some("misra-c-2012") => c.coding.c = Some("MISRA-C:2012".into()),
+                Some("misra-cpp-2023") => c.coding.cpp = Some("MISRA-CPP:2023".into()),
+                _ => {}
+            }
             let r = adapters::clang::scan(&root, &c)?;
             emit(&r, format)?;
             Ok(r.exit_code())
@@ -141,9 +237,21 @@ fn run(cli: Cli) -> Result<i32> {
         Commands::Report { path, run, format } => {
             let root = root(path)?;
             let c = Config::load(&root)?;
-            let r = evidence::load(&root, &c, &run)?;
-            emit(&r, format)?;
-            Ok(r.exit_code())
+            if let Some(id) = run {
+                let r = evidence::load(&root, &c, &id)?;
+                emit(&r, format)?;
+                Ok(r.exit_code())
+            } else {
+                let (json, text, code) = report::consolidated(&root, &c)?;
+                match format {
+                    Format::Json => println!("{}", serde_json::to_string_pretty(&json)?),
+                    Format::Markdown => print!("{text}"),
+                    Format::Sarif => {
+                        anyhow::bail!("SARIF export requires --run to preserve one operation scope")
+                    }
+                };
+                Ok(code)
+            }
         }
         Commands::Runs { path, run } => {
             let root = root(path)?;

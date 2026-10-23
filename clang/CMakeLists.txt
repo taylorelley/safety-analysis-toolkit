@@ -24,3 +24,12 @@ if(BUILD_TESTING)
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/check.py ${CLANG_TIDY}
   $<TARGET_FILE:SafetyMisra> ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()
+add_executable(safety-source-index src/SourceIndex.cpp)
+target_include_directories(safety-source-index SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS} ${CLANG_INCLUDE_DIRS})
+target_compile_definitions(safety-source-index PRIVATE ${LLVM_DEFINITIONS})
+target_link_libraries(safety-source-index PRIVATE clang-cpp LLVM)
+if(BUILD_TESTING)
+ add_test(NAME source-index COMMAND ${Python3_EXECUTABLE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/index.py $<TARGET_FILE:safety-source-index>
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+endif()

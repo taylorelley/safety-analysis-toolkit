@@ -1,0 +1,14 @@
+{
+  "rust": "1.99.1",
+  "llvm": "19.1.7",
+  "llvm_debian_package": "1:19.1.7-3+b1",
+  "debian_snapshot": "20260925T181338Z",
+  "esbmc": "8.6.0",
+  "esbmc_setup_download": "https://github.com/esbmc/esbmc/releases/download/v8.6/esbmc-linux.zip",
+  "esbmc_download_sha256": "07b00b4a2590fe285edb5ce063ca2e5fbb368bbe556cfe139014c173717637f6",
+  "esbmc_redistribution_review": "not approved; upstream bundle contains mixed licenses",
+  "frama_c": "unavailable; Eva/WP integration NOT_CHECKED",
+  "mcp_sdk_rmcp": "3.7.0",
+  "jsonschema_validation": "4.26.0",
+  "sarif_schema_sha256": "c96eb2d311c37b0a38cbd18c52d79a68f778bbd2d831abed7412d9850740f785"
+}

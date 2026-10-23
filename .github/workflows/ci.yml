@@ -33,7 +33,9 @@ jobs:
           mkdir -p .cache
           curl -fsSL https://json.schemastore.org/sarif-2.1.0.json -o .cache/sarif-2.1.0.json
           echo 'c96eb2d311c37b0a38cbd18c52d79a68f778bbd2d831abed7412d9850740f785  .cache/sarif-2.1.0.json' | sha256sum -c -
-      - run: make full-validation
+      - run: make validation
+      - name: Formal scope notice
+        run: echo "Frama-C and ESBMC suites are not run in this LLVM job; no formal acceptance is claimed here."
       - name: Preserve executed evidence
         if: always()
         uses: actions/upload-artifact@v4

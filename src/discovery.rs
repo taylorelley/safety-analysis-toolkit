@@ -173,6 +173,9 @@ fn validate_args(args: &[String]) -> Vec<String> {
             "-funsigned-char",
             "-ffreestanding",
             "-fno-builtin",
+            "-fprofile-instr-generate",
+            "-fcoverage-mapping",
+            "-fcoverage-mcdc",
             "-m32",
             "-m64",
             "-O0",
@@ -232,6 +235,7 @@ pub fn executable(name: &str, allowlist: &[PathBuf]) -> Option<PathBuf> {
             "llvm-profdata-19",
             "frama-c",
             "esbmc",
+            "safety-source-index",
             "git",
         ]
         .contains(&name)

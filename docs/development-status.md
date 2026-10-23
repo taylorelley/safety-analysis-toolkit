@@ -1,32 +1,27 @@
 # Implementation status
 
-This repository is a working development snapshot, not v1 complete.
+This is a working development snapshot; **the v1 definition of done is not met**.
 
-- Foundation: configuration/CLI, compilation databases and variant discovery,
-  restricted shared runner, tool probes, source hashes, execution provenance,
-  Git metadata and integrity-checked filesystem evidence work.
-- Clang: real C/C++ Static Analyzer/Tidy scans, native diagnostic preservation,
-  source locations, per-unit completeness, correlation, Markdown/JSON/SARIF
-  export work. Current compatibility vocabulary intentionally rejects many flags.
-- Native module: LLVM 19.1.7 module and original `safety-prohibited-goto` check
-  work on six real fixtures. MISRA rule mappings remain unvalidated, as directed
-  by the user. No MISRA guideline coverage is claimed. GEP/GRP/GCS and deviation
-  management are not implemented.
-- MCP: SDK-backed stdio interface provides discovery, scan, findings, run lookup
-  and reporting against one configured workspace. Real-client validation is
-  recorded separately; harness-specific end-to-end acceptance remains pending.
-- AST traceability, Frama-C/Eva/WP, ESBMC, LLVM coverage/MC/DC import, full
-  assurance reports and release packaging remain unimplemented.
+| Phase | Executed functionality | Outstanding acceptance |
+| --- | --- | --- |
+| 1 Foundation | Config, CLI, compilation databases/variants, restricted runner, tools, Git/input provenance, evidence | Wider compiler/platform support and complete external dependency fingerprints |
+| 2 Clang | Real C/C++ analysis, native diagnostics, source references, per-unit completeness, correlation, SARIF | Larger independent benchmark corpus |
+| 3 MISRA technology | Pinned module, direct-goto project check, real fixtures/CLI loading, incomplete GEP/GCS drafts | Licensed guideline inventory, validated mappings, edition registries, deviations/GRP |
+| 4 Traceability | Clang USRs, declarations/definitions, comments/templates/overloads, manifest graph and gap checking | Call edges, comprehensive specialization/annotation/build-variant reconciliation |
+| 5 Formal | ESBMC 8.6.0 C/C++ safe/violated/insufficient-bound tests, model scopes, bounds, machine counterexamples | Frama-C Eva/WP, reviewed harness metadata, induction, broader property taxonomy |
+| 6 Coverage/evidence | Real LLVM source/MC/DC import, known 50% gap, provenance checks, persisted consolidated reports | Full instrumentation/exclusion assessment and requirement/test graph joins |
+| 7 MCP/skill | SDK-backed eight-tool stdio server, strict inputs, bounded results, cancellation, reusable skill, real independent client | Two actual agent harnesses and complete end-to-end agent review |
+| 8 Packaging | Build/check targets, lockfile, CI definition, examples, dependency inventory, validation records | Fresh-machine CI execution, release license review, packaging and complete v1 validation |
 
-There are no placeholder `prove`, `trace` or `coverage` commands returning
-success. They and their MCP tools will be added with real adapters and fixtures.
-The unimplemented phases prevent claiming the overall v1 definition of done.
+Filesystem isolation uses Landlock where available. Its absence is explicitly
+recorded; requiring it fails closed. This host lacks Landlock, so no successful
+Landlock enforcement validation is claimed here. Seccomp networking denial,
+process timeout/cancellation and read-only analyzer invocation are tested.
 
-Design changes: filesystem write isolation is used when Landlock is available;
-its absence is recorded, with an opt-in requirement that fails closed. This
-preserves useful trusted-tool scans on the current host, which has no Landlock.
-No successful Landlock enforcement test result is claimed on this host.
-The user authorized unmapped custom checks while licensed-standard mappings
-remain unvalidated. No exact MISRA IDs have been selected or inferred.
+The user authorized unmapped custom checks while licensed MISRA validation is
+unavailable. No exact rule IDs are selected or inferred. Frama-C requests record
+NOT_CHECKED/incomplete after capability inspection; Eva/WP is not presented as an
+implemented adapter. No phase is declared complete solely from mocked outputs.
 
-See [validation log](validation.md) for executed checks and commit provenance.
+See [validation](validation.md), [formal](formal-verification.md),
+[traceability](traceability.md), [coverage](coverage.md) and [MCP](mcp.md).

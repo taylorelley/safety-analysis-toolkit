@@ -173,3 +173,181 @@ fn compiler_failure_is_incomplete() {
     assert_eq!(r["complete"], false);
     assert_eq!(r["completeness"]["failed"], 2);
 }
+#[test]
+#[ignore = "requires real clang-tidy 19.1.7 and Python 3"]
+fn real_mcp_stdio() {
+    let t = fixture(false);
+    let script =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/integration/mcp_client.py");
+    let out = Command::new("python3")
+        .arg(script)
+        .arg(env!("CARGO_BIN_EXE_safety"))
+        .arg(t.path())
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}\n{}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+}
+#[test]
+#[ignore = "requires real LLVM module and SAFETY_TEST_MODULE absolute path"]
+fn real_custom_module() {
+    let t = fixture(false);
+    let module = std::env::var("SAFETY_TEST_MODULE").expect("set SAFETY_TEST_MODULE");
+    let tidy = std::env::split_paths(&std::env::var_os("PATH").unwrap())
+        .map(|p| p.join("clang-tidy-19"))
+        .find(|p| p.is_file())
+        .unwrap()
+        .canonicalize()
+        .unwrap();
+    let config = serde_json::json!({"version":1,"project":{"name":"module"},"build":{"compile_commands":"compile_commands.json"},"tools":{"clang_module":module,"allowlist":[tidy,module]}});
+    fs::write(t.path().join("safety.yaml"), config.to_string()).unwrap();
+    fs::write(
+        t.path().join("unsafe.c"),
+        "int transfer(int x) { if(x) goto done; x=1; done: return x; }",
+    )
+    .unwrap();
+    let out = bin().arg("scan").arg(t.path()).output().unwrap();
+    assert_eq!(
+        out.status.code(),
+        Some(1),
+        "{}",
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let r: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(r["complete"], true);
+    assert_eq!(r["findings"].as_array().unwrap().len(), 2);
+    assert!(
+        r["findings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|f| f["rule_id"] == "safety-prohibited-goto")
+    );
+}
+#[test]
+#[ignore = "requires real safety-source-index on PATH"]
+fn real_ast_trace() {
+    let t = fixture(true);
+    fs::write(t.path().join("trace.yaml"),"version: 1\nnodes:\n- {id: R1, kind: requirement, root: true}\n- {id: T1, kind: test}\nlinks:\n- {from: R1, to: T1}\n").unwrap();
+    fs::write(
+        t.path().join("safe.cpp"),
+        "/** @req R1 */\nint safe_value(int *p) { return p ? *p : 0; }\n",
+    )
+    .unwrap();
+    fs::write(t.path().join("unsafe.cpp"),"/** @req MISSING */\nnamespace nav { template<class T> T value(T x) {return x;} int value(int x,int y){return x+y;} }\n").unwrap();
+    let out = bin().arg("trace").arg(t.path()).output().unwrap();
+    assert_eq!(
+        out.status.code(),
+        Some(1),
+        "{}",
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let r: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(r["complete"], true);
+    assert_eq!(r["completeness"]["analyzed"], 4);
+    let f = r["findings"].as_array().unwrap();
+    assert!(f.iter().any(|f| {
+        f["message"]
+            .as_str()
+            .unwrap()
+            .contains("Untraced code symbol")
+    }));
+    assert!(
+        !f.iter()
+            .any(|f| f["message"].as_str().unwrap().contains("R1 has no linked"))
+    );
+}
+fn proof_fixture(cpp: bool, code: &str) -> tempfile::TempDir {
+    let t = fixture(cpp);
+    let file = if cpp { "unsafe.cpp" } else { "unsafe.c" };
+    fs::write(t.path().join(file), code).unwrap();
+    let db = serde_json::json!([{"directory":t.path(),"file":file,"arguments":[if cpp{"clang++-19"}else{"clang-19"},if cpp{"-std=c++17"}else{"-std=c11"},"-c",file]}]);
+    fs::write(t.path().join("compile_commands.json"), db.to_string()).unwrap();
+    t
+}
+#[test]
+#[ignore = "requires real ESBMC 8.6.0 on PATH"]
+fn real_esbmc_properties() {
+    for cpp in [false, true] {
+        for (code, exit, outcome) in [
+            (
+                "#include <assert.h>\nint main(void){int x=0;assert(x==0);return 0;}",
+                0,
+                "PROVEN",
+            ),
+            (
+                "#include <assert.h>\nint main(void){int x=0;assert(x==1);return 0;}",
+                1,
+                "VIOLATED",
+            ),
+            (
+                "#include <assert.h>\nint main(void){int x=0;for(int i=0;i<20;i++)x++;assert(x==20);return 0;}",
+                3,
+                "UNKNOWN",
+            ),
+        ] {
+            let t = proof_fixture(cpp, code);
+            let out = bin()
+                .args([
+                    "prove",
+                    if cpp { "unsafe.cpp" } else { "unsafe.c" },
+                    "--path",
+                ])
+                .arg(t.path())
+                .args(["--engine", "esbmc", "--unwind", "2"])
+                .output()
+                .unwrap();
+            assert_eq!(
+                out.status.code(),
+                Some(exit),
+                "{}",
+                String::from_utf8_lossy(&out.stdout)
+            );
+            let r: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+            assert!(
+                r["properties"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|p| p["outcome"] == outcome)
+            );
+            if exit == 1 {
+                let dir = t
+                    .path()
+                    .join(".safety/runs")
+                    .join(r["id"].as_str().unwrap());
+                assert!(dir.join("counterexamples.json").exists());
+            }
+            if exit == 0 {
+                assert!(
+                    r["properties"]
+                        .as_array()
+                        .unwrap()
+                        .iter()
+                        .all(|p| p["scope"].as_str().unwrap().contains("finite unwind 2"))
+                );
+            }
+        }
+    }
+}
+#[test]
+#[ignore = "requires real LLVM/Clang 19.1.7 and Python 3"]
+fn real_llvm_mcdc() {
+    let script = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("tests/integration/coverage_fixture.py");
+    let out = Command::new("python3")
+        .arg(script)
+        .arg(env!("CARGO_BIN_EXE_safety"))
+        .output()
+        .unwrap();
+    assert!(
+        out.status.success(),
+        "{}\n{}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+}

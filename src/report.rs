@@ -24,6 +24,13 @@ pub fn markdown(r: &Run) -> String {
             f.build_variant
         ))
     }
+    s.push_str("\n## Formal properties\n\n");
+    for p in &r.properties {
+        s.push_str(&format!(
+            "- {}: {:?}; {}. Scope: {}\n",
+            p.id, p.outcome, p.description, p.scope
+        ));
+    }
     s.push_str("\n## Outstanding work and limitations\n\n");
     for l in &r.limitations {
         s.push_str(&format!("- {}\n", l))
@@ -45,6 +52,44 @@ fn uri(path: &str) -> String {
     }
     out
 }
+pub fn consolidated(
+    root: &std::path::Path,
+    c: &crate::config::Config,
+) -> anyhow::Result<(serde_json::Value, String, i32)> {
+    let base = crate::config::inside(root, &c.evidence.directory)?;
+    let mut ids = std::fs::read_dir(base)?
+        .map(|e| e.map(|e| e.file_name().to_string_lossy().into_owned()))
+        .collect::<std::io::Result<Vec<_>>>()?;
+    ids.sort();
+    anyhow::ensure!(!ids.is_empty(), "no persisted runs");
+    let mut runs = Vec::new();
+    let mut errors = Vec::new();
+    let mut text = String::from(
+        "# Consolidated safety evidence\n\nEach operation retains its own scope and build variants. This is draft evidence, not a compliance or certification decision.\n\n",
+    );
+    let mut code = 0;
+    for id in ids {
+        match crate::evidence::load(root, c, &id) {
+            Ok(r) => {
+                code = code.max(r.exit_code());
+                text.push_str(&markdown(&r));
+                text.push('\n');
+                runs.push(r)
+            }
+            Err(e) => {
+                code = 3;
+                errors.push(json!({"run_id":id,"error":e.to_string(),"status":"incomplete","complete":false}));
+                text.push_str(&format!("Run {id}: incomplete evidence: {e}\n\n"));
+            }
+        }
+    }
+    Ok((
+        json!({"schema_version":1,"status":if code==3{"incomplete"}else if code==1{"findings"}else{"passed"},"complete":code!=3,"runs":runs,"evidence_errors":errors}),
+        text,
+        code,
+    ))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

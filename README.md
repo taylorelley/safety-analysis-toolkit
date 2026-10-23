@@ -5,9 +5,10 @@ snapshot implements the executable foundation and real Clang Static Analyzer /
 Clang-Tidy scans. A tested out-of-tree Clang-Tidy module provides an original
 project-policy `goto` check. It has **no validated MISRA mapping**.
 
-This is not the completed v1 specification. Formal verification, AST
-traceability, LLVM coverage import, MISRA enforcement plans and MCP are not yet
-implemented. See [development status](docs/development-status.md).
+This is not the completed v1 specification. It also provides AST trace checks,
+scoped ESBMC verification, LLVM source/MC/DC import and an SDK-backed MCP stdio
+server. Frama-C execution, validated MISRA mappings, complete process artifacts
+and two-agent-harness acceptance remain outstanding. See [development status](docs/development-status.md).
 
 ## Build and use
 
@@ -22,6 +23,8 @@ safety init --path /path/to/project
 # Supply an existing compile_commands.json; safety never runs a project build.
 safety doctor /path/to/project
 safety scan /path/to/project --format json
+safety trace /path/to/project
+safety mcp --path /path/to/project
 safety runs /path/to/project
 safety report /path/to/project --run RUN-ID --format markdown
 ```
@@ -67,4 +70,6 @@ unsupported compiler flags and failed units produce an explicit incomplete
 status and exit 3. Assurance levels default to unconfigured.
 
 Original code is Apache-2.0. MISRA standard text is not included. See
-[dependency inventory](docs/dependencies.md) before redistributing binaries.
+[dependency inventory](docs/dependencies.md) before redistributing binaries. See [formal verification](docs/formal-verification.md),
+[traceability](docs/traceability.md), [coverage](docs/coverage.md) and
+[MCP](docs/mcp.md) for capability boundaries.

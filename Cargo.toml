@@ -24,3 +24,6 @@ tempfile = "3.23.0"
 [[test]]
 name = "integration"
 path = "tests/integration/main.rs"
+
+[profile.dev.package.sha2]
+opt-level = 3

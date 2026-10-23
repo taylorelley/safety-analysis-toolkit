@@ -69,6 +69,8 @@ pub struct Run {
     pub inputs: BTreeMap<String, String>,
     pub executions: Vec<Execution>,
     pub findings: Vec<Finding>,
+    #[serde(default)]
+    pub properties: Vec<Property>,
     pub limitations: Vec<String>,
     pub git: Option<serde_json::Value>,
 }
@@ -80,4 +82,25 @@ impl Run {
             Status::Incomplete => 3,
         }
     }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum ProofOutcome {
+    Proven,
+    Violated,
+    Unknown,
+    NotChecked,
+    Failed,
+}
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Property {
+    pub id: String,
+    pub description: String,
+    pub outcome: ProofOutcome,
+    pub scope: String,
+    pub assumptions: Vec<String>,
+    pub unwind_bound: Option<u32>,
+    pub completeness_established: bool,
+    pub native_references: Vec<String>,
 }

@@ -8,6 +8,8 @@ use std::{
 #[serde(deny_unknown_fields)]
 pub struct Config {
     pub version: u32,
+    #[serde(default)]
+    pub trace: Trace,
     pub project: Project,
     #[serde(default)]
     pub assurance: Option<Assurance>,
@@ -19,6 +21,18 @@ pub struct Config {
     pub tools: Tools,
     #[serde(default)]
     pub evidence: Evidence,
+}
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct Trace {
+    pub manifest: PathBuf,
+}
+impl Default for Trace {
+    fn default() -> Self {
+        Self {
+            manifest: "trace.yaml".into(),
+        }
+    }
 }
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -91,6 +105,7 @@ impl Config {
     pub fn new(name: String) -> Self {
         Self {
             version: 1,
+            trace: Trace::default(),
             project: Project { name },
             assurance: None,
             coding: Coding::default(),
@@ -136,7 +151,11 @@ impl Config {
         {
             bail!("unsupported coding edition")
         }
-        for path in [&self.build.compile_commands, &self.evidence.directory] {
+        for path in [
+            &self.build.compile_commands,
+            &self.evidence.directory,
+            &self.trace.manifest,
+        ] {
             relative(path)?;
         }
         if self.tools.timeout_seconds == 0

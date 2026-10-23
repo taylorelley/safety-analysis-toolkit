@@ -19,6 +19,24 @@ pub fn now() -> u128 {
 pub fn hash(bytes: &[u8]) -> String {
     format!("{:x}", Sha256::digest(bytes))
 }
+pub fn hash_file(path: &Path) -> Result<String> {
+    use std::io::Read;
+    let mut file = fs::File::open(path)?;
+    let mut hasher = Sha256::new();
+    let mut bytes = [0u8; 65536];
+    loop {
+        anyhow::ensure!(
+            !crate::runner::cancelled(),
+            "request cancelled during hashing"
+        );
+        let n = file.read(&mut bytes)?;
+        if n == 0 {
+            break;
+        }
+        hasher.update(&bytes[..n]);
+    }
+    Ok(format!("{:x}", hasher.finalize()))
+}
 pub fn fingerprint(root: &Path, excluded: &Path) -> Result<BTreeMap<String, String>> {
     fn walk(
         root: &Path,
@@ -53,7 +71,7 @@ pub fn fingerprint(root: &Path, excluded: &Path) -> Result<BTreeMap<String, Stri
             if meta.is_dir() {
                 walk(root, &p, excluded, out)?
             } else if meta.is_file() {
-                out.insert(rel.to_string_lossy().into_owned(), hash(&fs::read(&p)?));
+                out.insert(rel.to_string_lossy().into_owned(), hash_file(&p)?);
             }
         }
         Ok(())
@@ -75,7 +93,14 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
     fs::create_dir(&dir)?;
     fs::create_dir(dir.join("raw"))?;
     let inputs = fingerprint(root, &base)?;
-    let mut run=Run{schema_version:1,id,operation:operation.into(),project:c.project.name.clone(),status:Status::Incomplete,complete:false,completeness:Completeness::default(),started_unix_ms:now(),completed_unix_ms:0,inputs,executions:Vec::new(),findings:Vec::new(),limitations:vec!["Automated evidence for human review; no certification or compliance approval.".into(),"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.".into(),"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.".into()],git:None};
+    write_new(&dir.join("config.json"), &serde_json::to_vec_pretty(c)?)?;
+    if c.coding.c.is_some() || c.coding.cpp.is_some() {
+        write_new(
+            &dir.join("misra-drafts.json"),
+            &serde_json::to_vec_pretty(&crate::misra::drafts(c))?,
+        )?;
+    }
+    let mut run=Run{schema_version:1,id,operation:operation.into(),project:c.project.name.clone(),status:Status::Incomplete,complete:false,completeness:Completeness::default(),started_unix_ms:now(),completed_unix_ms:0,inputs,executions:Vec::new(),findings:Vec::new(),properties:Vec::new(),limitations:vec!["Automated evidence for human review; no certification or compliance approval.".into(),"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.".into(),"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.".into()],git:None};
     if let Some(git) = crate::discovery::executable("git", &c.tools.allowlist) {
         let mut values = serde_json::Map::new();
         for (name, args) in [
@@ -165,7 +190,7 @@ fn collect_hashes(root: &Path, dir: &Path, out: &mut BTreeMap<String, String>) -
         } else {
             out.insert(
                 p.strip_prefix(root)?.to_string_lossy().into_owned(),
-                hash(&fs::read(p)?),
+                hash_file(&p)?,
             );
         }
     }

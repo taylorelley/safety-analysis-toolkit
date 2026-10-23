@@ -8,12 +8,12 @@ absence of defects. The implemented check selection is intentionally limited.
 MISRA identifiers in configuration select metadata only. No MISRA guideline has
 a validated automated enforcement mapping. The custom check is original project
 policy, not a licensed-standard interpretation. No proprietary MISRA text is
-distributed. Full guideline inventories, GEP, GRP, deviations and GCS are pending.
+distributed. Full guideline inventories, GRP and deviation management are pending. GEP/GCS metadata is emitted only as explicitly incomplete drafts.
 
 DO-178C/DO-278A lifecycle evidence, independent verification, requirements-based
-testing, MC/DC, data/control coupling, source/object mapping, target execution,
+testing, MC/DC assurance completeness, data/control coupling, source/object mapping, target execution,
 DO-330 qualification assessment and human sign-off remain outside this snapshot.
-There are no proof outcomes or compliance claims inferred from missing results.
+Proof outcomes are restricted to the recorded ESBMC model and bound. No proof or compliance conclusion is inferred from missing results.
 
 The engine does not run project scripts, tests or arbitrary compiler commands.
 Its analyzer commands request no source fixes. Network sockets and io_uring

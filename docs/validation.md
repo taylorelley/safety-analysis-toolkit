@@ -48,3 +48,35 @@ No formal, traceability, MC/DC, whole-agent harness, MISRA-compliance or complet
 v1 validation has been executed. Those acceptance criteria remain outstanding.
 The next vertical slice is AST indexing and graph validation, alongside broader
 unmapped custom checks and reviewed MISRA enforcement metadata.
+
+## Subsequent integrated slice
+
+Implemented: Clang AST source indexer and graph-gap checks; scoped ESBMC adapter
+with native property classification and counterexample JSON; LLVM source/MC/DC
+import with provenance checks; eight-tool rmcp stdio server; incomplete MISRA
+GEP/GCS drafts; reusable agent skill; consolidated persisted reports.
+
+Latest combined real suite: 21 unit tests and 12 integration tests passed,
+including custom native-module loading, C/C++ static scans, AST trace, independent
+MCP client, LLVM 50% MC/DC gap/corrupt-profile tests and six ESBMC C/C++ property
+fixtures. CTest also passed both native suites. Ordinary Cargo runs explicitly
+ignore optional external-tool tests; `--include-ignored` was used for these
+results with all available tools configured.
+
+An earlier full run caught a cancellation regression in post-execution hashing;
+executable hashing now happens before spawn and the real cancellation test
+passes. An earlier trace run caught missing default allowlist registration; the
+indexer is now registered and its real CLI test passes. These failed runs were
+not classified as validation success.
+
+Formal limitations: the ESBMC tests are real, but Frama-C Eva/WP has not executed.
+MISRA mappings remain unvalidated by explicit user direction. Traceability call
+edges/specialization completeness, reviewed harness metadata, all instrumentation
+exclusions and two actual coding-agent harnesses remain acceptance gaps.
+
+The mixed-language demonstration is prepared explicitly with
+`python3 scripts/configure_demo.py` (this builds and executes its development
+coverage fixture), then `python3 scripts/e2e.py`. The latter records CLI and
+independent MCP outputs and copies integrity-checked run artifacts into
+`validation/e2e/`. The report deliberately remains incomplete. This client is
+not passed off as Claude Code, Codex, Hermes or Pi.

@@ -1,0 +1,13 @@
+version: 1
+baseline: BL-DEMO-1
+nodes:
+  - {id: R-NAV, kind: requirement, root: true}
+  - {id: R-CTRL, kind: requirement, root: true}
+  - {id: R-DEC, kind: requirement, root: true}
+  - {id: R-ORPHAN, kind: requirement, root: true}
+  - {id: T-NAV, kind: test}
+  - {id: T-DEC, kind: test}
+links:
+  - {from: R-NAV, to: T-NAV}
+  - {from: R-DEC, to: T-DEC}
+  - {from: R-ORPHAN, to: UNKNOWN-TEST}

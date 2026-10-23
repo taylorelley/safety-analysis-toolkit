@@ -1,6 +1,6 @@
 # Dependency inventory
 
-Generated from the locked Cargo graph. Declared licenses are metadata, not redistribution approval. No third-party binaries are included.
+Generated from Cargo.lock metadata; declared licenses do not constitute redistribution approval. Original code is Apache-2.0. No analyzer binaries are bundled.
 
 | Crate | Version | Declared license |
 | --- | --- | --- |
@@ -122,4 +122,6 @@ Generated from the locked Cargo graph. Declared licenses are metadata, not redis
 | windows-sys | 0.61.2 | MIT OR Apache-2.0 |
 | zmij | 1.0.23 | MIT |
 
-External runtime: LLVM/Clang 19.1.7 (Apache-2.0 WITH LLVM-exception and component notices). Developer tools: Rust 1.99.1 (MIT/Apache-2.0 components), CMake (BSD-3-Clause), Python (PSF), jsonschema 4.26.0 (MIT). No Frama-C or ESBMC binaries are distributed. Full redistribution review remains outstanding.
+External tools: LLVM/Clang 19.1.7 (Apache-2.0 WITH LLVM-exception and component notices); ESBMC 8.6.0 (Apache-2.0 modifications, CBMC lineage and solver-specific licenses; review its COPYING). This adapter selects Z3. The downloaded upstream ESBMC bundle warns about mixed solver licenses and is not redistributed or approved by this project.
+
+Developer tools: Rust 1.99.1, CMake, Python, jsonschema 4.26.0. Frama-C execution is unvalidated/unavailable. serde_yaml 0.9.34 is deprecated upstream; migration and malformed-input/fuzz review remain release tasks. Full dependency notice aggregation, transitive license review and binary redistribution approval remain outstanding.

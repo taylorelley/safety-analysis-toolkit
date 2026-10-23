@@ -27,11 +27,13 @@ established production defect. Correlation preserves property and variant.
 
 The custom C++ module uses Clang AST matchers. Its `goto` policy check has no
 MISRA rule identifier: licensed-standard validation is outstanding. CMake
-requires LLVM 19.1.7 exactly. Native module loading is not yet exposed by the
-Rust CLI; CTest validates it directly against the matching clang-tidy host.
+requires LLVM 19.1.7 exactly. Native module loading requires an explicit reviewed module path and allowlist.
+CTest and a real CLI fixture validate loading against the matching host.
 
 Run records include input content hashes, exact execution/environment records,
 executable hashes, available Git commit/dirty metadata, versions and per-unit
 completeness. Input changes during a run force incomplete status. Headers and
 other dependencies outside the workspace are not fingerprinted yet. No cached
 results are reused. Reports operate only on integrity-checked persisted records.
+
+AST traceability, ESBMC and LLVM coverage adapters use the same runner and evidence store. MCP uses rmcp stdio and calls those same operations with one fixed workspace, bounded results and cancellation. See their dedicated references for current limitations.

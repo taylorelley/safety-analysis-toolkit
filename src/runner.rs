@@ -55,6 +55,7 @@ pub fn execute(
     if !exe.is_absolute() || !exe.is_file() {
         bail!("executable must be an existing absolute path")
     }
+    let executable_sha256 = crate::evidence::hash_file(exe)?;
     let env = BTreeMap::from([
         ("LC_ALL".to_string(), "C".to_string()),
         ("LANG".to_string(), "C".to_string()),
@@ -138,7 +139,7 @@ pub fn execute(
         failure = Some("nonzero_exit".into())
     }
     Ok(Execution {
-        executable_sha256: crate::evidence::hash(&std::fs::read(exe)?),
+        executable_sha256,
         executable: exe.display().to_string(),
         arguments: args.to_vec(),
         cwd: cwd.display().to_string(),

@@ -6,13 +6,20 @@ This snapshot supports these operations:
 | --- | --- | --- |
 | `init` | `--path DIR` (default `.`) | Create config without overwriting |
 | `doctor` | `[DIR] --format json/markdown/sarif` | Tool probes and unit inventory |
+| `trace` | `[DIR] --format json/markdown/sarif` | AST relationship audit |
+| `prove` | `FILE --path DIR --engine esbmc/frama-c --variant ID --unwind N --bits 32/64` | Scoped properties or explicit unsupported status |
+| `coverage import` | `--path DIR --profile FILE --binary FILE [--provenance FILE]` | Existing LLVM coverage import |
+| `mcp` | `--path DIR` | SDK stdio server |
 | `scan` | `[DIR] --format json/markdown/sarif` | Clang analysis and evidence |
 | `runs` | `[DIR] [--run ID]` | List records or inspect verified record |
-| `report` | `[DIR] --run ID --format json/markdown/sarif` | Verify and export evidence |
+| `report` | `[DIR] [--run ID] --format json/markdown/sarif` | Verify and export evidence |
 
-`scan --profile` deliberately rejects every MISRA enforcement profile until
-rule mappings are validated. `prove`, `trace`, `coverage` and `mcp` are not
-advertised: they are pending implementation rather than success-returning stubs.
+`scan --profile misra-c-2012` and `misra-cpp-2023` record selected editions,
+produce incomplete GEP/GCS drafts and explicitly remain incomplete. No licensed
+mapping is validated. `report` without `--run` consolidates persisted runs in
+Markdown or JSON, retaining integrity errors and separate scopes. SARIF requires
+one `--run`. Frama-C execution remains unavailable; its prove request records
+NOT_CHECKED and incomplete status instead of fabricating success.
 
 Exit 0 means the selected operation completed without findings or policy failure.
 Exit 1 means findings remain. Exit 2 means usage/configuration/input errors,
@@ -27,14 +34,14 @@ analyzer does not mean its adapter is implemented.
 Configuration accepts version 1, a nonempty project name, optional assurance
 standard/level, optional edition identifiers, compilation database location,
 tools and execution limits, and evidence directory. Unknown fields and invalid
-standard/level combinations fail validation. Edition identifiers are metadata;
-they do not enable enforcement. No assurance profile is assigned by default.
+standard/level combinations fail validation. Edition identifiers select draft metadata; they do not enable validated
+enforcement and leave MISRA verification incomplete. No assurance profile is assigned by default.
 
 Defaults: Clang enabled; formal tools disabled; timeout 60 seconds; address-space
 limit 2048 MiB; output limit 4 MiB per stream; file-size limit 64 MiB; file
 descriptor limit 128; networking denied. The default tool vocabulary resolves
 only `clang-tidy-19`, `clang-19`, `llvm-cov-19`, `llvm-profdata-19`, `frama-c`,
-`esbmc` and `git`. A configured `tools.allowlist` replaces it with reviewed
+`esbmc`, `safety-source-index` and `git`. A configured `tools.allowlist` replaces it with reviewed
 absolute executable paths. Tool resolution follows PATH; use an explicit
 allowlist and a trusted PATH on untrusted repositories.
 
