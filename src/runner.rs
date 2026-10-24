@@ -218,11 +218,19 @@ fn isolate(output: &std::ffi::CStr, require_filesystem_isolation: bool) -> std::
                 parent,
             };
             let add = libc::syscall(libc::SYS_landlock_add_rule, ruleset, 1, &rule, 0);
-            let restrict = if add == 0 {
+            // Tools such as git open /dev/null read-write; allow only file write/truncate there.
+            let null = libc::open(c"/dev/null".as_ptr(), libc::O_PATH | libc::O_CLOEXEC);
+            let null_rule = Rule {
+                allowed: (1 << 1) | (1 << 14),
+                parent: null,
+            };
+            let add_null = libc::syscall(libc::SYS_landlock_add_rule, ruleset, 1, &null_rule, 0);
+            let restrict = if add == 0 && add_null == 0 {
                 libc::syscall(libc::SYS_landlock_restrict_self, ruleset, 0)
             } else {
                 -1
             };
+            libc::close(null);
             libc::close(parent);
             libc::close(ruleset);
             if restrict != 0 {
@@ -440,5 +448,27 @@ mod tests {
             assert_ne!(result.unwrap().exit_code, Some(0))
         }
         assert!(!source.path().join("forbidden").exists());
+    }
+    #[test]
+    fn isolation_allows_dev_null() {
+        let out = tempfile::tempdir().unwrap();
+        let result = execute(
+            Path::new("/bin/sh"),
+            &[
+                "-c".into(),
+                "echo discarded > /dev/null && exec 3<>/dev/null".into(),
+            ],
+            out.path(),
+            out.path(),
+            2,
+            256,
+            true,
+        );
+        if unsafe { libc::syscall(libc::SYS_landlock_create_ruleset, 0, 0, 1) } < 3 {
+            assert!(result.is_err())
+        } else {
+            let e = result.unwrap();
+            assert_eq!(e.exit_code, Some(0), "{}", e.stderr)
+        }
     }
 }
