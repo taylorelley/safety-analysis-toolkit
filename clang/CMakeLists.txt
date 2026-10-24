@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 project(SafetyClang LANGUAGES C CXX)
-find_package(LLVM 19.1.7 EXACT REQUIRED CONFIG)
+# LLVM accepts the same major.minor with a patch release of at least 19.1.7;
+# clang-tidy modules are not ABI-compatible across minor releases.
+find_package(LLVM 19.1.7 REQUIRED CONFIG)
 find_package(Clang REQUIRED CONFIG)
-if(NOT LLVM_PACKAGE_VERSION VERSION_EQUAL "19.1.7")
-  message(FATAL_ERROR "Requires LLVM 19.1.7 for clang-tidy ABI compatibility")
-endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(SafetyMisra MODULE src/MisraModule.cpp src/misra/Common.cpp

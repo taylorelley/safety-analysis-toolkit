@@ -195,7 +195,7 @@ impl Server {
     }
     #[tool(
         name = "safety.prove",
-        description = "Run pinned ESBMC BMC/induction or Frama-C Eva/WP on a selected compile variant; preserve assumptions, bounds and proof scope"
+        description = "Run ESBMC BMC/induction or Frama-C Eva/WP on a selected compile variant; preserve assumptions, bounds and proof scope"
     )]
     async fn prove(
         &self,

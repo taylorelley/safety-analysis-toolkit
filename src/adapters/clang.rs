@@ -31,11 +31,12 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     );
     match version {
         Ok(v) => {
-            let valid = v.failure.is_none() && v.stdout.contains("version 19.1.7");
+            let valid = v.failure.is_none() && discovery::llvm_supported(&v.stdout);
             run.record(v);
             if !valid {
                 run.completeness.unsupported = units.len();
-                run.limitations.push("Requires pinned LLVM 19.1.7".into());
+                run.limitations
+                    .push("Requires LLVM 19.1.7 or a later 19.1.x release".into());
                 return evidence::finish(root, c, &dir, run);
             }
         }

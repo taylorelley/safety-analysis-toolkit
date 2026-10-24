@@ -1,6 +1,6 @@
 # Formal verification
 
-## ESBMC 8.6.0
+## ESBMC 8.6.0 or later
 
 The adapter selects Z3, 32/64-bit width, overflow checking and default unwinding
 assertions. Select one compilation entry using `--variant` when necessary.
@@ -24,9 +24,9 @@ are retained as native JSON and logs; they need investigation before being
 classified as production defects. MCP `safety.get_run` returns a bounded trace
 excerpt and its full local evidence reference.
 
-## Frama-C Manganese 25.0-beta
+## Frama-C 25.0 (Manganese) or later
 
-The reference package is Debian `frama-c-base=20220511-manganese-3+b4`.
+The validated reference package is Debian `frama-c-base=20220511-manganese-3+b4`.
 C only; a selected complete analysis unit must contain the entry function.
 The default is Eva; WP is selected explicitly and uses Qed for supplied ACSL
 contracts. Other external prover commands are not exposed.
@@ -37,7 +37,7 @@ safety prove src/contracts.c --engine frama-c --method wp --entry identity
 ```
 
 The shared runner invokes allowlisted Clang 19 to preprocess into run-local
-`analysis.i`, preserving ACSL and copyright comments. It uses the pinned
+`analysis.i`, preserving ACSL and copyright comments. It uses the installed
 Frama-C libc model and explicit x86_32/x86_64 machine model. Frama-C consumes
 the `.i` directly; no project-controlled shell preprocessor is executed.
 Definitions, include options and dialect are translated conservatively; other
