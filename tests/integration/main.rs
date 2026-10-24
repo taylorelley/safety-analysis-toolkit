@@ -219,13 +219,16 @@ fn real_custom_module() {
     );
     let r: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
     assert_eq!(r["complete"], true);
-    assert_eq!(r["findings"].as_array().unwrap().len(), 2);
+    let findings = r["findings"].as_array().unwrap();
+    let count = |id: &str| findings.iter().filter(|f| f["rule_id"] == id).count();
+    // One goto in each of the two compilation variants.
+    assert_eq!(count("safety-prohibited-goto"), 2);
+    assert_eq!(count("misra-c2012-rule-15-1"), 2);
     assert!(
-        r["findings"]
-            .as_array()
-            .unwrap()
+        findings
             .iter()
-            .all(|f| f["rule_id"] == "safety-prohibited-goto")
+            .all(|f| f["rule_id"].as_str().unwrap().starts_with("safety-")
+                || f["rule_id"].as_str().unwrap().starts_with("misra-c2012-"))
     );
 }
 #[test]
@@ -563,7 +566,7 @@ fn draft_misra_process_rejects_unreviewed_mapping_and_weakening() {
 }
 
 #[test]
-fn bundled_misra_c_inventory_drafts_every_guideline_for_manual_assessment() {
+fn bundled_misra_c_inventory_drafts_every_guideline_with_partial_automation() {
     let t = fixture(false);
     let mut config: serde_json::Value =
         serde_yaml::from_slice(&fs::read(t.path().join("safety.yaml")).unwrap()).unwrap();
@@ -598,6 +601,16 @@ fn bundled_misra_c_inventory_drafts_every_guideline_for_manual_assessment() {
                 .starts_with("not_established")
     }));
     assert_eq!(draft["gcs"]["inventory"][0]["inventory_complete"], true);
+    let coverage = &draft["gcs"]["inventory"][0]["by_coverage"];
+    assert_eq!(coverage["\"partial\""], 157);
+    assert_eq!(coverage["\"manual\""], 2);
+    // Mapped checks are listed, but nothing ran in doctor so execution is unproven.
+    let rule = guidelines
+        .iter()
+        .find(|g| g["rule_id"] == "Rule 15.1")
+        .unwrap();
+    assert_eq!(rule["automated_checks"][0], "misra-c2012-rule-15-1");
+    assert_eq!(rule["automated_execution"], "not_established");
     assert_eq!(draft["gcs"]["compliance"], "not_established");
     // Recorded categories reject a proposal that misstates the original category.
     fs::write(t.path().join("grp.json"),"[{\"edition\":\"MISRA-C:2012\",\"rule_id\":\"Rule 9.1\",\"original_category\":\"advisory\",\"proposed_category\":\"required\",\"rationale\":\"misstated\"}]").unwrap();

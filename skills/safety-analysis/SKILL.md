@@ -58,8 +58,9 @@ missing policy instead of inventing lifecycle decisions.
   solver configuration and proof scope beside every outcome.
 - Never treat generated tests as independent verification or LLVM branch
   coverage as all DO-178C decision-coverage objectives.
-- Never hide unsupported MISRA rules. This snapshot's custom checks are unmapped;
-  no guideline coverage is validated. GEP/GCS files are incomplete drafts.
+- Never hide unsupported MISRA rules. The `misra-c2012-*` checks are partial
+  mappings awaiting independent review; Dir 3.1 and Rule 8.6 are manual and
+  every guideline still needs manual assessment. GEP/GCS files are incomplete drafts.
 - Never claim certification, approval, complete compliance or complete safety
   based on this toolkit. Agent reasoning remains advisory.
 

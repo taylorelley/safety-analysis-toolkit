@@ -136,7 +136,10 @@ pub fn review_valid(root: &Path, r: &Review) -> Result<()> {
     Ok(())
 }
 pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
+    // Bundled profiles cite test evidence in the toolkit repository rather than
+    // the analysed project, so their evidence paths are not resolved here.
     let mut profiles = Vec::new();
+    let mut bundled = BTreeSet::new();
     for edition in [c.coding.c.as_deref(), c.coding.cpp.as_deref()]
         .into_iter()
         .flatten()
@@ -146,7 +149,9 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
         } else {
             include_str!("../profiles/misra-cpp-2023.yaml")
         };
-        profiles.push(serde_yaml::from_str::<Profile>(data)?);
+        let profile = serde_yaml::from_str::<Profile>(data)?;
+        bundled.insert(profile.edition.clone());
+        profiles.push(profile);
     }
     for path in &c.coding.registries {
         let profile: Profile = load(root, path)?;
@@ -158,6 +163,7 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
             .iter()
             .position(|p| p.edition == profile.edition)
             .unwrap();
+        bundled.remove(&profile.edition);
         profiles[pos] = profile;
     }
     let mut entries = Vec::new();
@@ -190,8 +196,10 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
                         && !rule.limitations.is_empty(),
                     "incomplete mapping scope or validation"
                 );
-                for path in &review.test_evidence {
-                    inside(root, Path::new(path))?;
+                if !bundled.contains(&profile.edition) {
+                    for path in &review.test_evidence {
+                        inside(root, Path::new(path))?;
+                    }
                 }
             }
             if rule.coverage == Coverage::NotApplicable {
@@ -206,28 +214,30 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
                 .filter(|f| rule.automated_checks.contains(&f.rule_id))
                 .map(|f| f.id.clone())
                 .collect();
+            // Compiler errors are reported whatever the check selection.
             let enabled = |id: &String| {
-                run.executions.iter().any(|e| {
-                    e.arguments
-                        .iter()
-                        .filter_map(|a| a.strip_prefix("--checks="))
-                        .any(|setting| {
-                            let mut selected = false;
-                            for part in setting.split(',') {
-                                let (negative, pattern) =
-                                    part.strip_prefix('-').map_or((false, part), |p| (true, p));
-                                let matches = pattern == "*"
-                                    || pattern == id
-                                    || pattern
-                                        .strip_suffix('*')
-                                        .is_some_and(|prefix| id.starts_with(prefix));
-                                if matches {
-                                    selected = !negative
+                id == "clang-diagnostic-error"
+                    || run.executions.iter().any(|e| {
+                        e.arguments
+                            .iter()
+                            .filter_map(|a| a.strip_prefix("--checks="))
+                            .any(|setting| {
+                                let mut selected = false;
+                                for part in setting.split(',') {
+                                    let (negative, pattern) =
+                                        part.strip_prefix('-').map_or((false, part), |p| (true, p));
+                                    let matches = pattern == "*"
+                                        || pattern == id
+                                        || pattern
+                                            .strip_suffix('*')
+                                            .is_some_and(|prefix| id.starts_with(prefix));
+                                    if matches {
+                                        selected = !negative
+                                    }
                                 }
-                            }
-                            selected
-                        })
-                })
+                                selected
+                            })
+                    })
             };
             let automated_performed = run.operation == "scan"
                 && run.completeness.complete()
@@ -303,21 +313,61 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
 mod tests {
     use super::*;
     #[test]
-    fn builtins_do_not_invent_mappings() {
-        for text in [
-            include_str!("../profiles/misra-c-2012.yaml"),
-            include_str!("../profiles/misra-cpp-2023.yaml"),
-        ] {
-            let p: Profile = serde_yaml::from_str(text).unwrap();
-            assert!(p.original_checks.iter().all(|c| c.mapping == "unvalidated"));
-            assert!(p.rules.iter().all(|r| r.validation.is_none()
-                && r.automated_checks.is_empty()
-                && r.manual_review_required
-                && !matches!(r.coverage, Coverage::Supported | Coverage::Partial)));
+    fn builtin_mappings_are_partial_and_evidenced() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"));
+        let sources: String = std::fs::read_dir(root.join("clang/src/misra"))
+            .unwrap()
+            .map(|e| std::fs::read_to_string(e.unwrap().path()).unwrap())
+            .collect();
+        let p: Profile =
+            serde_yaml::from_str(include_str!("../profiles/misra-c-2012.yaml")).unwrap();
+        assert!(p.original_checks.iter().all(|c| c.mapping == "unvalidated"));
+        let manual: Vec<_> = p
+            .rules
+            .iter()
+            .filter(|r| r.coverage == Coverage::Manual)
+            .map(|r| r.rule_id.as_str())
+            .collect();
+        assert_eq!(manual, ["Dir 3.1", "Rule 8.6"]);
+        for r in &p.rules {
+            // No mapping is claimed as complete or independently reviewed.
+            assert!(r.manual_review_required, "{}", r.rule_id);
+            assert!(r.coverage != Coverage::Supported, "{}", r.rule_id);
+            if r.coverage == Coverage::Manual {
+                assert!(r.automated_checks.is_empty() && r.validation.is_none());
+                continue;
+            }
+            assert!(r.coverage == Coverage::Partial, "{}", r.rule_id);
+            let review = r.validation.as_ref().unwrap();
+            assert!(review.reviewed_by.contains("independent review pending"));
+            assert!(review.source_ref.contains(&r.rule_id));
+            for check in &r.automated_checks {
+                if check.starts_with("misra-c2012-") {
+                    assert!(sources.contains(&format!("\"{check}\"")), "{check}");
+                }
+            }
+            // Each evidence fixture exercises at least one mapped check.
+            assert!(!review.test_evidence.is_empty());
+            for path in &review.test_evidence {
+                let text = std::fs::read_to_string(root.join(path)).unwrap();
+                let header = text.lines().next().unwrap();
+                assert!(
+                    r.automated_checks
+                        .iter()
+                        .any(|c| header.contains(c.as_str())),
+                    "{path} does not exercise {}",
+                    r.rule_id
+                );
+            }
         }
         let cpp: Profile =
             serde_yaml::from_str(include_str!("../profiles/misra-cpp-2023.yaml")).unwrap();
         assert!(!cpp.inventory_complete && cpp.rules.is_empty());
+        assert!(
+            cpp.original_checks
+                .iter()
+                .all(|c| c.mapping == "unvalidated")
+        );
     }
     #[test]
     fn misra_c_2012_inventory_lists_every_guideline() {
