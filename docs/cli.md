@@ -15,8 +15,9 @@ This snapshot supports these operations:
 | `report` | `[DIR] [--run ID] --format json/markdown/sarif` | Verify and export evidence |
 
 `scan --profile misra-c-2012` and `misra-cpp-2023` record selected editions,
-produce incomplete GEP/GCS drafts and explicitly remain incomplete. No licensed
-mapping is validated. `report` without `--run` consolidates persisted runs in
+produce incomplete GEP/GCS drafts and explicitly remain incomplete. With the
+native module configured, `scan` runs the `misra-c2012-*` checks; their MISRA
+C:2012 mappings are partial and not independently reviewed. `report` without `--run` consolidates persisted runs in
 Markdown or JSON, retaining integrity errors and separate scopes. SARIF requires
 one `--run`. See the formal reference for supported pinned engines and proof scope.
 
@@ -33,8 +34,8 @@ analyzer does not mean its adapter is implemented.
 Configuration accepts version 1, a nonempty project name, optional assurance
 standard/level, optional edition identifiers, compilation database location,
 tools and execution limits, and evidence directory. Unknown fields and invalid
-standard/level combinations fail validation. Edition identifiers select draft metadata; they do not enable validated
-enforcement and leave MISRA verification incomplete. No assurance profile is assigned by default.
+standard/level combinations fail validation. Edition identifiers select draft metadata and guideline mappings; they do not
+establish complete enforcement and leave MISRA verification incomplete. No assurance profile is assigned by default.
 
 Defaults: Clang enabled; formal tools disabled; timeout 60 seconds; address-space
 limit 2048 MiB; output limit 4 MiB per stream; file-size limit 64 MiB; file

@@ -15,6 +15,9 @@ commit identifiers need not be self-referential.
 The sole explicit specification change is the user's instruction:
 “Proceed with unmapped checks; leave MISRA mappings unvalidated.” Therefore no
 licensed guideline inventory, rule ID or overall compliance result is claimed.
+The executed records below predate the later MISRA C:2012 inventory and the
+partial guideline checks (see [MISRA coverage](misra-coverage.md)), which are
+validated by the `misra-c2012` CTest fixtures rather than by these records.
 
 ## Commands and results
 

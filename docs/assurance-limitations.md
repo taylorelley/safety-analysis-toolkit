@@ -5,11 +5,12 @@ approve deviations, reviews, assurance levels, baselines, compliance or
 certification. A clean scan does not demonstrate requirements satisfaction or
 absence of defects. The implemented check selection is intentionally limited.
 
-MISRA identifiers in configuration select metadata only. No MISRA guideline has
-a validated automated enforcement mapping. The custom check is original project
-policy, not a licensed-standard interpretation. No proprietary MISRA text is
-distributed. The bundled MISRA C:2012 inventory lists all 159 guidelines with
-classifications only. Every guideline needs manual assessment. The MISRA C++:2023 inventory, GRP and deviation management are pending. GEP/GCS metadata is emitted only as explicitly incomplete drafts.
+MISRA identifiers in configuration select metadata and mapped checks. 157 of the
+159 MISRA C:2012 guidelines have partial automated checks written against a
+user-supplied licensed copy; none is complete and none has been reviewed by an
+independent qualified person. Dir 3.1 and Rule 8.6 are manual. The three
+original policy checks are project policy, not standard interpretations. No
+proprietary MISRA text is distributed. Every guideline needs manual assessment. The MISRA C++:2023 inventory, GRP and deviation management are pending. GEP/GCS metadata is emitted only as explicitly incomplete drafts.
 
 DO-178C/DO-278A lifecycle evidence, independent verification, requirements-based
 testing, MC/DC assurance completeness, data/control coupling, source/object mapping, target execution,

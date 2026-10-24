@@ -56,11 +56,11 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
         evidence::write_new(
             &dir.join("module.json"),
             &serde_json::to_vec_pretty(
-                &serde_json::json!({"path":path,"sha256":hash,"checks":["safety-prohibited-goto","safety-unsafe-library-call","safety-repeated-macro-parameter"],"misra_mapping":"unvalidated"}),
+                &serde_json::json!({"path":path,"sha256":hash,"checks":["safety-prohibited-goto","safety-unsafe-library-call","safety-repeated-macro-parameter","misra-c2012-*"],"misra_mapping":"partial; independent review pending"}),
             )?,
         )?;
         run.limitations
-            .push("Original project-policy checks enabled; MISRA mappings unvalidated".into());
+            .push("Original project-policy and MISRA C:2012 checks enabled; MISRA mappings are partial and await independent review".into());
         Some(path)
     } else {
         None
@@ -98,7 +98,7 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
             u.file.display().to_string(),
         ];
         if let Some(path) = module {
-            args[1] = format!("--checks={CHECKS},safety-*");
+            args[1] = format!("--checks={CHECKS},safety-*,misra-c2012-*");
             args.insert(0, format!("--load={}", path.display()));
         }
         match runner::execute(
@@ -153,7 +153,7 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     run.complete = run.completeness.complete();
     if c.coding.c.is_some() || c.coding.cpp.is_some() {
         run.complete = false;
-        run.limitations.push("Configured MISRA edition has no validated enforcement mapping; guideline verification remains incomplete".into());
+        run.limitations.push("Configured MISRA edition has only partial, independently unreviewed automated mappings and manual guidelines; guideline verification remains incomplete".into());
     }
     run.status = if !run.complete {
         Status::Incomplete

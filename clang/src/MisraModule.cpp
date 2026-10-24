@@ -5,6 +5,7 @@
 #include "clang/ASTMatchers/ASTMatchFinder.h"
 #include "clang/Lex/PPCallbacks.h"
 #include "clang/Lex/Preprocessor.h"
+#include "misra/Misra.h"
 #include <map>
 
 namespace safety {
@@ -68,8 +69,25 @@ class SafetyModule final : public clang::tidy::ClangTidyModule {
     Factories.registerCheck<ProhibitedGoto>("safety-prohibited-goto");
     Factories.registerCheck<UnsafeLibrary>("safety-unsafe-library-call");
     Factories.registerCheck<RepeatedMacro>("safety-repeated-macro-parameter");
+    // MISRA C:2012 guideline checks; see profiles/misra-c-2012.yaml for scope.
+    misra::Table Table;
+    misra::addDirectives(Table);
+    misra::addRulesBasic(Table);
+    misra::addRulesDeclarations(Table);
+    misra::addRulesTypes(Table);
+    misra::addRulesExpressions(Table);
+    misra::addRulesControl(Table);
+    misra::addRulesPointers(Table);
+    misra::addRulesPreprocessor(Table);
+    misra::addRulesLibrary(Table);
+    for (auto &Entry : Table) {
+      misra::Factory Make = Entry.second;
+      Factories.registerCheckFactory(Entry.first, [Make](llvm::StringRef Name, clang::tidy::ClangTidyContext *Context) {
+        return std::make_unique<misra::Rule>(Name, Context, Make());
+      });
+    }
   }
 };
 static clang::tidy::ClangTidyModuleRegistry::Add<SafetyModule>
-    Registration("safety-module", "Original safety project-policy checks");
+    Registration("safety-module", "Original safety project-policy checks and MISRA C:2012 guideline checks");
 } // namespace safety

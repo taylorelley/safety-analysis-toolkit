@@ -7,7 +7,10 @@ if(NOT LLVM_PACKAGE_VERSION VERSION_EQUAL "19.1.7")
 endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-add_library(SafetyMisra MODULE src/MisraModule.cpp)
+add_library(SafetyMisra MODULE src/MisraModule.cpp src/misra/Common.cpp
+  src/misra/Directives.cpp src/misra/Basic.cpp src/misra/Declarations.cpp
+  src/misra/Types.cpp src/misra/Expressions.cpp src/misra/Control.cpp
+  src/misra/Pointers.cpp src/misra/Preprocessor.cpp src/misra/Library.cpp)
 target_include_directories(SafetyMisra SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS} ${CLANG_INCLUDE_DIRS})
 target_compile_definitions(SafetyMisra PRIVATE ${LLVM_DEFINITIONS})
 if(NOT LLVM_ENABLE_RTTI)
@@ -36,6 +39,11 @@ endif()
 if(BUILD_TESTING)
  add_test(NAME original-policies COMMAND ${Python3_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/tests/policies.py ${CLANG_TIDY}
+  $<TARGET_FILE:SafetyMisra> ${CMAKE_CURRENT_SOURCE_DIR}/tests)
+endif()
+if(BUILD_TESTING)
+ add_test(NAME misra-c2012 COMMAND ${Python3_EXECUTABLE}
+  ${CMAKE_CURRENT_SOURCE_DIR}/tests/misra.py ${CLANG_TIDY}
   $<TARGET_FILE:SafetyMisra> ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 endif()
 

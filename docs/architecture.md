@@ -25,8 +25,10 @@ unexpected output without an export, parser errors and timeouts are incomplete.
 Raw output is always retained. A diagnostic remains a diagnostic, not a formally
 established production defect. Correlation preserves property and variant.
 
-The custom C++ module uses Clang AST matchers. Its `goto` policy check has no
-MISRA rule identifier: licensed-standard validation is outstanding. CMake
+The custom C++ module uses Clang AST matchers, preprocessor callbacks and
+comment handlers. Its three original policy checks carry no MISRA rule
+identifier. Its `misra-c2012-*` checks implement partial MISRA C:2012 guideline
+mappings that await independent review (see [MISRA coverage](misra-coverage.md)). CMake
 requires LLVM 19.1.7 exactly. Native module loading requires an explicit reviewed module path and allowlist.
 CTest and a real CLI fixture validate loading against the matching host.
 

@@ -86,7 +86,7 @@ report=subprocess.run([binary,"report",root,"--format","markdown"],capture_outpu
 assert report.returncode==3
 (output/"consolidated-report.md").write_bytes(report.stdout)
 (output/"summary.json").write_text(json.dumps({"status":"incomplete","complete":False,
-    "reason":"MISRA mappings unvalidated by user direction; intentionally seeded trace gaps, MC/DC gap and uninstrumented units remain outstanding. Actual agent-host validation is recorded separately.",
+    "reason":"MISRA mappings partial and not independently reviewed; intentionally seeded trace gaps, MC/DC gap and uninstrumented units remain outstanding. Actual agent-host validation is recorded separately.",
     "results":summary},indent=2)+"\n")
 # Copy only generated records, never analyzer binaries or a third-party bundle.
 (output/"runs").mkdir(exist_ok=True)

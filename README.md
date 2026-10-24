@@ -3,8 +3,10 @@
 A local Rust CLI and MCP server for C/C++ static analysis, scoped formal
 verification, AST traceability, LLVM source/MC/DC coverage and reproducible evidence.
 It uses Clang/LLVM 19.1.7, Frama-C Eva/WP and ESBMC rather than new analysis engines.
-The out-of-tree Clang-Tidy module implements three original policy checks.
-**MISRA mappings remain unvalidated by explicit project direction.**
+The out-of-tree Clang-Tidy module implements three original policy checks and
+148 MISRA C:2012 guideline checks. **157 of 159 MISRA C:2012 guidelines have
+partial automated assessment; no mapping is independently reviewed and no
+compliance is claimed** (see [MISRA coverage](docs/misra-coverage.md)).
 
 The same engine serves humans and agents. Real Codex and Pi host workflows,
 native integrations, packaging and offline reference validation are recorded in
