@@ -10,6 +10,10 @@ using namespace clang;
 
 namespace safety::misra {
 void Rule::report(SourceLocation Loc, llvm::StringRef Message) {
+  // Diagnostics inside system macros are dropped by clang-tidy; use the
+  // location where the macro was expanded instead.
+  if (Sources && Loc.isMacroID() && Sources->isInSystemHeader(Sources->getSpellingLoc(Loc)))
+    Loc = Sources->getExpansionLoc(Loc);
   if (std::find(Reported.begin(), Reported.end(), Loc) != Reported.end()) return;
   Reported.push_back(Loc);
   diag(Loc, Message);

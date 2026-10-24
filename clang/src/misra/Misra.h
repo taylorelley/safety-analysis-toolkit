@@ -41,6 +41,7 @@ public:
   }
   void registerPPCallbacks(const clang::SourceManager &SM, clang::Preprocessor *PP,
                            clang::Preprocessor *) override {
+    Sources = &SM;
     if (S.Preprocessor) S.Preprocessor(*this, *PP, SM);
   }
   void onEndOfTranslationUnit() override {
@@ -52,6 +53,7 @@ public:
   clang::ASTContext *Context = nullptr;
 
 private:
+  const clang::SourceManager *Sources = nullptr;
   Spec S;
   std::vector<clang::SourceLocation> Reported;
 };
