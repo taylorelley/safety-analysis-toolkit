@@ -8,7 +8,8 @@ absence of defects. The implemented check selection is intentionally limited.
 MISRA identifiers in configuration select metadata only. No MISRA guideline has
 a validated automated enforcement mapping. The custom check is original project
 policy, not a licensed-standard interpretation. No proprietary MISRA text is
-distributed. Full guideline inventories, GRP and deviation management are pending. GEP/GCS metadata is emitted only as explicitly incomplete drafts.
+distributed. The bundled MISRA C:2012 inventory lists all 159 guidelines with
+classifications only. Every guideline needs manual assessment. The MISRA C++:2023 inventory, GRP and deviation management are pending. GEP/GCS metadata is emitted only as explicitly incomplete drafts.
 
 DO-178C/DO-278A lifecycle evidence, independent verification, requirements-based
 testing, MC/DC assurance completeness, data/control coupling, source/object mapping, target execution,

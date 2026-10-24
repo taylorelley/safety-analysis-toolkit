@@ -5,7 +5,10 @@ use crate::{
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::{collections::BTreeSet, path::Path};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    path::Path,
+};
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Profile {
@@ -32,10 +35,37 @@ enum Coverage {
     NotImplemented,
     NotApplicable,
 }
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq)]
+#[serde(rename_all = "snake_case")]
+enum Category {
+    Advisory,
+    Required,
+    Mandatory,
+}
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum Decidability {
+    Decidable,
+    Undecidable,
+}
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum AnalysisScope {
+    SingleTranslationUnit,
+    System,
+}
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Rule {
     rule_id: String,
+    #[serde(default)]
+    category: Option<Category>,
+    #[serde(default)]
+    decidability: Option<Decidability>,
+    #[serde(default)]
+    analysis_scope: Option<AnalysisScope>,
+    #[serde(default)]
+    applies_to: Vec<String>,
     coverage: Coverage,
     implementation: Option<String>,
     automated_checks: Vec<String>,
@@ -132,13 +162,21 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
     }
     let mut entries = Vec::new();
     let mut known = BTreeSet::new();
+    let mut categories = BTreeMap::new();
     for profile in &profiles {
+        anyhow::ensure!(
+            !profile.inventory_complete || !profile.rules.is_empty(),
+            "complete inventory has no guidelines"
+        );
         for rule in &profile.rules {
             anyhow::ensure!(
                 !rule.rule_id.is_empty()
                     && known.insert((profile.edition.clone(), rule.rule_id.clone())),
                 "empty or duplicate rule identifier"
             );
+            if let Some(category) = rule.category {
+                categories.insert((profile.edition.clone(), rule.rule_id.clone()), category);
+            }
             if matches!(rule.coverage, Coverage::Supported | Coverage::Partial) {
                 let review = rule.validation.as_ref().context(
                     "automated mapping requires externally reviewed source and test evidence",
@@ -195,9 +233,21 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
                 && run.completeness.complete()
                 && !rule.automated_checks.is_empty()
                 && rule.automated_checks.iter().all(enabled);
-            entries.push(json!({"edition":profile.edition,"rule_id":rule.rule_id,"coverage":rule.coverage,"automated_checks":rule.automated_checks,"manual_review_required":rule.manual_review_required,"limitations":rule.limitations,"project_conditions":rule.project_conditions,"mapping_review":rule.validation,"automated_execution":if automated_performed{"performed; inspect selected tool checks"}else{"not_established"},"related_findings":related,"compliance":"not_established; human guideline assessment required"}));
+            entries.push(json!({"edition":profile.edition,"rule_id":rule.rule_id,"category":rule.category,"decidability":rule.decidability,"analysis_scope":rule.analysis_scope,"applies_to":rule.applies_to,"coverage":rule.coverage,"automated_checks":rule.automated_checks,"manual_review_required":rule.manual_review_required,"limitations":rule.limitations,"project_conditions":rule.project_conditions,"mapping_review":rule.validation,"automated_execution":if automated_performed{"performed; inspect selected tool checks"}else{"not_established"},"related_findings":related,"compliance":"not_established; human guideline assessment required"}));
         }
     }
+    let inventory: Vec<_> = profiles
+        .iter()
+        .map(|p| {
+            let mut by_coverage = BTreeMap::new();
+            for rule in &p.rules {
+                *by_coverage
+                    .entry(serde_json::to_value(&rule.coverage).unwrap().to_string())
+                    .or_insert(0) += 1;
+            }
+            json!({"edition":p.edition,"inventory_complete":p.inventory_complete,"inventory_source":p.inventory_source,"guidelines":p.rules.len(),"by_coverage":by_coverage})
+        })
+        .collect();
     let deviations = if let Some(path) = &c.coding.deviations {
         load::<Vec<Deviation>>(root, path)?
     } else {
@@ -229,22 +279,24 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
         Vec::new()
     };
     for r in &grp {
+        let recorded = categories.get(&(r.edition.clone(), r.rule_id.clone()));
         let rank = |s: &str| match s {
-            "advisory" => Some(0),
-            "required" => Some(1),
-            "mandatory" => Some(2),
+            "advisory" => Some(Category::Advisory as u8),
+            "required" => Some(Category::Required as u8),
+            "mandatory" => Some(Category::Mandatory as u8),
             _ => None,
         };
         anyhow::ensure!(
             known.contains(&(r.edition.clone(), r.rule_id.clone()))
                 && !r.rationale.is_empty()
                 && rank(&r.original_category).is_some()
-                && rank(&r.proposed_category) >= rank(&r.original_category),
-            "invalid or weakening recategorization"
+                && rank(&r.proposed_category) >= rank(&r.original_category)
+                && recorded.is_none_or(|c| rank(&r.original_category) == Some(*c as u8)),
+            "invalid, mismatched or weakening recategorization"
         );
     }
     Ok(
-        json!({"status":"incomplete","complete":false,"artifact_status":"draft_for_human_review","profiles":profiles,"gep":{"guidelines":entries,"original_check_mapping":"unvalidated unless externally reviewed mapping is supplied"},"grp":{"proposals":grp,"approval":"not_granted_by_tool"},"gcs":{"guidelines":entries,"compliance":"not_established","outstanding":["Verify licensed inventory and applicability","Complete manual checks and independent review","Resolve tool failures and incomplete scope"]},"deviations":{"records":deviations,"approved_by_tool":false,"external_reviews":"supplied process assertions, not authenticated by toolkit"}}),
+        json!({"status":"incomplete","complete":false,"artifact_status":"draft_for_human_review","profiles":profiles,"gep":{"guidelines":entries,"original_check_mapping":"unvalidated unless externally reviewed mapping is supplied"},"grp":{"proposals":grp,"approval":"not_granted_by_tool"},"gcs":{"inventory":inventory,"guidelines":entries,"compliance":"not_established","outstanding":["Verify licensed inventory and applicability","Complete manual checks and independent review","Resolve tool failures and incomplete scope"]},"deviations":{"records":deviations,"approved_by_tool":false,"external_reviews":"supplied process assertions, not authenticated by toolkit"}}),
     )
 }
 #[cfg(test)]
@@ -257,9 +309,53 @@ mod tests {
             include_str!("../profiles/misra-cpp-2023.yaml"),
         ] {
             let p: Profile = serde_yaml::from_str(text).unwrap();
-            assert!(!p.inventory_complete);
-            assert!(p.rules.is_empty());
             assert!(p.original_checks.iter().all(|c| c.mapping == "unvalidated"));
+            assert!(p.rules.iter().all(|r| r.validation.is_none()
+                && r.automated_checks.is_empty()
+                && r.manual_review_required
+                && !matches!(r.coverage, Coverage::Supported | Coverage::Partial)));
+        }
+        let cpp: Profile =
+            serde_yaml::from_str(include_str!("../profiles/misra-cpp-2023.yaml")).unwrap();
+        assert!(!cpp.inventory_complete && cpp.rules.is_empty());
+    }
+    #[test]
+    fn misra_c_2012_inventory_lists_every_guideline() {
+        let p: Profile =
+            serde_yaml::from_str(include_str!("../profiles/misra-c-2012.yaml")).unwrap();
+        assert!(p.inventory_complete);
+        // Guidelines per section of the first edition: Dir 1-4, then Rule 1-22.
+        let directives = [1, 1, 1, 13];
+        let rules = [
+            3, 7, 2, 2, 9, 2, 4, 14, 5, 8, 9, 4, 6, 4, 7, 7, 8, 8, 2, 14, 12, 6,
+        ];
+        let mut expected = Vec::new();
+        for (kind, sizes) in [("Dir", &directives[..]), ("Rule", &rules[..])] {
+            for (section, &n) in sizes.iter().enumerate() {
+                expected.extend((1..=n).map(|i| format!("{kind} {}.{i}", section + 1)));
+            }
+        }
+        let ids: Vec<_> = p.rules.iter().map(|r| r.rule_id.clone()).collect();
+        assert_eq!(ids, expected);
+        assert_eq!(ids.len(), 159);
+        let count = |kind: &str, c: Category| {
+            p.rules
+                .iter()
+                .filter(|r| r.rule_id.starts_with(kind) && r.category == Some(c))
+                .count()
+        };
+        assert_eq!(count("Dir", Category::Mandatory), 0);
+        assert_eq!(count("Dir", Category::Required), 9);
+        assert_eq!(count("Dir", Category::Advisory), 7);
+        assert_eq!(count("Rule", Category::Mandatory), 10);
+        assert_eq!(count("Rule", Category::Required), 101);
+        assert_eq!(count("Rule", Category::Advisory), 32);
+        for r in &p.rules {
+            let directive = r.rule_id.starts_with("Dir");
+            assert_eq!(r.decidability.is_none(), directive, "{}", r.rule_id);
+            assert_eq!(r.analysis_scope.is_none(), directive, "{}", r.rule_id);
+            assert!(!r.applies_to.is_empty() && !r.limitations.is_empty());
+            assert!(r.applies_to.iter().all(|v| v == "C90" || v == "C99"));
         }
     }
 }
