@@ -563,6 +563,49 @@ fn draft_misra_process_rejects_unreviewed_mapping_and_weakening() {
 }
 
 #[test]
+fn bundled_misra_c_inventory_drafts_every_guideline_for_manual_assessment() {
+    let t = fixture(false);
+    let mut config: serde_json::Value =
+        serde_yaml::from_slice(&fs::read(t.path().join("safety.yaml")).unwrap()).unwrap();
+    config["coding"] = serde_json::json!({"c":"MISRA-C:2012","recategorization":"grp.json"});
+    fs::write(t.path().join("safety.yaml"), config.to_string()).unwrap();
+    fs::write(t.path().join("grp.json"),"[{\"edition\":\"MISRA-C:2012\",\"rule_id\":\"Rule 15.1\",\"original_category\":\"advisory\",\"proposed_category\":\"required\",\"rationale\":\"project policy\"}]").unwrap();
+    let out = bin().arg("doctor").arg(t.path()).output().unwrap();
+    assert_ne!(
+        out.status.code(),
+        Some(2),
+        "{}",
+        String::from_utf8_lossy(&out.stdout)
+    );
+    let run: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    let draft: serde_json::Value = serde_json::from_slice(
+        &fs::read(
+            t.path()
+                .join(".safety/runs")
+                .join(run["id"].as_str().unwrap())
+                .join("misra-drafts.json"),
+        )
+        .unwrap(),
+    )
+    .unwrap();
+    let guidelines = draft["gcs"]["guidelines"].as_array().unwrap();
+    assert_eq!(guidelines.len(), 159);
+    assert!(guidelines.iter().all(|g| {
+        g["manual_review_required"] == true
+            && g["compliance"]
+                .as_str()
+                .unwrap()
+                .starts_with("not_established")
+    }));
+    assert_eq!(draft["gcs"]["inventory"][0]["inventory_complete"], true);
+    assert_eq!(draft["gcs"]["compliance"], "not_established");
+    // Recorded categories reject a proposal that misstates the original category.
+    fs::write(t.path().join("grp.json"),"[{\"edition\":\"MISRA-C:2012\",\"rule_id\":\"Rule 9.1\",\"original_category\":\"advisory\",\"proposed_category\":\"required\",\"rationale\":\"misstated\"}]").unwrap();
+    let bad = bin().arg("doctor").arg(t.path()).output().unwrap();
+    assert_eq!(bad.status.code(), Some(2));
+}
+
+#[test]
 #[ignore = "requires pinned Frama-C and ESBMC"]
 fn real_frama_c_rejects_unreviewed_compiler() {
     let t = proof_fixture(

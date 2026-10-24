@@ -1,9 +1,25 @@
 # MISRA coverage and original checks
 
 No exact MISRA guideline mapping is validated. The user authorized unmapped
-original checks. Bundled edition manifests in `profiles/` have empty guideline
-inventories and explicitly incomplete inventory status. No proprietary standard
-text, reconstructed inventory or invented rule identifiers are distributed.
+original checks. No proprietary standard text or invented rule identifiers are
+distributed.
+
+`profiles/misra-c-2012.yaml` inventories every guideline of the MISRA C:2012
+first edition (March 2013): 16 directives (Dir 1.1-4.13) and 143 rules (Rule
+1.1-22.6). It records each guideline's identifier, category, decidability, analysis
+scope and C90/C99 applicability, taken from a user-supplied licensed copy. It
+does not include headlines or other standard text. Amendments and technical corrigenda are
+not included. Every directive is `manual` and every rule is `not_implemented`,
+and each one requires manual review. The inventory is complete, but no guideline is
+automatically enforced. A project can raise a guideline to `supported` or `partial` only through a
+reviewed registry. The MISRA C++:2023 manifest still has an empty, explicitly incomplete
+inventory.
+
+| Category | Directives | Rules |
+| --- | --- | --- |
+| Mandatory | 0 | 10 |
+| Required | 9 | 101 |
+| Advisory | 7 | 32 |
 
 | Original check | Implemented behavior | Scope limit |
 | --- | --- | --- |
@@ -36,7 +52,8 @@ partial, manual, not_implemented and not_applicable, with implementation,
 automated check IDs, manual-review flag and limitations. Supported/partial
 claims require supplied mapping-review source reference, reviewer, timestamp
 and existing test-evidence paths. Not-applicable needs documented project
-conditions. Unknown editions, duplicate IDs and unsupported fields are rejected.
+conditions. Optional `category`, `decidability`, `analysis_scope` and
+`applies_to` fields record guideline classification. Unknown editions, duplicate IDs and unsupported fields are rejected.
 This validates supplied records; it cannot authenticate a licensed standards
 review or replace that review. No mapping review is fabricated by this project.
 
@@ -45,12 +62,14 @@ rationale, artifacts, change_request and optional external review. Unknown rules
 and duplicates are rejected. Findings remain visible; the toolkit never approves
 or suppresses them through a deviation. `coding.recategorization` accepts draft
 GRP proposals with edition/rule, original/proposed category and rationale;
-unknown or weakened categories are rejected. `evidence.reviews` stores separate
+unknown or weakened categories, and original categories that differ from the
+inventory, are rejected. `evidence.reviews` stores separate
 externally supplied reviewer/decision/rationale/timestamp/evidence/change_record
 records. These are process assertions, never toolkit-granted approval.
 
 Every relevant run generates `misra-drafts.json` with draft GEP, GRP, GCS and
-deviation summaries. GCS never derives compliance from analyzer silence. Actual
+deviation summaries. GCS includes per-edition inventory size and coverage counts.
+GCS never derives compliance from analyzer silence. Actual
 check selection and translation-unit completeness determine whether an
 execution is recorded as performed; manual work and incomplete inventories
 remain outstanding. Review supplied registries against licensed editions.

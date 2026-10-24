@@ -3,14 +3,15 @@
 The native toolkit, CLI, MCP, original Clang checks, formal adapters,
 traceability, coverage/evidence workflow and release tooling are implemented.
 MISRA guideline mapping is deliberately **unvalidated**, under the user's
-explicit instruction to proceed with unmapped checks. No licensed guideline
-inventory or exact rule mapping has been invented to close that exception.
+explicit instruction to proceed with unmapped checks. The MISRA C:2012 guideline
+inventory (identifiers and classifications from a user-supplied licensed copy) is
+complete. No exact rule mapping has been invented to close that exception.
 
 | Phase | Working implementation and real validation | Capability boundary |
 | --- | --- | --- |
 | 1 Foundation | Strict config/path validation, init/doctor, compilation variants, one runner, versions, provenance and bounded JSON | Linux x86-64 is the validated reference; proprietary compiler flags can be unsupported |
 | 2 Clang | C/C++ clang-tidy/static analyzer, normalized native ranges, per-unit completeness, SARIF and seven-case benchmark | Selected checks do not find every defect; no unvalidated result cache |
-| 3 Original checks/MISRA process | Three AST/preprocessor checks with positive/negative/boundary/macro tests, edition registries, reviewed-mapping input validation, draft GEP/GRP/GCS/deviations and separate human-record import | Exact MISRA mappings and inventories remain unvalidated by approved scope decision; no compliance/approval grant |
+| 3 Original checks/MISRA process | Three AST/preprocessor checks with positive/negative/boundary/macro tests, edition registries, reviewed-mapping input validation, draft GEP/GRP/GCS/deviations and separate human-record import | Exact MISRA mappings and the MISRA C++:2023 inventory remain unvalidated by approved scope decision; no compliance/approval grant |
 | 4 Traceability | AST USRs, declarations/definitions, direct calls, templates/specializations, explicit per-build graphs, cycles/unknown/untraced/baseline gaps | Dynamic/virtual/indirect calls and ambiguous ownership remain visible investigation gaps |
 | 5 Formal | Real Frama-C Eva/WP and ESBMC C/C++ BMC/induction, validated harness metadata, property outcomes, scoped assumptions/bounds and native counterexamples | Sequential source/library models; user assumptions need authorized review; no unrestricted bounded-proof claim |
 | 6 Coverage/evidence | Native LLVM source/branch/MC/DC import, per-condition gaps, provenance and trace joins, immutable run creation, SHA checks and persisted reports | Host/target provenance is supplied; instrumentation exclusions, coupling/object/target/qualification evidence remain separate objectives |
