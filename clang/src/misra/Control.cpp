@@ -133,7 +133,7 @@ std::optional<bool> rangeInvariant(const Expr *E, ASTContext &C) {
   return std::nullopt;
 }
 std::optional<bool> invariant(const Expr *E, ASTContext &C) {
-  if (!E || E->HasSideEffects(C)) return std::nullopt;
+  if (!E || E->containsErrors() || E->HasSideEffects(C)) return std::nullopt;
   bool Value = false;
   if (E->EvaluateAsBooleanCondition(Value, C)) return Value;
   return rangeInvariant(E, C);

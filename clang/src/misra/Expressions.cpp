@@ -71,13 +71,14 @@ bool notEvaluated(ASTContext &C, const Expr *E) {
   for (const Stmt *P = parentStmt(C, E); P; Child = P, P = parentStmt(C, P)) {
     if (const auto *Cond = dyn_cast<ConditionalOperator>(P)) {
       bool Value = false;
-      if (Child != Cond->getCond() && Cond->getCond()->EvaluateAsBooleanCondition(Value, C) &&
+      if (Child != Cond->getCond() && !Cond->getCond()->containsErrors() &&
+          Cond->getCond()->EvaluateAsBooleanCondition(Value, C) &&
           !Cond->getCond()->HasSideEffects(C))
         if ((Value && Child == Cond->getFalseExpr()) || (!Value && Child == Cond->getTrueExpr())) return true;
     }
     if (const auto *B = dyn_cast<BinaryOperator>(P); B && B->isLogicalOp() && Child == B->getRHS()) {
       bool Value = false;
-      if (B->getLHS()->EvaluateAsBooleanCondition(Value, C) && Value == (B->getOpcode() == BO_LOr)) return true;
+      if (!B->getLHS()->containsErrors() && B->getLHS()->EvaluateAsBooleanCondition(Value, C) && Value == (B->getOpcode() == BO_LOr)) return true;
     }
   }
   return false;

@@ -31,7 +31,7 @@ for source in sorted(fixtures.glob("*.c")):
     expected = {(f.name, n) for f in files
                 for n, line in enumerate(f.read_text().splitlines(), 1) if "NONCOMPLIANT" in line}
     result = subprocess.run(
-        [exe, f"--load={module}", "--allow-no-checks", "--checks=-*," + ",".join(checks),
+        [exe, f"--load={module}", "--checks=-*," + ",".join(checks),
          "--config={HeaderFilterRegex: '.*'}", str(source), "--", *args, f"-I{fixtures}"],
         capture_output=True, text=True, timeout=120)
     actual = set()
@@ -46,6 +46,13 @@ for source in sorted(fixtures.glob("*.c")):
     if result.returncode != 0 and "clang-diagnostic-error" not in checks:
         failures.append(f"{source.name}: clang-tidy exit {result.returncode}\n{result.stderr}")
     covered.update(c for c in checks if c.startswith("misra-c2012-"))
+    # Every check together must also survive each fixture, including ones
+    # with compile errors, without crashing the analyzer host.
+    together = subprocess.run(
+        [exe, f"--load={module}", "--checks=-*,misra-c2012-*", str(source), "--", *args, f"-I{fixtures}"],
+        capture_output=True, text=True, timeout=300)
+    if together.returncode < 0 or "Stack dump" in together.stderr:
+        failures.append(f"{source.name}: crash with all checks enabled\n{together.stderr[-2000:]}")
 missing = sorted(registered - covered)
 if missing:
     failures.append(f"checks without fixtures: {missing}")

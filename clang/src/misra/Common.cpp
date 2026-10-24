@@ -131,7 +131,8 @@ std::string objectKey(const Expr *E) {
 std::optional<llvm::APSInt> integerConstant(const Expr *E, ASTContext &C) {
   // The value as written, before any implicit conversion of the context.
   E = stripAll(E);
-  if (!E || !E->getType()->isIntegralOrEnumerationType() || E->isValueDependent()) return std::nullopt;
+  if (!E || E->containsErrors() || !E->getType()->isIntegralOrEnumerationType() || E->isValueDependent())
+    return std::nullopt;
   return E->getIntegerConstantExpr(C);
 }
 static bool refersToObjectOrCall(const Stmt *S) {
@@ -143,6 +144,7 @@ static bool refersToObjectOrCall(const Stmt *S) {
   return false;
 }
 bool isConstantExpression(const Expr *E, ASTContext &C) {
+  if (!E || E->containsErrors()) return false;
   if (integerConstant(E, C)) return true;
   return !refersToObjectOrCall(E) && E->isEvaluatable(C);
 }
@@ -169,7 +171,7 @@ static bool leavesLoop(const Stmt *S, bool Break, bool Continue) {
 static bool loopBodyBreaks(const Stmt *Body) { return leavesLoop(Body, true, false); }
 static std::optional<bool> constantCondition(const Expr *E, ASTContext &C) {
   bool Value = false;
-  if (E && !E->HasSideEffects(C) && E->EvaluateAsBooleanCondition(Value, C)) return Value;
+  if (E && !E->containsErrors() && !E->HasSideEffects(C) && E->EvaluateAsBooleanCondition(Value, C)) return Value;
   return std::nullopt;
 }
 bool canCompleteNormally(const Stmt *S, ASTContext &C) {
@@ -361,7 +363,7 @@ static EType binaryEssential(const BinaryOperator *B, ASTContext &C) {
 }
 
 EType essentialType(const Expr *E, ASTContext &C) {
-  if (!E) return {};
+  if (!E || E->containsErrors()) return {};
   E = E->IgnoreParenImpCasts();
   const SourceManager &SM = C.getSourceManager();
   const LangOptions &LO = C.getLangOpts();
