@@ -125,6 +125,8 @@ std::string objectKey(const Expr *E) {
 }
 
 std::optional<llvm::APSInt> integerConstant(const Expr *E, ASTContext &C) {
+  // The value as written, before any implicit conversion of the context.
+  E = stripAll(E);
   if (!E || !E->getType()->isIntegralOrEnumerationType() || E->isValueDependent()) return std::nullopt;
   return E->getIntegerConstantExpr(C);
 }
