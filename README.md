@@ -52,6 +52,11 @@ bounds output, enforces time/memory limits and rejects unreviewed compiler
 flags. It never executes the compiler named in a compilation database, project
 build scripts, or test programs. No automatic fixes are requested.
 
+Scans analyse one translation unit at a time by default. Set `tools.jobs`
+(1 to 64) to run that many Clang-Tidy processes concurrently; each keeps its own
+time and memory limits, so peak memory scales with `jobs`. Findings and
+recorded executions keep compilation database order regardless of scheduling.
+
 Analyzer writes are restricted with Landlock when available. When unavailable,
 executions explicitly record the absence of filesystem isolation. Set
 `tools.require_filesystem_isolation: true` to refuse execution without it.

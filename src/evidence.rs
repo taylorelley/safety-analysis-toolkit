@@ -2,7 +2,7 @@ use crate::{
     config::{Config, inside, output_dir},
     model::{Completeness, Run, Status},
 };
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
 use sha2::{Digest, Sha256};
 use std::{
     collections::BTreeMap,
@@ -38,7 +38,7 @@ pub fn fingerprint(root: &Path, excluded: &Path) -> Result<BTreeMap<String, Stri
         root: &Path,
         dir: &Path,
         excluded: &Path,
-        out: &mut BTreeMap<String, String>,
+        out: &mut Vec<(String, PathBuf)>,
     ) -> Result<()> {
         let mut entries = fs::read_dir(dir)?.collect::<std::io::Result<Vec<_>>>()?;
         entries.sort_by_key(|e| e.file_name());
@@ -67,14 +67,24 @@ pub fn fingerprint(root: &Path, excluded: &Path) -> Result<BTreeMap<String, Stri
             if meta.is_dir() {
                 walk(root, &p, excluded, out)?
             } else if meta.is_file() {
-                out.insert(rel.to_string_lossy().into_owned(), hash_file(&p)?);
+                out.push((rel.to_string_lossy().into_owned(), p));
             }
         }
         Ok(())
     }
-    let mut out = BTreeMap::new();
-    walk(root, root, excluded, &mut out)?;
-    Ok(out)
+    let mut files = Vec::new();
+    walk(root, root, excluded, &mut files)?;
+    // Hashing dominates fingerprinting of large trees, so files are hashed concurrently.
+    let jobs = std::thread::available_parallelism().map_or(1, |n| n.get().min(8));
+    let hashes = crate::runner::parallel(&files, jobs, |_, (_, p)| hash_file(p));
+    files
+        .into_iter()
+        .zip(hashes)
+        .map(|((rel, _), hash)| {
+            let hash = hash.context("request cancelled during fingerprinting")??;
+            Ok((rel, hash))
+        })
+        .collect()
 }
 pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)> {
     let base = output_dir(root, &c.evidence.directory)?;

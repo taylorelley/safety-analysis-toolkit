@@ -166,6 +166,18 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
         bundled.remove(&profile.edition);
         profiles[pos] = profile;
     }
+    // Distinct check selections, one per analyzer invocation in a scan.
+    let selections: BTreeSet<&str> = run
+        .executions
+        .iter()
+        .flat_map(|e| &e.arguments)
+        .filter_map(|a| a.strip_prefix("--checks="))
+        .collect();
+    // Finding indices per check, so related findings keep their run order.
+    let mut by_check: BTreeMap<&str, Vec<usize>> = BTreeMap::new();
+    for (i, f) in run.findings.iter().enumerate() {
+        by_check.entry(f.rule_id.as_str()).or_default().push(i);
+    }
     let mut entries = Vec::new();
     let mut known = BTreeSet::new();
     let mut categories = BTreeMap::new();
@@ -208,35 +220,34 @@ pub fn drafts(root: &Path, c: &Config, run: &Run) -> Result<Value> {
                     "not-applicable guideline needs documented project conditions"
                 );
             }
-            let related: Vec<_> = run
-                .findings
+            let mut related: Vec<_> = rule
+                .automated_checks
                 .iter()
-                .filter(|f| rule.automated_checks.contains(&f.rule_id))
-                .map(|f| f.id.clone())
+                .filter_map(|check| by_check.get(check.as_str()))
+                .flatten()
+                .copied()
                 .collect();
+            related.sort_unstable();
+            related.dedup();
+            let related: Vec<_> = related.iter().map(|&i| &run.findings[i].id).collect();
             // Compiler errors are reported whatever the check selection.
             let enabled = |id: &String| {
                 id == "clang-diagnostic-error"
-                    || run.executions.iter().any(|e| {
-                        e.arguments
-                            .iter()
-                            .filter_map(|a| a.strip_prefix("--checks="))
-                            .any(|setting| {
-                                let mut selected = false;
-                                for part in setting.split(',') {
-                                    let (negative, pattern) =
-                                        part.strip_prefix('-').map_or((false, part), |p| (true, p));
-                                    let matches = pattern == "*"
-                                        || pattern == id
-                                        || pattern
-                                            .strip_suffix('*')
-                                            .is_some_and(|prefix| id.starts_with(prefix));
-                                    if matches {
-                                        selected = !negative
-                                    }
-                                }
-                                selected
-                            })
+                    || selections.iter().any(|setting| {
+                        let mut selected = false;
+                        for part in setting.split(',') {
+                            let (negative, pattern) =
+                                part.strip_prefix('-').map_or((false, part), |p| (true, p));
+                            let matches = pattern == "*"
+                                || pattern == id
+                                || pattern
+                                    .strip_suffix('*')
+                                    .is_some_and(|prefix| id.starts_with(prefix));
+                            if matches {
+                                selected = !negative
+                            }
+                        }
+                        selected
                     })
             };
             let automated_performed = run.operation == "scan"

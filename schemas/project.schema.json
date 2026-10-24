@@ -198,6 +198,11 @@
           "minimum": 128,
           "maximum": 65536
         },
+        "jobs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 64
+        },
         "allowlist": {
           "type": "array",
           "items": {
