@@ -77,6 +77,10 @@ pub fn fingerprint(root: &Path, excluded: &Path) -> Result<BTreeMap<String, Stri
     // Hashing dominates fingerprinting of large trees, so files are hashed concurrently.
     let jobs = std::thread::available_parallelism().map_or(1, |n| n.get().min(8));
     let hashes = crate::runner::parallel(&files, jobs, |_, (_, p)| hash_file(p));
+    anyhow::ensure!(
+        !crate::runner::cancelled(),
+        "request cancelled during fingerprinting"
+    );
     files
         .into_iter()
         .zip(hashes)
@@ -290,6 +294,25 @@ mod tests {
         let a = fingerprint(t.path(), &t.path().join(".safety")).unwrap();
         fs::write(t.path().join("untracked.c"), "b").unwrap();
         assert_ne!(a, fingerprint(t.path(), &t.path().join(".safety")).unwrap());
+    }
+    #[test]
+    fn fingerprint_cancelled_after_workers_finish() {
+        use std::sync::atomic::{AtomicUsize, Ordering};
+        let t = tempfile::tempdir().unwrap();
+        fs::write(t.path().join("input.c"), "int x;").unwrap();
+        let caller = std::thread::current().id();
+        let checks = AtomicUsize::new(0);
+        let result = crate::runner::with_cancellation(
+            // Allow traversal and every worker check; cancel when the caller checks again.
+            move || {
+                std::thread::current().id() == caller && checks.fetch_add(1, Ordering::Relaxed) > 0
+            },
+            || fingerprint(t.path(), &t.path().join(".safety")),
+        );
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "request cancelled during fingerprinting"
+        );
     }
     #[test]
     fn tamper() {
