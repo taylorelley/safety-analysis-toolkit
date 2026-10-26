@@ -31,11 +31,12 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     );
     match version {
         Ok(v) => {
-            let valid = v.failure.is_none() && v.stdout.contains("version 19.1.7");
+            let valid = v.failure.is_none() && discovery::llvm_supported(&v.stdout);
             run.record(v);
             if !valid {
                 run.completeness.unsupported = units.len();
-                run.limitations.push("Requires pinned LLVM 19.1.7".into());
+                run.limitations
+                    .push("Requires LLVM 19.1.7 or a later 19.1.x release".into());
                 return evidence::finish(root, c, &dir, run);
             }
         }
@@ -65,21 +66,9 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     } else {
         None
     };
-    for (i, u) in units.iter().enumerate() {
-        if runner::cancelled() {
-            run.completeness.failed += units.len() - i;
-            run.limitations
-                .push("Remaining translation units cancelled".into());
-            break;
-        }
+    let analyze = |i: usize, u: &discovery::Unit| -> Result<Outcome> {
         if !u.unsupported.is_empty() {
-            run.completeness.unsupported += 1;
-            run.limitations.extend(
-                u.unsupported
-                    .iter()
-                    .map(|p| format!("{} {}: {p}", u.file.display(), u.variant)),
-            );
-            continue;
+            return Ok(Outcome::Unsupported);
         }
         let work = dir.join(format!("unit-{i}"));
         fs::create_dir(&work)?;
@@ -101,6 +90,7 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
             args[1] = format!("--checks={CHECKS},safety-*,misra-c2012-*");
             args.insert(0, format!("--load={}", path.display()));
         }
+        let mut out = Analyzed::default();
         match runner::execute(
             &tool,
             &args,
@@ -116,38 +106,67 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
                     &dir.join(&reference),
                     format!("{}\n{}", e.stdout, e.stderr).as_bytes(),
                 )?;
-                let mut failed = e.failure.is_some();
+                out.failed = e.failure.is_some();
                 if fixes.exists() {
                     match findings::parse(&fs::read(&fixes)?, &u.variant, &reference, &u.directory)
                     {
                         Ok(f) => {
-                            failed |= f.iter().any(|d| d.rule_id == "clang-diagnostic-error");
-                            run.findings.extend(f)
+                            out.failed |= f.iter().any(|d| d.rule_id == "clang-diagnostic-error");
+                            out.findings = f
                         }
                         Err(err) => {
-                            failed = true;
-                            run.limitations.push(err.to_string())
+                            out.failed = true;
+                            out.limitations.push(err.to_string())
                         }
                     }
                 } else if !e.stdout.trim().is_empty() || !e.stderr.trim().is_empty() {
-                    failed = true;
-                    run.limitations.push(format!(
+                    out.failed = true;
+                    out.limitations.push(format!(
                         "No structured diagnostics export for {}",
                         u.file.display()
                     ));
                 }
-                if failed {
+                out.execution = Some(e);
+            }
+            Err(e) => {
+                out.failed = true;
+                out.limitations.push(format!("{}: {e}", u.file.display()))
+            }
+        }
+        Ok(Outcome::Analyzed(Box::new(out)))
+    };
+    // Results are merged in unit order so evidence does not depend on scheduling.
+    let outcomes = runner::parallel(&units, c.tools.jobs, analyze);
+    let mut cancelled = 0;
+    for (u, outcome) in units.iter().zip(outcomes) {
+        match outcome.transpose()? {
+            None => cancelled += 1,
+            Some(Outcome::Unsupported) => {
+                run.completeness.unsupported += 1;
+                run.limitations.extend(
+                    u.unsupported
+                        .iter()
+                        .map(|p| format!("{} {}: {p}", u.file.display(), u.variant)),
+                );
+            }
+            Some(Outcome::Analyzed(out)) => {
+                if out.failed {
                     run.completeness.failed += 1
                 } else {
                     run.completeness.analyzed += 1
                 }
-                run.record(e);
-            }
-            Err(e) => {
-                run.completeness.failed += 1;
-                run.limitations.push(format!("{}: {e}", u.file.display()))
+                run.findings.extend(out.findings);
+                run.limitations.extend(out.limitations);
+                if let Some(e) = out.execution {
+                    run.record(e);
+                }
             }
         }
+    }
+    if cancelled > 0 {
+        run.completeness.failed += cancelled;
+        run.limitations
+            .push("Remaining translation units cancelled".into());
     }
     run.findings = findings::correlate(run.findings, root);
     run.complete = run.completeness.complete();
@@ -163,6 +182,17 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
         Status::Passed
     };
     evidence::finish(root, c, &dir, run)
+}
+enum Outcome {
+    Unsupported,
+    Analyzed(Box<Analyzed>),
+}
+#[derive(Default)]
+struct Analyzed {
+    failed: bool,
+    findings: Vec<crate::model::Finding>,
+    limitations: Vec<String>,
+    execution: Option<crate::model::Execution>,
 }
 pub fn profile_check(profile: Option<&str>) -> Result<()> {
     if profile.is_some_and(|p| p != "misra-c-2012" && p != "misra-cpp-2023") {

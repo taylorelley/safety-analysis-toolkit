@@ -44,14 +44,32 @@ pub fn parse(
 ) -> Result<Vec<Finding>> {
     let export: Export =
         serde_yaml::from_slice(data).context("invalid clang diagnostics export")?;
+    // Sources and their newline offsets, read once per file rather than per diagnostic.
+    let mut sources: BTreeMap<String, (usize, Vec<usize>)> = BTreeMap::new();
     let mut findings = Vec::new();
     for d in export.diagnostics {
         let file = directory.join(&d.message.file);
-        let source = std::fs::read(&file).context("diagnostic source unavailable")?;
-        anyhow::ensure!(
-            d.message.offset <= source.len(),
-            "diagnostic offset outside source"
-        );
+        if !sources.contains_key(&d.message.file) {
+            let source = std::fs::read(&file).context("diagnostic source unavailable")?;
+            let newlines = source
+                .iter()
+                .enumerate()
+                .filter_map(|(i, b)| (*b == b'\n').then_some(i))
+                .collect();
+            sources.insert(d.message.file.clone(), (source.len(), newlines));
+        }
+        let (len, newlines) = &sources[&d.message.file];
+        let len = *len;
+        anyhow::ensure!(d.message.offset <= len, "diagnostic offset outside source");
+        // One-based line and column of a byte offset.
+        let position = |offset: usize| {
+            let k = newlines.partition_point(|&n| n < offset);
+            (
+                k + 1,
+                k.checked_sub(1)
+                    .map_or(offset + 1, |k| offset - newlines[k]),
+            )
+        };
         let offset = d.message.offset;
         let end = d
             .message
@@ -62,20 +80,9 @@ pub fn parse(
                     && r.offset <= offset
                     && r.offset.saturating_add(r.length) >= offset
             })
-            .map(|r| r.offset.saturating_add(r.length).min(source.len()));
-        let end_line = end.map(|p| source[..p].iter().filter(|b| **b == b'\n').count() + 1);
-        let end_column = end.map(|p| {
-            source[..p]
-                .iter()
-                .rposition(|b| *b == b'\n')
-                .map_or(p + 1, |line| p - line)
-        });
-        let prefix = &source[..offset];
-        let line = prefix.iter().filter(|&&b| b == b'\n').count() + 1;
-        let column = prefix
-            .iter()
-            .rposition(|&b| b == b'\n')
-            .map_or(offset + 1, |n| offset - n);
+            .map(|r| position(r.offset.saturating_add(r.length).min(len)));
+        let (end_line, end_column) = (end.map(|p| p.0), end.map(|p| p.1));
+        let (line, column) = position(offset);
         findings.push(Finding {
             id: String::new(),
             tool: "clang-tidy-19".into(),
@@ -129,6 +136,22 @@ mod tests {
     #[test]
     fn malformed() {
         assert!(parse(b"invalid yaml", "v", "raw/x", Path::new(".")).is_err());
+    }
+    #[test]
+    fn positions() {
+        let d = tempfile::tempdir().unwrap();
+        std::fs::write(d.path().join("x.c"), "ab\ncd\n\nef").unwrap();
+        let export = "Diagnostics:\n\
+            - {DiagnosticName: a, Level: Warning, DiagnosticMessage: {Message: m, FilePath: x.c, FileOffset: 0, Ranges: [{FilePath: x.c, FileOffset: 0, Length: 4}]}}\n\
+            - {DiagnosticName: b, DiagnosticMessage: {Message: m, FilePath: x.c, FileOffset: 2}}\n\
+            - {DiagnosticName: c, DiagnosticMessage: {Message: m, FilePath: x.c, FileOffset: 7}}\n\
+            - {DiagnosticName: d, DiagnosticMessage: {Message: m, FilePath: x.c, FileOffset: 9}}\n";
+        let f = parse(export.as_bytes(), "v", "raw/x", d.path()).unwrap();
+        let at: Vec<_> = f.iter().map(|f| (f.line, f.column)).collect();
+        assert_eq!(at, [(1, 1), (1, 3), (4, 1), (4, 3)]);
+        assert_eq!((f[0].end_line, f[0].end_column), (Some(2), Some(2)));
+        assert_eq!(f[1].end_line, None);
+        assert!(parse(export.replace("9}}", "10}}").as_bytes(), "v", "r", d.path()).is_err());
     }
     #[test]
     fn empty() {

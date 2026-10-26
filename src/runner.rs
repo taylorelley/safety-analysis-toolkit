@@ -1,14 +1,58 @@
-thread_local! {static CANCEL:std::cell::RefCell<Option<Box<dyn Fn()->bool>>>=std::cell::RefCell::new(None);}
-pub fn with_cancellation<T>(check: impl Fn() -> bool + 'static, work: impl FnOnce() -> T) -> T {
-    CANCEL.with(|c| *c.borrow_mut() = Some(Box::new(check)));
-    struct Reset;
+/// Cancellation check shared with worker threads started on behalf of a request.
+pub type Cancellation = std::sync::Arc<dyn Fn() -> bool + Send + Sync>;
+thread_local! {static CANCEL:std::cell::RefCell<Option<Cancellation>>=const { std::cell::RefCell::new(None) };}
+pub fn with_cancellation<T>(
+    check: impl Fn() -> bool + Send + Sync + 'static,
+    work: impl FnOnce() -> T,
+) -> T {
+    scoped_cancellation(Some(std::sync::Arc::new(check)), work)
+}
+/// The check installed on this thread, for propagation to worker threads.
+pub fn current_cancellation() -> Option<Cancellation> {
+    CANCEL.with(|c| c.borrow().clone())
+}
+pub fn scoped_cancellation<T>(check: Option<Cancellation>, work: impl FnOnce() -> T) -> T {
+    let previous = CANCEL.with(|c| c.replace(check));
+    // Restore the enclosing check, including on unwind.
+    struct Reset(Option<Cancellation>);
     impl Drop for Reset {
         fn drop(&mut self) {
-            CANCEL.with(|c| *c.borrow_mut() = None);
+            CANCEL.with(|c| *c.borrow_mut() = self.0.take());
         }
     }
-    let _reset = Reset;
+    let _reset = Reset(previous);
     work()
+}
+/// Applies `work` to each item on up to `jobs` threads that share this thread's
+/// cancellation. Results keep item order; items skipped after cancellation are `None`.
+pub fn parallel<I: Sync, T: Send>(
+    items: &[I],
+    jobs: usize,
+    work: impl Fn(usize, &I) -> T + Sync,
+) -> Vec<Option<T>> {
+    use std::sync::{Mutex, atomic::AtomicUsize, atomic::Ordering};
+    let next = AtomicUsize::new(0);
+    let slots: Vec<Mutex<Option<T>>> = items.iter().map(|_| Mutex::new(None)).collect();
+    let cancellation = current_cancellation();
+    std::thread::scope(|scope| {
+        for _ in 0..jobs.clamp(1, items.len().max(1)) {
+            let (cancellation, next, slots, work) = (cancellation.clone(), &next, &slots, &work);
+            scope.spawn(move || {
+                scoped_cancellation(cancellation, || {
+                    while !cancelled() {
+                        let i = next.fetch_add(1, Ordering::Relaxed);
+                        let Some(item) = items.get(i) else { break };
+                        let result = work(i, item);
+                        *slots[i].lock().unwrap_or_else(|e| e.into_inner()) = Some(result);
+                    }
+                })
+            });
+        }
+    });
+    slots
+        .into_iter()
+        .map(|s| s.into_inner().unwrap_or_else(|e| e.into_inner()))
+        .collect()
 }
 pub static CLI_CANCELLED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 pub fn cancelled() -> bool {
@@ -143,8 +187,10 @@ pub fn execute(
     }
     static OUTPUT_SEQUENCE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
     let raw = write_dir.join("raw");
-    if !raw.exists() {
-        std::fs::create_dir(&raw)?;
+    // Concurrent executions may race to create the shared output directory.
+    match std::fs::create_dir(&raw) {
+        Err(e) if e.kind() != std::io::ErrorKind::AlreadyExists => return Err(e.into()),
+        _ => {}
     }
     let sequence = OUTPUT_SEQUENCE.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
     let output_refs = vec![
@@ -399,6 +445,33 @@ mod tests {
         .unwrap();
         assert!(e.stderr.contains("Operation not permitted"), "{}", e.stderr);
         assert_ne!(e.exit_code, Some(0));
+    }
+    #[test]
+    fn parallel_keeps_order_and_cancellation() {
+        let items: Vec<usize> = (0..50).collect();
+        let squares = parallel(&items, 4, |i, n| (i, n * n));
+        assert!(
+            squares
+                .iter()
+                .enumerate()
+                .all(|(i, r)| *r == Some((i, i * i)))
+        );
+        let seen = std::sync::atomic::AtomicUsize::new(0);
+        let start = Instant::now();
+        let partial = with_cancellation(
+            move || start.elapsed() > Duration::from_millis(50),
+            || {
+                parallel(&items, 2, |_, _| {
+                    seen.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+                    std::thread::sleep(Duration::from_millis(20))
+                })
+            },
+        );
+        assert!(partial.iter().any(Option::is_none));
+        assert_eq!(
+            partial.iter().filter(|r| r.is_some()).count(),
+            seen.into_inner()
+        );
     }
     #[test]
     fn cancellation_kills_child() {

@@ -81,6 +81,8 @@ pub struct Tools {
     pub esbmc: bool,
     pub timeout_seconds: u64,
     pub memory_mb: u64,
+    /// Translation units analysed concurrently; each analyzer keeps its own limits.
+    pub jobs: usize,
     pub allowlist: Vec<PathBuf>,
 }
 impl Default for Tools {
@@ -93,6 +95,7 @@ impl Default for Tools {
             esbmc: false,
             timeout_seconds: 60,
             memory_mb: 2048,
+            jobs: 1,
             allowlist: Vec::new(),
         }
     }
@@ -172,6 +175,7 @@ impl Config {
         if self.tools.timeout_seconds == 0
             || self.tools.timeout_seconds > 3600
             || !(128..=65536).contains(&self.tools.memory_mb)
+            || !(1..=64).contains(&self.tools.jobs)
         {
             bail!("invalid execution limits")
         }
@@ -277,6 +281,9 @@ mod tests {
         c.coding.c = Some("MISRA-C:2023".into());
         assert!(c.validate().is_err());
         c.coding.c = None;
+        c.tools.jobs = 0;
+        assert!(c.validate().is_err());
+        c.tools.jobs = 1;
         c.assurance = Some(Assurance {
             standard: "DO-278A".into(),
             level: "C".into(),

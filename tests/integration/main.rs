@@ -136,12 +136,12 @@ fn scan_fixture(cpp: bool) {
     );
 }
 #[test]
-#[ignore = "requires real clang-tidy 19.1.7 on PATH"]
+#[ignore = "requires real clang-tidy 19.1.7+ on PATH"]
 fn real_c_pipeline() {
     scan_fixture(false)
 }
 #[test]
-#[ignore = "requires real clang-tidy 19.1.7 on PATH"]
+#[ignore = "requires real clang-tidy 19.1.7+ on PATH"]
 fn real_cpp_pipeline() {
     scan_fixture(true)
 }
@@ -163,7 +163,7 @@ fn rejected_semantic_flag_is_incomplete() {
     assert_eq!(r["complete"], false);
 }
 #[test]
-#[ignore = "requires real clang-tidy 19.1.7 on PATH"]
+#[ignore = "requires real clang-tidy 19.1.7+ on PATH"]
 fn compiler_failure_is_incomplete() {
     let t = fixture(false);
     fs::write(t.path().join("unsafe.c"), "int broken( { return 0; }").unwrap();
@@ -174,7 +174,7 @@ fn compiler_failure_is_incomplete() {
     assert_eq!(r["completeness"]["failed"], 2);
 }
 #[test]
-#[ignore = "requires real clang-tidy 19.1.7 and Python 3"]
+#[ignore = "requires real clang-tidy 19.1.7+ and Python 3"]
 fn real_mcp_stdio() {
     let t = fixture(false);
     let script =
@@ -293,7 +293,7 @@ fn proof_fixture(cpp: bool, code: &str) -> tempfile::TempDir {
     t
 }
 #[test]
-#[ignore = "requires real ESBMC 8.6.0 on PATH"]
+#[ignore = "requires real ESBMC 8.6.0+ on PATH"]
 fn real_esbmc_properties() {
     for cpp in [false, true] {
         for (code, exit, outcome) in [
@@ -367,7 +367,7 @@ fn real_esbmc_properties() {
     }
 }
 #[test]
-#[ignore = "requires real LLVM/Clang 19.1.7 and Python 3"]
+#[ignore = "requires real LLVM/Clang 19.1.7+ and Python 3"]
 fn real_llvm_mcdc() {
     let script = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/integration/coverage_fixture.py");
@@ -384,7 +384,7 @@ fn real_llvm_mcdc() {
     );
 }
 #[test]
-#[ignore = "requires pinned Frama-C Manganese and Clang 19.1.7"]
+#[ignore = "requires Frama-C 25.0+ and Clang 19.1.7+"]
 fn real_frama_c() {
     for (code, method, entry, expected, success) in [
         (
@@ -462,7 +462,7 @@ fn malformed_harness_and_oversized_config_rejected() {
     assert!(String::from_utf8_lossy(&out.stdout).contains("parser limit"));
 }
 #[test]
-#[ignore = "requires real ESBMC 8.6.0"]
+#[ignore = "requires real ESBMC 8.6.0+"]
 fn real_esbmc_induction_harness() {
     let t = proof_fixture(
         false,
@@ -619,7 +619,7 @@ fn bundled_misra_c_inventory_drafts_every_guideline_with_partial_automation() {
 }
 
 #[test]
-#[ignore = "requires pinned Frama-C and ESBMC"]
+#[ignore = "requires Frama-C and ESBMC"]
 fn real_frama_c_rejects_unreviewed_compiler() {
     let t = proof_fixture(
         false,

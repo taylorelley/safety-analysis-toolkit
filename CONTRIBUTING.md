@@ -1,6 +1,6 @@
 # Contributing
 
-Use the pinned Rust toolchain and LLVM 19.1.7. Original contributions must be
+Use Rust 1.89 or later and LLVM 19.1.7 or a later 19.1.x release. Original contributions must be
 Apache-2.0 compatible. Do not submit MISRA standards text. Review dependency
 licenses before distributing binaries, containers or installers.
 
@@ -15,9 +15,9 @@ cmake --build build/clang --parallel 2
 ctest --test-dir build/clang --output-on-failure
 PATH="$PWD/build/clang:$PATH" SAFETY_TEST_MODULE="$PWD/build/clang/SafetyMisra.so" \
   cargo test --locked -- --include-ignored --skip real_esbmc_properties --skip real_frama_c --skip real_esbmc_induction_harness
-# With externally installed ESBMC 8.6.0:
+# With externally installed ESBMC 8.6.0 or later:
 cargo test --locked real_esbmc -- --ignored
-# With pinned Frama-C Manganese:
+# With Frama-C 25.0 (Manganese) or later:
 cargo test --locked real_frama_c -- --ignored
 ```
 
@@ -27,7 +27,7 @@ validation requires `clang-tidy-19`, `llvm-cov-19`, `llvm-profdata-19`, `clang-1
 real integration results with mocked output. The formal suites are opt-in; missing analyzers are skipped, never reported as passed.
 
 Use `make full-validation` with installed dependencies and Python jsonschema
-4.26.0. JSON/SARIF checks use original committed schemas and an external SARIF schema cached during setup:
+4.26.0 or later. JSON/SARIF checks use original committed schemas and an external SARIF schema cached during setup:
 
 ```sh
 mkdir -p .cache

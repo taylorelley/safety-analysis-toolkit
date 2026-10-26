@@ -219,6 +219,24 @@ fn validate_args(args: &[String]) -> Vec<String> {
     }
     problems
 }
+/// Dotted numeric version following `marker` in tool output, e.g. "version 19.1.7".
+pub fn version_after(text: &str, marker: &str) -> Option<Vec<u32>> {
+    let rest = &text[text.find(marker)? + marker.len()..];
+    let end = rest
+        .find(|c: char| !c.is_ascii_digit() && c != '.')
+        .unwrap_or(rest.len());
+    rest[..end]
+        .trim_end_matches('.')
+        .split('.')
+        .map(|part| part.parse().ok())
+        .collect()
+}
+/// LLVM 19.1.7 or a later 19.1.x patch release, matching LLVM's own
+/// major.minor compatibility rule for the native module.
+pub fn llvm_supported(version_output: &str) -> bool {
+    version_after(version_output, "version ")
+        .is_some_and(|v| v.starts_with(&[19, 1]) && v >= vec![19, 1, 7])
+}
 pub fn executable(name: &str, allowlist: &[PathBuf]) -> Option<PathBuf> {
     let candidate = std::env::var_os("PATH").and_then(|v| {
         std::env::split_paths(&v)
@@ -340,6 +358,24 @@ mod tests {
         for f in ["@evil", "-fplugin=evil", "-Xclang", "-funknown"] {
             assert!(!validate_args(&[f.into()]).is_empty());
         }
+    }
+    #[test]
+    fn versions() {
+        assert!(llvm_supported("Ubuntu LLVM version 19.1.7\n"));
+        assert!(llvm_supported("LLVM version 19.1.8 (x)"));
+        assert!(!llvm_supported("LLVM version 19.2.0"));
+        assert!(!llvm_supported("LLVM version 19.1.1"));
+        assert!(!llvm_supported("LLVM version 20.1.0"));
+        assert!(!llvm_supported("no version here"));
+        assert_eq!(
+            version_after("ESBMC version 8.6.0.", "ESBMC version "),
+            Some(vec![8, 6, 0])
+        );
+        assert_eq!(
+            version_after("25.0-beta (Manganese)", ""),
+            Some(vec![25, 0])
+        );
+        assert_eq!(version_after("version x", "version "), None);
     }
     #[test]
     fn variants() {
