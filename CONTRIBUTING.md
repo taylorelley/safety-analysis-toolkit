@@ -1,6 +1,8 @@
 # Contributing
 
-Use the pinned Rust toolchain and LLVM 19.1.7. Original contributions must be
+Use Rust 1.89 or later and LLVM 19.1.0 or later in the 19.1 series. CI checks
+both the minimum Rust version and current stable; minimum versions are recorded
+in `Cargo.toml` (`rust-version`), `clang/CMakeLists.txt` and `src/version.rs`. Original contributions must be
 Apache-2.0 compatible. Do not submit MISRA standards text. Review dependency
 licenses before distributing binaries, containers or installers.
 
@@ -15,9 +17,9 @@ cmake --build build/clang --parallel 2
 ctest --test-dir build/clang --output-on-failure
 PATH="$PWD/build/clang:$PATH" SAFETY_TEST_MODULE="$PWD/build/clang/SafetyMisra.so" \
   cargo test --locked -- --include-ignored --skip real_esbmc_properties --skip real_frama_c --skip real_esbmc_induction_harness
-# With externally installed ESBMC 8.6.0:
+# With externally installed ESBMC 8.6.0 or later:
 cargo test --locked real_esbmc -- --ignored
-# With pinned Frama-C Manganese:
+# With Frama-C 25.0 (Manganese) or later:
 cargo test --locked real_frama_c -- --ignored
 ```
 

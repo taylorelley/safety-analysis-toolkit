@@ -2,7 +2,7 @@
 
 A local Rust CLI and MCP server for C/C++ static analysis, scoped formal
 verification, AST traceability, LLVM source/MC/DC coverage and reproducible evidence.
-It uses Clang/LLVM 19.1.7, Frama-C Eva/WP and ESBMC rather than new analysis engines.
+It uses Clang/LLVM 19.1 or later, Frama-C Eva/WP and ESBMC rather than new analysis engines.
 The out-of-tree Clang-Tidy module implements three original policy checks and
 148 MISRA C:2012 guideline checks. **157 of 159 MISRA C:2012 guidelines have
 partial automated assessment; no mapping is independently reviewed and no
@@ -14,7 +14,10 @@ native integrations, packaging and offline reference validation are recorded in
 
 ## Build and use
 
-Validated reference: Linux x86-64, Rust 1.99.1, LLVM/Clang **19.1.7**.
+Minimum versions: Rust 1.89, LLVM/Clang 19.1.0 (19.1.x series), CMake 3.25,
+ESBMC 8.6.0 and Frama-C 25.0. Validated reference: Linux x86-64, Rust 1.99.1,
+LLVM/Clang **19.1.7**. Other releases at or above the minimum run, but each
+run records a limitation that output interpretation for that release is unvalidated.
 AArch64 runner code exists but has not been validated here. Install `clang-tidy-19`,
 `clang-19`, `llvm-19-dev`, `libclang-19-dev`, `libclang-rt-19-dev`, CMake >=3.25, a C++17 compiler and
 Python 3. See [contributing](CONTRIBUTING.md) for validation.

@@ -19,7 +19,7 @@ configuration is overridden. Static Analyzer diagnostics arrive through
 `clang-analyzer-*`. The runner uses direct argv execution, no shell. The
 compiler named in the database is never executed.
 
-LLVM 19.1.7 emits no export file on a diagnostic-free run. That case is accepted
+The LLVM 19.1.7 reference emits no export file on a diagnostic-free run. That case is accepted
 only with successful exit and empty stdout/stderr. Malformed structured output,
 unexpected output without an export, parser errors and timeouts are incomplete.
 Raw output is always retained. A diagnostic remains a diagnostic, not a formally
@@ -29,7 +29,8 @@ The custom C++ module uses Clang AST matchers, preprocessor callbacks and
 comment handlers. Its three original policy checks carry no MISRA rule
 identifier. Its `misra-c2012-*` checks implement partial MISRA C:2012 guideline
 mappings that await independent review (see [MISRA coverage](misra-coverage.md)). CMake
-requires LLVM 19.1.7 exactly. Native module loading requires an explicit reviewed module path and allowlist.
+requires LLVM 19.1.0 or a later 19.1.x release; build against the same LLVM as
+the clang-tidy host. Native module loading requires an explicit reviewed module path and allowlist.
 CTest and a real CLI fixture validate loading against the matching host.
 
 Run records include input content hashes, exact execution/environment records,

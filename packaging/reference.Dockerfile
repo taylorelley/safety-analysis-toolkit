@@ -2,7 +2,7 @@
 FROM debian:bookworm-slim@sha256:7ff6ba31527b9e336162fa061746c366c4b2032f4d2cff2078bea43f78efe3f8
 ENV PATH="/root/.cargo/bin:/usr/lib/llvm-19/bin:${PATH}"
 WORKDIR /opt/safety-cache
-COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
+COPY Cargo.toml Cargo.lock ./
 COPY src ./src
 COPY profiles ./profiles
 RUN --mount=type=secret,id=system_ca,required=true \

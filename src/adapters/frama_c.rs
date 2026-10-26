@@ -145,7 +145,26 @@ fn properties(
         } else {
             ProofOutcome::Unknown
         };
-        result.push(Property{id:format!("FC-{}",&evidence::hash(description.as_bytes())[..20]),description:format!("{description} [native status: {status}]"),outcome,scope:format!("Frama-C 25.0-beta (Debian Manganese), {method}, entry {entry}, x86 {bits}-bit model; {}",if method=="eva"{"reachable sequential C states; alarms and native assumptions apply"}else{"supplied ACSL contracts; WP typed memory model, RTE obligations and Qed only"}),assumptions:assumptions.clone(),unwind_bound:None,completeness_established:clean&&no_unknown,native_references:vec!["raw/frama-c.log".into(),"raw/frama-c-properties.tsv".into()]});
+        result.push(Property {
+            id: format!("FC-{}", &evidence::hash(description.as_bytes())[..20]),
+            description: format!("{description} [native status: {status}]"),
+            outcome,
+            scope: format!(
+                "Frama-C, {method}, entry {entry}, x86 {bits}-bit model; {}",
+                if method == "eva" {
+                    "reachable sequential C states; alarms and native assumptions apply"
+                } else {
+                    "supplied ACSL contracts; WP typed memory model, RTE obligations and Qed only"
+                }
+            ),
+            assumptions: assumptions.clone(),
+            unwind_bound: None,
+            completeness_established: clean && no_unknown,
+            native_references: vec![
+                "raw/frama-c.log".into(),
+                "raw/frama-c-properties.tsv".into(),
+            ],
+        });
     }
     if result.is_empty() {
         result.push(Property {
@@ -224,6 +243,7 @@ pub fn prove(
             false,
         );
     };
+    let mut release = String::new();
     for args in [vec!["-version".into()], vec!["-print-share-path".into()]] {
         match runner::execute(
             &tool,
@@ -235,11 +255,31 @@ pub fn prove(
             c.tools.require_filesystem_isolation,
         ) {
             Ok(e) => {
-                let good = e.failure.is_none()
-                    && (args[0] != "-version" || e.stdout.trim() == "25.0-beta (Manganese)");
+                let failed = e.failure.is_some();
+                let version = args[0] == "-version";
+                let found = version
+                    .then(|| crate::version::parse(e.stdout.trim(), ""))
+                    .flatten();
+                if version {
+                    release = e.stdout.trim().to_string();
+                }
                 run.record(e);
-                if !good {
-                    return incomplete(run,root,c,&dir,"Unsupported Frama-C version or capability failure; requires Debian Manganese 25.0-beta".into(),true);
+                if failed {
+                    return incomplete(
+                        run,
+                        root,
+                        c,
+                        &dir,
+                        "Frama-C capability failure".into(),
+                        true,
+                    );
+                }
+                if version {
+                    use crate::version::{FRAMA_C_MINIMUM, FRAMA_C_REFERENCE, check};
+                    match check("Frama-C", found, FRAMA_C_MINIMUM, FRAMA_C_REFERENCE) {
+                        Ok(note) => run.limitations.extend(note),
+                        Err(reason) => return incomplete(run, root, c, &dir, reason, true),
+                    }
                 }
             }
             Err(e) => return incomplete(run, root, c, &dir, e.to_string(), true),
@@ -373,6 +413,11 @@ pub fn prove(
                     Ok(p) => p,
                     Err(e) => return incomplete(run, root, c, &dir, e.to_string(), true),
                 };
+            for p in &mut run.properties {
+                p.scope = p
+                    .scope
+                    .replacen("Frama-C,", &format!("Frama-C {release},"), 1);
+            }
             if run.executions.last().is_some_and(|e| e.failure.is_some()) {
                 for p in &mut run.properties {
                     p.outcome = ProofOutcome::Failed;

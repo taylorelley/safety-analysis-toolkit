@@ -1,6 +1,9 @@
 # Formal verification
 
-## ESBMC 8.6.0
+## ESBMC 8.6.0 or later
+
+The validated reference is 8.6.0; later releases are accepted and recorded as
+an unvalidated limitation. Property scopes name the detected release.
 
 The adapter selects Z3, 32/64-bit width, overflow checking and default unwinding
 assertions. Select one compilation entry using `--variant` when necessary.
@@ -24,8 +27,9 @@ are retained as native JSON and logs; they need investigation before being
 classified as production defects. MCP `safety.get_run` returns a bounded trace
 excerpt and its full local evidence reference.
 
-## Frama-C Manganese 25.0-beta
+## Frama-C 25.0 (Manganese) or later
 
+Later releases are accepted and recorded as an unvalidated limitation.
 The reference package is Debian `frama-c-base=20220511-manganese-3+b4`.
 C only; a selected complete analysis unit must contain the entry function.
 The default is Eva; WP is selected explicitly and uses Qed for supplied ACSL

@@ -31,12 +31,20 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     );
     match version {
         Ok(v) => {
-            let valid = v.failure.is_none() && v.stdout.contains("version 19.1.7");
+            let found = v
+                .failure
+                .is_none()
+                .then(|| crate::version::parse(&v.stdout, "LLVM version "))
+                .flatten();
             run.record(v);
-            if !valid {
-                run.completeness.unsupported = units.len();
-                run.limitations.push("Requires pinned LLVM 19.1.7".into());
-                return evidence::finish(root, c, &dir, run);
+            use crate::version::{LLVM_MINIMUM, LLVM_REFERENCE, check};
+            match check("LLVM", found, LLVM_MINIMUM, LLVM_REFERENCE) {
+                Ok(note) => run.limitations.extend(note),
+                Err(reason) => {
+                    run.completeness.unsupported = units.len();
+                    run.limitations.push(reason);
+                    return evidence::finish(root, c, &dir, run);
+                }
             }
         }
         Err(e) => {

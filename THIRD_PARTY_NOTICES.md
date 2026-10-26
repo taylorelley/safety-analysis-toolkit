@@ -5,7 +5,7 @@ Rust dependencies retain their respective copyright and license notices. Consult
 Cargo.lock and the generated dependency inventory before redistributing binaries.
 No analyzer executables, native libraries or container images are redistributed.
 
-LLVM/Clang 19.1.7: Apache-2.0 WITH LLVM-exception (and component-specific notices).
+LLVM/Clang 19.1 or later (reference 19.1.7): Apache-2.0 WITH LLVM-exception (and component-specific notices).
 Rust MCP SDK (rmcp): Apache-2.0. See each upstream project's licenses for actual
 redistribution obligations. Process invocation does not waive license obligations.
 

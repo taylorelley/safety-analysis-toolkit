@@ -52,13 +52,20 @@ pub fn import(
         c.tools.require_filesystem_isolation,
     ) {
         Ok(e) => {
-            let compatible = e.failure.is_none() && e.stdout.contains("version 19.1.7");
+            let found = e
+                .failure
+                .is_none()
+                .then(|| crate::version::parse(&e.stdout, "LLVM version "))
+                .flatten();
             run.record(e);
-            if !compatible {
-                run.completeness.unsupported = units.len();
-                run.limitations
-                    .push("Coverage import requires LLVM 19.1.7".into());
-                return evidence::finish(root, c, &dir, run);
+            use crate::version::{LLVM_MINIMUM, LLVM_REFERENCE, check};
+            match check("Coverage import LLVM", found, LLVM_MINIMUM, LLVM_REFERENCE) {
+                Ok(note) => run.limitations.extend(note),
+                Err(reason) => {
+                    run.completeness.unsupported = units.len();
+                    run.limitations.push(reason);
+                    return evidence::finish(root, c, &dir, run);
+                }
             }
         }
         Err(e) => {

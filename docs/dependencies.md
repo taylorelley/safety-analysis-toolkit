@@ -1,7 +1,7 @@
 # Dependency and license inventory
 
 Original toolkit code: Apache-2.0. Cargo.lock pins the Rust graph; native
-extensions target LLVM/Clang 19.1.7. `scripts/license_inventory.py` traverses the
+extensions target LLVM/Clang 19.1.0 or later in the 19.1 series (reference 19.1.7). `scripts/license_inventory.py` traverses the
 locked Linux dependency graph, selects an allowed SPDX license alternative and
 copies package license/notice files into the binary package. It fails closed
 for unknown/disallowed expressions or missing license texts. This is an
@@ -107,7 +107,7 @@ engineering redistribution policy, not a legal opinion.
 External executables/libraries are installed separately and are not included in
 toolkit archives. LLVM/Clang uses Apache-2.0 WITH LLVM-exception and component
 notices. Frama-C Manganese uses LGPL-2.1 (see package copyright and model headers).
-ESBMC 8.6.0 contains Apache-2.0 modifications, CBMC lineage and solver-specific
+ESBMC 8.6.0 (the reference release) contains Apache-2.0 modifications, CBMC lineage and solver-specific
 licenses; the upstream prebuilt bundle is not approved for redistribution here.
 The adapter explicitly selects Z3; that does not change the bundle's contents.
 
