@@ -50,6 +50,27 @@ jobs:
           name: clang-evidence
           path: examples/**/.safety/runs/
           include-hidden-files: true
+  clang-distribution-llvm:
+    # Exercises the documented LLVM minimum with a non-reference 19.1.x
+    # release (Ubuntu 24.04 ships 19.1.1); the clang job covers 19.1.7.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Install Ubuntu LLVM 19 packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-19 clang-tidy-19 llvm-19-dev libclang-19-dev libclang-rt-19-dev cmake
+          version="$(clang-tidy-19 --version | sed -n 's/.*version \(19\.1\.[0-9]*\).*/\1/p')"
+          echo "Distribution LLVM: $version"
+          dpkg --compare-versions "$version" ge 19.1.0
+          if [ "$version" = 19.1.7 ]; then echo "Runner provides the reference 19.1.7; this job no longer tests a non-reference release" >&2; exit 1; fi
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+      - run: make clang examples
+      - name: Real Clang integration tests
+        run: |
+          PATH="$PWD/build/clang:/usr/lib/llvm-19/bin:$PATH" SAFETY_TEST_MODULE="$PWD/build/clang/SafetyMisra.so" \
+            cargo test --locked -- --include-ignored --skip real_esbmc --skip real_frama_c
   reference-formal-and-package:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
