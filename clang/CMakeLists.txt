@@ -4,7 +4,15 @@ project(SafetyClang LANGUAGES C CXX)
 # clang-tidy modules are not ABI-compatible across minor releases. Build
 # against the same LLVM as the clang-tidy host; the validated reference is 19.1.7.
 find_package(LLVM 19.1.0 REQUIRED CONFIG)
-find_package(Clang REQUIRED CONFIG)
+# Take Clang from the LLVM installation found above. An unconstrained search can
+# pick another installed LLVM's Clang (for example Ubuntu's clang-18) and mix ABIs.
+find_package(Clang REQUIRED CONFIG HINTS "${LLVM_LIBRARY_DIR}/cmake/clang" NO_DEFAULT_PATH)
+file(REAL_PATH "${Clang_DIR}" safety_clang_dir)
+file(REAL_PATH "${LLVM_INSTALL_PREFIX}" safety_llvm_prefix)
+cmake_path(IS_PREFIX safety_llvm_prefix "${safety_clang_dir}" safety_clang_matches)
+if(NOT safety_clang_matches)
+  message(FATAL_ERROR "Clang config ${Clang_DIR} is not from LLVM ${LLVM_PACKAGE_VERSION} at ${LLVM_INSTALL_PREFIX}")
+endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(SafetyMisra MODULE src/MisraModule.cpp src/misra/Common.cpp
