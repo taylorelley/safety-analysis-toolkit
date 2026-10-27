@@ -1,12 +1,20 @@
 # SPDX-License-Identifier: Apache-2.0
 """Offline, real CLI known-answer validation, including schema validation."""
 import hashlib
+import importlib.metadata
 import json
+import re
 import subprocess
 from pathlib import Path
 import jsonschema
 
 root = Path(__file__).resolve().parent.parent
+minimum_jsonschema = json.loads((root / "docs/tool-versions.json").read_text())["minimum"]["python_jsonschema"]
+installed_jsonschema = importlib.metadata.version("jsonschema")
+def numeric(version):
+    return tuple(int(part) for part in re.findall(r"\d+", version)[:3])
+if numeric(installed_jsonschema) < numeric(minimum_jsonschema):
+    raise SystemExit(f"jsonschema {installed_jsonschema} is older than the minimum {minimum_jsonschema}")
 binary = root / "target/release/safety"
 if not binary.is_file():
     raise SystemExit("Build the release executable first")
@@ -51,4 +59,4 @@ except jsonschema.ValidationError:
     pass
 else:
     raise AssertionError("Schema accepted incompatible assurance level")
-print("Offline schema and real-analysis validation passed")
+print(f"Offline schema and real-analysis validation passed (jsonschema {installed_jsonschema})")

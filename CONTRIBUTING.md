@@ -24,7 +24,7 @@ validation requires `clang-tidy-19`, `llvm-cov-19`, `llvm-profdata-19`, `clang-1
 `safety doctor` to confirm their versions and capabilities. Never replace
 real integration results with mocked output. The formal suites are opt-in; missing analyzers are skipped, never reported as passed.
 
-Validation needs Python jsonschema 4.26.0 or later. JSON/SARIF checks use original committed schemas and an external SARIF schema cached during setup.
+Validation needs Python jsonschema 4.10.3 or later; `validate.py` checks the installed version. JSON/SARIF checks use original committed schemas and an external SARIF schema cached during setup.
 `make cache` downloads it and verifies the SHA-256 pinned in `docs/tool-versions.json`;
 it is the only validation step that uses the network.
 
