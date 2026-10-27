@@ -1,4 +1,4 @@
-.PHONY: build check test clang validation full-validation examples
+.PHONY: build check test clang validation full-validation examples smoke
 build:
 	cargo build --locked --release
 check:
@@ -16,6 +16,13 @@ validation: check clang examples
 	PATH="$(CURDIR)/build/clang:$$PATH" SAFETY_TEST_MODULE="$(CURDIR)/build/clang/SafetyMisra.so" cargo test --locked -- --include-ignored --skip real_esbmc_properties --skip real_frama_c --skip real_esbmc_induction_harness
 	cargo build --locked --release
 	python3 scripts/validate.py
+
+# End-to-end CLI and MCP smoke test into a throwaway directory. Requires all
+# analyzers on PATH; configure_demo.py builds and runs the demo coverage test.
+smoke: build
+	rm -rf build/e2e-smoke
+	python3 scripts/configure_demo.py
+	python3 scripts/e2e.py --output build/e2e-smoke
 
 full-validation: validation
 	esbmc --version
