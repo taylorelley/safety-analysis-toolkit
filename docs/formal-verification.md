@@ -2,6 +2,9 @@
 
 ## ESBMC 8.6.0 or later
 
+The validated reference is 8.6.0; other supported releases record that output
+interpretation is unvalidated.
+
 The adapter selects Z3, 32/64-bit width, overflow checking and default unwinding
 assertions. Select one compilation entry using `--variant` when necessary.
 Only reviewed argument translations are accepted; semantic options are never
@@ -26,6 +29,9 @@ excerpt and its full local evidence reference.
 
 ## Frama-C 25.0 (Manganese) or later
 
+Releases other than the validated `25.0-beta (Manganese)`, including 25.0
+final, record that output interpretation is unvalidated. A recognised release
+below 25.0 is unsupported; an unrecognised version is a failure.
 The validated reference package is Debian `frama-c-base=20220511-manganese-3+b4`.
 C only; a selected complete analysis unit must contain the entry function.
 The default is Eva; WP is selected explicitly and uses Qed for supplied ACSL

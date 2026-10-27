@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.25)
 project(SafetyClang LANGUAGES C CXX)
-# LLVM accepts the same major.minor with a patch release of at least 19.1.7;
-# clang-tidy modules are not ABI-compatible across minor releases.
-find_package(LLVM 19.1.7 REQUIRED CONFIG)
+# LLVM accepts the same major.minor with a patch release of at least 19.1.0;
+# clang-tidy modules are not ABI-compatible across minor releases. Build
+# against the same LLVM as the clang-tidy host; the validated reference is 19.1.7.
+find_package(LLVM 19.1.0 REQUIRED CONFIG)
 find_package(Clang REQUIRED CONFIG)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -31,14 +31,21 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     );
     match version {
         Ok(v) => {
-            let valid = v.failure.is_none() && discovery::llvm_supported(&v.stdout);
+            let release = (v.failure.is_none())
+                .then(|| discovery::llvm_release(&v.stdout))
+                .flatten();
             run.record(v);
-            if !valid {
+            let Some(release) = release else {
                 run.completeness.unsupported = units.len();
                 run.limitations
-                    .push("Requires LLVM 19.1.7 or a later 19.1.x release".into());
+                    .push("Requires LLVM 19.1.0 or a later 19.1.x release".into());
                 return evidence::finish(root, c, &dir, run);
-            }
+            };
+            run.limitations.extend(discovery::reference_note(
+                "LLVM",
+                &release,
+                discovery::LLVM_REFERENCE,
+            ));
         }
         Err(e) => {
             run.completeness.failed = units.len();

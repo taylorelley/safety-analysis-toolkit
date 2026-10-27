@@ -1,6 +1,6 @@
 # Contributing
 
-Use Rust 1.89 or later and LLVM 19.1.7 or a later 19.1.x release. Original contributions must be
+Use Rust 1.89 or later and LLVM 19.1.0 or a later 19.1.x release. Original contributions must be
 Apache-2.0 compatible. Do not submit MISRA standards text. Review dependency
 licenses before distributing binaries, containers or installers.
 

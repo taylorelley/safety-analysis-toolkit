@@ -1,8 +1,8 @@
 # Dependency and license inventory
 
 Original toolkit code: Apache-2.0. Cargo.toml sets minimum crate versions and Cargo.lock
-records the resolved graph; native extensions target LLVM/Clang 19.1.7 or a later
-19.1.x release. `scripts/license_inventory.py` traverses the
+records the resolved graph; native extensions target LLVM/Clang 19.1.0 or a later
+19.1.x release (reference 19.1.7). `scripts/license_inventory.py` traverses the
 locked Linux dependency graph, selects an allowed SPDX license alternative and
 copies package license/notice files into the binary package. It fails closed
 for unknown/disallowed expressions or missing license texts. This is an

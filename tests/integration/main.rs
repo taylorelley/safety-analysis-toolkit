@@ -136,12 +136,12 @@ fn scan_fixture(cpp: bool) {
     );
 }
 #[test]
-#[ignore = "requires real clang-tidy 19.1.7+ on PATH"]
+#[ignore = "requires real clang-tidy 19.1+ on PATH"]
 fn real_c_pipeline() {
     scan_fixture(false)
 }
 #[test]
-#[ignore = "requires real clang-tidy 19.1.7+ on PATH"]
+#[ignore = "requires real clang-tidy 19.1+ on PATH"]
 fn real_cpp_pipeline() {
     scan_fixture(true)
 }
@@ -163,7 +163,7 @@ fn rejected_semantic_flag_is_incomplete() {
     assert_eq!(r["complete"], false);
 }
 #[test]
-#[ignore = "requires real clang-tidy 19.1.7+ on PATH"]
+#[ignore = "requires real clang-tidy 19.1+ on PATH"]
 fn compiler_failure_is_incomplete() {
     let t = fixture(false);
     fs::write(t.path().join("unsafe.c"), "int broken( { return 0; }").unwrap();
@@ -174,7 +174,7 @@ fn compiler_failure_is_incomplete() {
     assert_eq!(r["completeness"]["failed"], 2);
 }
 #[test]
-#[ignore = "requires real clang-tidy 19.1.7+ and Python 3"]
+#[ignore = "requires real clang-tidy 19.1+ and Python 3"]
 fn real_mcp_stdio() {
     let t = fixture(false);
     let script =
@@ -367,7 +367,7 @@ fn real_esbmc_properties() {
     }
 }
 #[test]
-#[ignore = "requires real LLVM/Clang 19.1.7+ and Python 3"]
+#[ignore = "requires real LLVM/Clang 19.1+ and Python 3"]
 fn real_llvm_mcdc() {
     let script = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("tests/integration/coverage_fixture.py");
@@ -384,7 +384,7 @@ fn real_llvm_mcdc() {
     );
 }
 #[test]
-#[ignore = "requires Frama-C 25.0+ and Clang 19.1.7+"]
+#[ignore = "requires Frama-C 25.0+ and Clang 19.1+"]
 fn real_frama_c() {
     for (code, method, entry, expected, success) in [
         (

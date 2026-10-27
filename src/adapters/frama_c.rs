@@ -255,16 +255,56 @@ pub fn prove(
             c.tools.require_filesystem_isolation,
         ) {
             Ok(e) => {
-                let good = e.failure.is_none()
-                    && (args[0] != "-version"
-                        || discovery::version_after(e.stdout.trim(), "")
-                            .is_some_and(|v| v >= vec![25]));
+                let failed = e.failure.is_some();
+                // A recognised release below the minimum is unsupported, not a
+                // failure; an unrecognised version or failed call is a failure.
+                let recognised = discovery::version_after(e.stdout.trim(), "");
                 if args[0] == "-version" {
                     version = e.stdout.trim().to_string();
                 }
                 run.record(e);
-                if !good {
-                    return incomplete(run,root,c,&dir,"Unsupported Frama-C version or capability failure; requires Frama-C 25.0 or later".into(),true);
+                if failed {
+                    return incomplete(
+                        run,
+                        root,
+                        c,
+                        &dir,
+                        "Frama-C capability failure".into(),
+                        true,
+                    );
+                }
+                if args[0] == "-version" {
+                    match recognised {
+                        Some(v) if v >= vec![25] => {
+                            run.limitations.extend(discovery::reference_note(
+                                "Frama-C",
+                                &version,
+                                discovery::FRAMA_C_REFERENCE,
+                            ))
+                        }
+                        Some(_) => {
+                            return incomplete(
+                                run,
+                                root,
+                                c,
+                                &dir,
+                                "Unsupported Frama-C version; requires Frama-C 25.0 or later"
+                                    .into(),
+                                false,
+                            );
+                        }
+                        None => {
+                            return incomplete(
+                                run,
+                                root,
+                                c,
+                                &dir,
+                                "Unrecognised Frama-C version; requires Frama-C 25.0 or later"
+                                    .into(),
+                                true,
+                            );
+                        }
+                    }
                 }
             }
             Err(e) => return incomplete(run, root, c, &dir, e.to_string(), true),

@@ -28,7 +28,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y clang-19 clang-tidy-19 llvm-19-dev libclang-19-dev libclang-rt-19-dev cmake g++ python3 python3-jsonschema curl ca-certificates git
-          dpkg --compare-versions "$(clang-tidy-19 --version | sed -n 's/.*version \(19\.1\.[0-9]*\).*/\1/p')" ge 19.1.7
+          dpkg --compare-versions "$(clang-tidy-19 --version | sed -n 's/.*version \(19\.1\.[0-9]*\).*/\1/p')" ge 19.1.0
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Install Rust
         run: |

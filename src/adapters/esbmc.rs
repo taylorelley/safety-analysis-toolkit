@@ -189,6 +189,11 @@ pub fn prove(
         .map(u32::to_string)
         .collect::<Vec<_>>()
         .join(".");
+    run.limitations.extend(discovery::reference_note(
+        "ESBMC",
+        &detected,
+        discovery::ESBMC_REFERENCE,
+    ));
     let mut args = std::iter::once(source.display().to_string())
         .chain(vec![
             "--z3".into(),

@@ -1,4 +1,11 @@
 {
+  "minimum": {
+    "rust": "1.89",
+    "llvm": "19.1.0",
+    "cmake": "3.25",
+    "esbmc": "8.6.0",
+    "frama_c": "25.0"
+  },
   "rust": "1.99.1",
   "llvm": "19.1.7",
   "llvm_debian_package": "1:19.1.7-3+b1",

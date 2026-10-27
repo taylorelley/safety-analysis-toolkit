@@ -29,7 +29,7 @@ The custom C++ module uses Clang AST matchers, preprocessor callbacks and
 comment handlers. Its three original policy checks carry no MISRA rule
 identifier. Its `misra-c2012-*` checks implement partial MISRA C:2012 guideline
 mappings that await independent review (see [MISRA coverage](misra-coverage.md)). CMake
-requires LLVM 19.1.7 or a later 19.1.x patch release. Native module loading requires an explicit reviewed module path and allowlist.
+requires LLVM 19.1.0 or a later 19.1.x patch release; build against the same LLVM as the clang-tidy host. Native module loading requires an explicit reviewed module path and allowlist.
 CTest and a real CLI fixture validate loading against the matching host.
 
 Run records include input content hashes, exact execution/environment records,

@@ -52,14 +52,21 @@ pub fn import(
         c.tools.require_filesystem_isolation,
     ) {
         Ok(e) => {
-            let compatible = e.failure.is_none() && discovery::llvm_supported(&e.stdout);
+            let release = (e.failure.is_none())
+                .then(|| discovery::llvm_release(&e.stdout))
+                .flatten();
             run.record(e);
-            if !compatible {
+            let Some(release) = release else {
                 run.completeness.unsupported = units.len();
                 run.limitations
-                    .push("Coverage import requires LLVM 19.1.7 or a later 19.1.x release".into());
+                    .push("Coverage import requires LLVM 19.1.0 or a later 19.1.x release".into());
                 return evidence::finish(root, c, &dir, run);
-            }
+            };
+            run.limitations.extend(discovery::reference_note(
+                "Coverage import LLVM",
+                &release,
+                discovery::LLVM_REFERENCE,
+            ));
         }
         Err(e) => {
             run.completeness.failed = units.len();

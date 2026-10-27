@@ -13,7 +13,7 @@ RUN --mount=type=secret,id=system_ca,required=true \
     gpg --dearmor -o /usr/share/keyrings/llvm.gpg /tmp/llvm.key && \
     echo 'deb [signed-by=/usr/share/keyrings/llvm.gpg] http://apt.llvm.org/bookworm/ llvm-toolchain-bookworm-19 main' > /etc/apt/sources.list.d/llvm.list && \
     apt-get update && apt-get install -y --no-install-recommends clang-19 clang-tidy-19 llvm-19-dev libclang-19-dev libclang-rt-19-dev && \
-    dpkg --compare-versions "$(clang-tidy-19 --version | sed -n 's/.*version \(19\.1\.[0-9]*\).*/\1/p')" ge 19.1.7 && rm -rf /var/lib/apt/lists/* /tmp/llvm.key && \
+    dpkg --compare-versions "$(clang-tidy-19 --version | sed -n 's/.*version \(19\.1\.[0-9]*\).*/\1/p')" ge 19.1.0 && rm -rf /var/lib/apt/lists/* /tmp/llvm.key && \
     \
     curl --cacert /run/secrets/system_ca --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -o /tmp/rustup.sh && \
     CURL_CA_BUNDLE=/run/secrets/system_ca SSL_CERT_FILE=/run/secrets/system_ca sh /tmp/rustup.sh -y --default-toolchain stable --profile minimal --component clippy --component rustfmt && rm /tmp/rustup.sh && \
