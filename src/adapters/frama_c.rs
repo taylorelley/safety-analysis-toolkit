@@ -180,15 +180,30 @@ fn properties(
     }
     Ok(result)
 }
+pub struct Options<'a> {
+    pub method: &'a str,
+    pub entry: &'a str,
+    pub bits: u32,
+    /// Eva `-eva-precision` level (0-11); None keeps Frama-C's default.
+    pub precision: Option<u8>,
+}
 pub fn prove(
     root: &Path,
     c: &Config,
     source: &Path,
     variant: Option<&str>,
-    method: &str,
-    entry: &str,
-    bits: u32,
+    options: Options,
 ) -> Result<Run> {
+    let Options {
+        method,
+        entry,
+        bits,
+        precision,
+    } = options;
+    anyhow::ensure!(
+        precision.is_none_or(|p| method == "eva" && p <= 11),
+        "Eva precision applies only to --method eva and must be 0-11"
+    );
     anyhow::ensure!(
         ["eva", "wp"].contains(&method)
             && [32, 64].contains(&bits)
@@ -380,6 +395,9 @@ pub fn prove(
     ];
     if method == "eva" {
         args.extend(["-eva".into(), "-eva-no-reduce-on-logic-alarms".into()]);
+        if let Some(p) = precision {
+            args.extend(["-eva-precision".into(), p.to_string()]);
+        }
     } else {
         args.extend([
             "-wp".into(),
@@ -440,6 +458,9 @@ pub fn prove(
                 };
             for p in &mut run.properties {
                 p.scope = format!("Frama-C {version}, {}", p.scope);
+                if let Some(level) = precision {
+                    p.scope.push_str(&format!("; Eva precision {level}"));
+                }
             }
             if run.executions.last().is_some_and(|e| e.failure.is_some()) {
                 for p in &mut run.properties {

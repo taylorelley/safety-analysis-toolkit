@@ -592,6 +592,25 @@ fn real_frama_c() {
 }
 
 #[test]
+fn eva_precision_is_rejected_outside_eva() {
+    let t = proof_fixture(false, "int main(void){return 0;}");
+    for extra in [
+        &["--engine", "esbmc"][..],
+        &["--engine", "frama-c", "--method", "wp"][..],
+    ] {
+        let out = bin()
+            .args(["prove", "unsafe.c", "--path"])
+            .arg(t.path())
+            .args(extra)
+            .args(["--precision", "3"])
+            .output()
+            .unwrap();
+        assert_eq!(out.status.code(), Some(2), "{extra:?}");
+        let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        assert!(v["error"].as_str().unwrap().contains("precision"), "{v}");
+    }
+}
+#[test]
 fn malformed_harness_and_oversized_config_rejected() {
     let t = proof_fixture(false, "int main(void){return 0;}");
     fs::write(

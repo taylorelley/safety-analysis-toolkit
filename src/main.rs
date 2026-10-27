@@ -72,6 +72,9 @@ enum Commands {
         unwind: u32,
         #[arg(long, default_value_t = 64)]
         bits: u32,
+        /// Frama-C Eva precision level, 0 (fast) to 11 (precise); recorded in scope.
+        #[arg(long, value_parser = clap::value_parser!(u8).range(0..=11))]
+        precision: Option<u8>,
         #[arg(long, value_enum, default_value = "json")]
         format: Format,
     },
@@ -190,6 +193,7 @@ fn run(cli: Cli) -> Result<i32> {
             entry,
             unwind,
             bits,
+            precision,
             format,
         } => {
             let root = root(path)?;
@@ -210,6 +214,7 @@ fn run(cli: Cli) -> Result<i32> {
                     bits,
                     entry,
                     harness,
+                    precision,
                 },
             )?;
             emit(&r, format)?;

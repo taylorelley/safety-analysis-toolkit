@@ -104,6 +104,21 @@ fn results(log: &str, exit: Option<i32>, bounded: u32, bits: u32, version: &str)
     }
     properties
 }
+/// Limitation when ESBMC stopped at the unwinding bound: loops were not fully
+/// explored, so affected properties stay unknown rather than proven/violated.
+fn unwind_hint(properties: &[Property], unwind: u32) -> Option<String> {
+    properties
+        .iter()
+        .any(|p| {
+            p.outcome != ProofOutcome::Proven
+                && p.description.to_lowercase().contains("unwinding assertion")
+        })
+        .then(|| {
+            format!(
+                "ESBMC reached the unwinding bound {unwind} before exploring all loop iterations; results are unknown, not proven or violated. Re-run with a larger --unwind"
+            )
+        })
+}
 pub struct Options<'a> {
     pub unwind: u32,
     pub bits: u32,
@@ -226,6 +241,7 @@ pub fn prove(
             let log = format!("{}\n{}", e.stdout, e.stderr);
             evidence::write_new(&dir.join("raw/esbmc.log"), log.as_bytes())?;
             run.properties = results(&log, e.exit_code, unwind, bits, &detected);
+            run.limitations.extend(unwind_hint(&run.properties, unwind));
             for p in &mut run.properties {
                 p.scope = p.scope.replace("entry main", &format!("entry {entry}"));
                 if method == "induction" {
@@ -282,6 +298,25 @@ pub fn prove(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn unwind_bound_hint() {
+        let stopped = results(
+            "FAILED [P1] unwinding assertion loop 3\nVERIFICATION FAILED",
+            Some(1),
+            8,
+            64,
+            "8.6.0",
+        );
+        assert!(unwind_hint(&stopped, 8).unwrap().contains("--unwind"));
+        let complete = results(
+            "PASSED [P1] unwinding assertion loop 3\nVERIFICATION SUCCESSFUL",
+            Some(0),
+            12,
+            64,
+            "8.6.0",
+        );
+        assert_eq!(unwind_hint(&complete, 12), None);
+    }
     #[test]
     fn no_false_proof() {
         for (log, exit) in [
