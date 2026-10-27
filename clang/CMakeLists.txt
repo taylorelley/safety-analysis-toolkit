@@ -7,11 +7,13 @@ find_package(LLVM 19.1.0 REQUIRED CONFIG)
 # Take Clang from the LLVM installation found above. An unconstrained search can
 # pick another installed LLVM's Clang (for example Ubuntu's clang-18) and mix ABIs.
 find_package(Clang REQUIRED CONFIG HINTS "${LLVM_LIBRARY_DIR}/cmake/clang" NO_DEFAULT_PATH)
+# LLVM_LIBRARY_DIR is defined by both installed and build-tree LLVM packages
+# (LLVM_INSTALL_PREFIX is not set in a build tree); Clang's package lives below it.
 file(REAL_PATH "${Clang_DIR}" safety_clang_dir)
-file(REAL_PATH "${LLVM_INSTALL_PREFIX}" safety_llvm_prefix)
-cmake_path(IS_PREFIX safety_llvm_prefix "${safety_clang_dir}" safety_clang_matches)
-if(NOT safety_clang_matches)
-  message(FATAL_ERROR "Clang config ${Clang_DIR} is not from LLVM ${LLVM_PACKAGE_VERSION} at ${LLVM_INSTALL_PREFIX}")
+file(REAL_PATH "${LLVM_LIBRARY_DIR}" safety_llvm_libdir)
+cmake_path(IS_PREFIX safety_llvm_libdir "${safety_clang_dir}" safety_clang_matches)
+if(NOT LLVM_LIBRARY_DIR OR NOT safety_clang_matches)
+  message(FATAL_ERROR "Clang config ${Clang_DIR} is not from LLVM ${LLVM_PACKAGE_VERSION} (libraries ${LLVM_LIBRARY_DIR})")
 endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
