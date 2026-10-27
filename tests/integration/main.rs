@@ -41,6 +41,37 @@ fn missing_database_is_explicit() {
     assert_eq!(v["status"], "incomplete");
 }
 #[test]
+fn sandboxed_git_records_commit() {
+    let t = tempfile::tempdir().unwrap();
+    let git = |args: &[&str]| {
+        Command::new("git")
+            .args([
+                "-c",
+                "user.name=t",
+                "-c",
+                "user.email=t@t",
+                "-c",
+                "commit.gpgsign=false",
+            ])
+            .args(args)
+            .current_dir(t.path())
+            .output()
+            .unwrap()
+    };
+    git(&["init", "-q"]);
+    bin()
+        .args(["init", "--path"])
+        .arg(t.path())
+        .output()
+        .unwrap();
+    git(&["add", "-A"]);
+    git(&["commit", "-q", "-m", "fixture"]);
+    let head = String::from_utf8(git(&["rev-parse", "HEAD"]).stdout).unwrap();
+    let out = bin().arg("doctor").arg(t.path()).output().unwrap();
+    let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(v["git"]["commit"], head.trim(), "{v}");
+}
+#[test]
 fn invalid_config() {
     let t = tempfile::tempdir().unwrap();
     fs::write(
