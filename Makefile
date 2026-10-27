@@ -27,7 +27,8 @@ validation: check clang examples
 # End-to-end CLI and MCP smoke test into a throwaway directory. Requires all
 # analyzers on PATH; configure_demo.py builds and runs the demo coverage test.
 smoke: build
-	rm -rf build/e2e-smoke
+	# Start from an empty demo so e2e.py copies only this invocation's runs.
+	rm -rf build/e2e-smoke build/demo
 	python3 scripts/configure_demo.py
 	python3 scripts/e2e.py --output build/e2e-smoke
 
