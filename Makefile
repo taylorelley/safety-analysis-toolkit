@@ -7,8 +7,11 @@ check:
 	cargo clippy --locked --all-targets -- -D warnings
 test:
 	cargo test --locked
+# Pass a non-default LLVM with, e.g.,
+# make clang CMAKE_ARGS="-DLLVM_DIR=/path/lib/cmake/llvm -DClang_DIR=/path/lib/cmake/clang"
+CMAKE_ARGS ?=
 clang:
-	cmake -S clang -B build/clang -DCMAKE_BUILD_TYPE=Release
+	cmake -S clang -B build/clang -DCMAKE_BUILD_TYPE=Release $(CMAKE_ARGS)
 	cmake --build build/clang --parallel 2
 	ctest --test-dir build/clang --output-on-failure
 examples:
