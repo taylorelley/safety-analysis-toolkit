@@ -71,6 +71,81 @@ fn sandboxed_git_records_commit() {
     let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
     assert_eq!(v["git"]["commit"], head.trim(), "{v}");
 }
+#[cfg(unix)]
+fn stub_tool(dir: &std::path::Path, name: &str, script: &str) {
+    use std::os::unix::fs::PermissionsExt;
+    let path = dir.join(name);
+    fs::write(&path, format!("#!/bin/sh\n{script}\n")).unwrap();
+    fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+}
+#[cfg(unix)]
+#[test]
+fn doctor_reports_missing_analyzer_capabilities() {
+    let t = tempfile::tempdir().unwrap();
+    let stubs = tempfile::tempdir().unwrap();
+    fs::write(t.path().join("x.c"), "int x;").unwrap();
+    fs::write(
+        t.path().join("compile_commands.json"),
+        serde_json::json!([{"directory":t.path(),"file":"x.c","arguments":["cc","-c","x.c"]}])
+            .to_string(),
+    )
+    .unwrap();
+    fs::write(
+        t.path().join("safety.yaml"),
+        "version: 1\nproject: {name: caps}\nbuild: {compile_commands: compile_commands.json}\ntools: {clang: false, frama_c: true, esbmc: true}\n",
+    )
+    .unwrap();
+    // Frama-C with Eva but without WP, as some distribution packages ship.
+    stub_tool(
+        stubs.path(),
+        "frama-c",
+        r#"case "$1" in -version) echo "25.0-beta (Manganese)";; -plugins) echo "Eva                 automatically computes";; esac"#,
+    );
+    let doctor = |solvers: &str| {
+        stub_tool(
+            stubs.path(),
+            "esbmc",
+            &format!(
+                r#"case "$1" in --version) echo "ESBMC version 8.6.0 64-bit";; --list-solvers) echo "Available solvers: {solvers}" >&2;; esac"#
+            ),
+        );
+        let path = format!(
+            "{}:{}",
+            stubs.path().display(),
+            std::env::var("PATH").unwrap()
+        );
+        let out = bin()
+            .arg("doctor")
+            .arg(t.path())
+            .env("PATH", path)
+            .output()
+            .unwrap();
+        let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+        (out.status.code(), v)
+    };
+    let has = |v: &serde_json::Value, text: &str| {
+        v["limitations"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|l| l.as_str().unwrap().contains(text))
+    };
+    let (code, v) = doctor("smtlib z3 boolector");
+    assert!(has(&v, "frama-c: WP plugin unavailable"), "{v}");
+    assert!(!has(&v, "Z3 solver unavailable"), "{v}");
+    assert_eq!(
+        (code, v["complete"].as_bool()),
+        (Some(0), Some(true)),
+        "{v}"
+    );
+    let (code, v) = doctor("smtlib boolector");
+    assert!(has(&v, "esbmc: Z3 solver unavailable"), "{v}");
+    assert_eq!(
+        (code, v["complete"].as_bool()),
+        (Some(3), Some(false)),
+        "{v}"
+    );
+}
 #[test]
 fn invalid_config() {
     let t = tempfile::tempdir().unwrap();
