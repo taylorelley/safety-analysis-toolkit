@@ -88,6 +88,21 @@ fn incomplete(
     });
     evidence::finish(root, c, dir, run)
 }
+/// Plain explanation for native statuses that are easily misread. The native
+/// status itself is always kept verbatim.
+fn status_note(method: &str, status: &str) -> Option<&'static str> {
+    match (method, status) {
+        // The Report plugin prints never-tried properties as "Ignored".
+        ("wp", "Ignored") => Some(
+            "no prover result: Qed could not discharge this goal and no other prover is configured; not evidence that the property holds or fails",
+        ),
+        (_, "Ignored") => Some("no analysis attempted this property"),
+        (_, "Invalid or unreachable") => Some(
+            "Frama-C found the property invalid or its code unreachable; never treated as proof",
+        ),
+        _ => None,
+    }
+}
 // Version-specific statuses are interpreted conservatively. In particular
 // 'Considered valid' and 'Invalid or unreachable' are never proof success.
 fn properties(
@@ -147,7 +162,10 @@ fn properties(
         };
         result.push(Property {
             id: format!("FC-{}", &evidence::hash(description.as_bytes())[..20]),
-            description: format!("{description} [native status: {status}]"),
+            description: match status_note(method, &status) {
+                Some(note) => format!("{description} [native status: {status}; {note}]"),
+                None => format!("{description} [native status: {status}]"),
+            },
             outcome,
             scope: format!(
                 "{method}, entry {entry}, x86 {bits}-bit model; {}",
@@ -488,6 +506,18 @@ pub fn prove(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn ignored_wp_goal_is_explained_not_proven() {
+        let t = tempfile::tempdir().unwrap();
+        fs::write(t.path().join("x.c"), "").unwrap();
+        let data = b"directory\tfile\tline\tfunction\tproperty kind\tstatus\tproperty\n.\tx.c\t1\tmax\tpostcondition\tIgnored\tr >= a\n";
+        let p = properties(data, t.path(), t.path(), "wp", "max", 64, true).unwrap();
+        assert_eq!(p[0].outcome, ProofOutcome::Unknown);
+        assert!(
+            p[0].description
+                .contains("native status: Ignored; no prover result")
+        );
+    }
     #[test]
     fn external_assumptions_are_not_proofs() {
         let t = tempfile::tempdir().unwrap();
