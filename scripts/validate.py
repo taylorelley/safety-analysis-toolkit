@@ -11,9 +11,26 @@ import jsonschema
 root = Path(__file__).resolve().parent.parent
 minimum_jsonschema = json.loads((root / "docs/tool-versions.json").read_text())["minimum"]["python_jsonschema"]
 installed_jsonschema = importlib.metadata.version("jsonschema")
-def numeric(version):
-    return tuple(int(part) for part in re.findall(r"\d+", version)[:3])
-if numeric(installed_jsonschema) < numeric(minimum_jsonschema):
+def meets_minimum(installed, minimum):
+    """PEP 440 ordering against a final-release minimum: a pre-release or dev
+    release of the minimum (4.10.3rc1, 4.10.3.dev1) is older; post-releases
+    and local labels are not. Unparseable versions are refused."""
+    pattern = (r"v?(\d+(?:\.\d+)*)((?:[-_.]?(?:a|b|c|rc|alpha|beta|pre|preview)[-_.]?\d*)?)"
+               r"((?:[-_.]?(?:post|rev|r)[-_.]?\d*|-\d+)?)((?:[-_.]?dev[-_.]?\d*)?)(?:\+[a-z0-9.]+)?")
+    parsed = [re.fullmatch(pattern, version.strip().lower()) for version in (installed, minimum)]
+    if not all(parsed) or any(parsed[1].group(2, 3, 4)):
+        return False
+    release = [[int(part) for part in match.group(1).split(".")] for match in parsed]
+    width = max(map(len, release))
+    have, need = (tuple(r + [0] * (width - len(r))) for r in release)
+    pre, post, dev = parsed[0].group(2, 3, 4)
+    # A dev suffix after a post-release (4.10.3.post1.dev1) still follows 4.10.3.
+    return have > need or (have == need and not pre and (bool(post) or not dev))
+for installed, minimum, expected in [("4.10.3", "4.10.3", True), ("4.19.2", "4.10.3", True),
+        ("4.10.3.post1", "4.10.3", True), ("4.10.3+deb", "4.10.3", True), ("4.10.3rc1", "4.10.3", False),
+        ("4.10.3.dev1", "4.10.3", False), ("4.10.3.post1.dev1", "4.10.3", True), ("4.10.2", "4.10.3", False), ("4.11.0a1", "4.10.3", True), ("x", "4.10.3", False)]:
+    assert meets_minimum(installed, minimum) is expected, (installed, minimum)
+if not meets_minimum(installed_jsonschema, minimum_jsonschema):
     raise SystemExit(f"jsonschema {installed_jsonschema} is older than the minimum {minimum_jsonschema}")
 binary = root / "target/release/safety"
 if not binary.is_file():
