@@ -27,13 +27,9 @@ validation requires `clang-tidy-19`, `llvm-cov-19`, `llvm-profdata-19`, `clang-1
 real integration results with mocked output. The formal suites are opt-in; missing analyzers are skipped, never reported as passed.
 
 Use `make full-validation` with installed dependencies and Python jsonschema
-4.26.0 or later. JSON/SARIF checks use original committed schemas and an external SARIF schema cached during setup:
-
-```sh
-mkdir -p .cache
-curl -fsSL https://json.schemastore.org/sarif-2.1.0.json -o .cache/sarif-2.1.0.json
-echo "c96eb2d311c37b0a38cbd18c52d79a68f778bbd2d831abed7412d9850740f785  .cache/sarif-2.1.0.json" | sha256sum -c -
-```
+4.26.0 or later. JSON/SARIF checks use original committed schemas and an external SARIF schema cached during setup.
+`make cache` downloads it and verifies the SHA-256 pinned in `docs/tool-versions.json`;
+it is the only validation step that uses the network.
 
 Example compilation databases are generated explicitly by
 `python3 examples/configure.py`. The engine must never run that script itself.

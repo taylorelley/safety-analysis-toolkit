@@ -1,4 +1,4 @@
-.PHONY: build check test clang validation full-validation examples smoke
+.PHONY: build check test clang validation full-validation examples smoke cache
 build:
 	cargo build --locked --release
 check:
@@ -12,6 +12,9 @@ clang:
 	ctest --test-dir build/clang --output-on-failure
 examples:
 	python3 examples/configure.py
+# Network: downloads the external SARIF schema and verifies its pinned hash.
+cache:
+	python3 scripts/cache_sarif.py
 validation: check clang examples
 	PATH="$(CURDIR)/build/clang:$$PATH" SAFETY_TEST_MODULE="$(CURDIR)/build/clang/SafetyMisra.so" cargo test --locked -- --include-ignored --skip real_esbmc_properties --skip real_frama_c --skip real_esbmc_induction_harness
 	cargo build --locked --release

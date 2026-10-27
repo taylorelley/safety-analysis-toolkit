@@ -13,8 +13,12 @@ if not binary.is_file():
 schemas = {name: json.loads((root / f"schemas/{name}.schema.json").read_text())
            for name in ["project", "findings", "evidence"]}
 sarif_path = root / ".cache/sarif-2.1.0.json"
-assert hashlib.sha256(sarif_path.read_bytes()).hexdigest() == "c96eb2d311c37b0a38cbd18c52d79a68f778bbd2d831abed7412d9850740f785", "Unexpected SARIF schema version"
-sarif_schema = json.loads((root / ".cache/sarif-2.1.0.json").read_text())
+sarif_sha256 = json.loads((root / "docs/tool-versions.json").read_text())["sarif_schema_sha256"]
+if not sarif_path.is_file():
+    raise SystemExit(f"{sarif_path} is missing; run `make cache` (downloads and hash-verifies the SARIF schema)")
+if hashlib.sha256(sarif_path.read_bytes()).hexdigest() != sarif_sha256:
+    raise SystemExit(f"{sarif_path} does not match the pinned SHA-256; delete it and run `make cache`")
+sarif_schema = json.loads(sarif_path.read_text())
 for schema in [*schemas.values(), sarif_schema]:
     jsonschema.validators.validator_for(schema).check_schema(schema)
 for project in ["embedded-c", "embedded-cpp"]:
