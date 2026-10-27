@@ -88,6 +88,10 @@ enum Commands {
     Init {
         #[arg(long, default_value = ".")]
         path: PathBuf,
+        /// Native clang-tidy module to enable. Writes an explicit allowlist of
+        /// the module and the supported tools resolved from PATH, for review.
+        #[arg(long)]
+        module: Option<PathBuf>,
     },
     Doctor {
         #[arg(default_value = ".")]
@@ -223,22 +227,43 @@ fn run(cli: Cli) -> Result<i32> {
             tokio::runtime::Runtime::new()?.block_on(mcp::serve(root))?;
             Ok(0)
         }
-        Commands::Init { path } => {
+        Commands::Init { path, module } => {
             let root = root(path)?;
-            let c = Config::new(
+            let mut c = Config::new(
                 root.file_name()
                     .unwrap_or_default()
                     .to_string_lossy()
                     .into_owned(),
             );
+            if let Some(module) = module {
+                let module = module
+                    .canonicalize()
+                    .with_context(|| format!("native module {}", module.display()))?;
+                // A non-empty allowlist must name every executable, so record
+                // the module plus each supported tool currently on PATH.
+                let mut allowlist = vec![module.clone()];
+                for name in discovery::SUPPORTED_TOOLS {
+                    if let Some(tool) = discovery::executable(name, &[])
+                        && !allowlist.contains(&tool)
+                    {
+                        allowlist.push(tool);
+                    }
+                }
+                c.tools.clang_module = Some(module);
+                c.tools.allowlist = allowlist;
+                c.validate()?;
+            }
             evidence::write_new(
                 &root.join("safety.yaml"),
                 serde_yaml::to_string(&c)?.as_bytes(),
             )?;
-            println!(
-                "{}",
-                serde_json::json!({"status":"passed","complete":true,"config":root.join("safety.yaml"),"assurance":"unconfigured; advisory analysis only"})
-            );
+            let mut out = serde_json::json!({"status":"passed","complete":true,"config":root.join("safety.yaml"),"assurance":"unconfigured; advisory analysis only"});
+            if c.tools.clang_module.is_some() {
+                out["allowlist"] = serde_json::json!(c.tools.allowlist);
+                out["review"] =
+                    "Allowlist resolved from PATH at init; review every entry before use".into();
+            }
+            println!("{out}");
             Ok(0)
         }
         Commands::Doctor { path, format } => {

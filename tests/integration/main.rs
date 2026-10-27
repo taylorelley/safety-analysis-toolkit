@@ -27,6 +27,50 @@ fn init_does_not_overwrite() {
     assert_eq!(first, fs::read(t.path().join("safety.yaml")).unwrap());
 }
 #[test]
+fn init_module_writes_reviewable_allowlist() {
+    let t = tempfile::tempdir().unwrap();
+    let missing = bin()
+        .args(["init", "--path"])
+        .arg(t.path())
+        .arg("--module")
+        .arg(t.path().join("absent.so"))
+        .output()
+        .unwrap();
+    assert_ne!(missing.status.code(), Some(0));
+    assert!(!t.path().join("safety.yaml").exists());
+    let module = t.path().join("module.so");
+    fs::write(&module, b"").unwrap();
+    let out = bin()
+        .args(["init", "--path"])
+        .arg(t.path())
+        .arg("--module")
+        .arg(&module)
+        .output()
+        .unwrap();
+    assert_eq!(out.status.code(), Some(0));
+    let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert!(v["review"].as_str().unwrap().contains("review"));
+    let config: serde_yaml::Value =
+        serde_yaml::from_slice(&fs::read(t.path().join("safety.yaml")).unwrap()).unwrap();
+    let module = module.canonicalize().unwrap();
+    assert_eq!(config["tools"]["clang_module"].as_str(), module.to_str());
+    let allowlist = config["tools"]["allowlist"].as_sequence().unwrap();
+    assert_eq!(allowlist[0].as_str(), module.to_str());
+    assert!(
+        allowlist
+            .iter()
+            .all(|p| std::path::Path::new(p.as_str().unwrap()).is_absolute())
+    );
+    // The written configuration must load: doctor validates it on start-up.
+    let doctor = bin().arg("doctor").arg(t.path()).output().unwrap();
+    assert_ne!(
+        doctor.status.code(),
+        Some(2),
+        "{}",
+        String::from_utf8_lossy(&doctor.stderr)
+    );
+}
+#[test]
 fn missing_database_is_explicit() {
     let t = tempfile::tempdir().unwrap();
     bin()

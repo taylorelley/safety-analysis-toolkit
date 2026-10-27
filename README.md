@@ -26,6 +26,9 @@ Python 3. See [contributing](CONTRIBUTING.md) for validation.
 cargo build --locked --release
 export PATH="$PWD/target/release:$PATH"
 safety init --path /path/to/project
+# Or enable the MISRA/policy module; this writes an explicit allowlist of the
+# module and supported tools resolved from PATH. Review it before use.
+safety init --path /path/to/project --module "$PWD/build/clang/SafetyMisra.so"
 # Supply an existing compile_commands.json; safety never runs a project build.
 safety doctor /path/to/project
 safety scan /path/to/project --format json

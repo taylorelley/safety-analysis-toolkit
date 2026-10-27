@@ -252,6 +252,17 @@ pub fn reference_note(tool: &str, release: &str, reference: &str) -> Option<Stri
         )
     })
 }
+/// Tool names resolved from PATH when no explicit allowlist is configured.
+pub const SUPPORTED_TOOLS: [&str; 8] = [
+    "clang-tidy-19",
+    "clang-19",
+    "llvm-cov-19",
+    "llvm-profdata-19",
+    "frama-c",
+    "esbmc",
+    "safety-source-index",
+    "git",
+];
 pub fn executable(name: &str, allowlist: &[PathBuf]) -> Option<PathBuf> {
     let candidate = std::env::var_os("PATH").and_then(|v| {
         std::env::split_paths(&v)
@@ -261,18 +272,7 @@ pub fn executable(name: &str, allowlist: &[PathBuf]) -> Option<PathBuf> {
     let p = candidate.canonicalize().ok()?;
     if allowlist.is_empty() {
         // Default allowlist is the fixed set of supported tool names.
-        if ![
-            "clang-tidy-19",
-            "clang-19",
-            "llvm-cov-19",
-            "llvm-profdata-19",
-            "frama-c",
-            "esbmc",
-            "safety-source-index",
-            "git",
-        ]
-        .contains(&name)
-        {
+        if !SUPPORTED_TOOLS.contains(&name) {
             return None;
         }
     } else if !allowlist
