@@ -183,7 +183,7 @@ pub fn prove(
         .flatten();
     run.record(version);
     use crate::version::{ESBMC_MINIMUM, ESBMC_REFERENCE, check, display};
-    let release = found.as_deref().map(display).unwrap_or_default();
+    let release = found.as_ref().map(display).unwrap_or_default();
     match check("ESBMC", found, ESBMC_MINIMUM, ESBMC_REFERENCE) {
         Ok(note) => run.limitations.extend(note),
         Err(reason) => {

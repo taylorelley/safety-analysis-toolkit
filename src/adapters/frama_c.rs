@@ -276,9 +276,12 @@ pub fn prove(
                 }
                 if version {
                     use crate::version::{FRAMA_C_MINIMUM, FRAMA_C_REFERENCE, check};
+                    let unrecognized = found.is_none();
                     match check("Frama-C", found, FRAMA_C_MINIMUM, FRAMA_C_REFERENCE) {
                         Ok(note) => run.limitations.extend(note),
-                        Err(reason) => return incomplete(run, root, c, &dir, reason, true),
+                        Err(reason) => {
+                            return incomplete(run, root, c, &dir, reason, unrecognized);
+                        }
                     }
                 }
             }
