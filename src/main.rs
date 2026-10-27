@@ -11,7 +11,6 @@ mod report;
 mod runner;
 mod trace;
 mod verification;
-mod version;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use config::Config;

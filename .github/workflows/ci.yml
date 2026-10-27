@@ -5,19 +5,21 @@ permissions:
 jobs:
   rust:
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        toolchain: ["1.89", stable]
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - name: Install Rust ${{ matrix.toolchain }}
-        run: |
-          rustup toolchain install ${{ matrix.toolchain }} --profile minimal --component clippy --component rustfmt
-          rustup default ${{ matrix.toolchain }}
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal --component clippy --component rustfmt && rustup default stable
       - run: cargo fmt --check
       - run: cargo clippy --locked --all-targets -- -D warnings
       - run: cargo test --locked
       - run: cargo build --locked --release
+  minimum-rust:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Install minimum supported Rust (Cargo.toml rust-version)
+        run: rustup toolchain install 1.89 --profile minimal && rustup default 1.89
+      - run: cargo test --locked
   clang:
     runs-on: ubuntu-24.04
     container: debian:trixie-slim@sha256:62bd423aeee912639ca8ee681c2b762cb3e25137e0a92b20be455898a9f034ad
@@ -26,7 +28,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y clang-19 clang-tidy-19 llvm-19-dev libclang-19-dev libclang-rt-19-dev cmake g++ python3 python3-jsonschema curl ca-certificates git
-          clang-tidy-19 --version
+          dpkg --compare-versions "$(clang-tidy-19 --version | sed -n 's/.*version \(19\.1\.[0-9]*\).*/\1/p')" ge 19.1.0
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Install Rust
         run: |

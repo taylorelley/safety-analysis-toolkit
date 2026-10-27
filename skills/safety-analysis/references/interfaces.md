@@ -6,7 +6,7 @@ Start `safety mcp --path /absolute/reviewed/workspace`. MCP tools:
 
 Use tools/list to obtain authoritative schemas. Operation tools default to the
 server's fixed workspace. Proof and coverage source/profile paths must be
-relative, existing and contained. MCP proof supports pinned ESBMC BMC/induction and Frama-C Eva/WP.
+relative, existing and contained. MCP proof supports ESBMC BMC/induction and Frama-C Eva/WP.
 
 CLI JSON has `status`, `complete`, `completeness`, `findings` and `properties`.
 MCP operation summaries use `run_id` and evidence references. Findings pages

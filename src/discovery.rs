@@ -219,6 +219,39 @@ fn validate_args(args: &[String]) -> Vec<String> {
     }
     problems
 }
+/// Dotted numeric version following `marker` in tool output, e.g. "version 19.1.1".
+pub fn version_after(text: &str, marker: &str) -> Option<Vec<u32>> {
+    let rest = &text[text.find(marker)? + marker.len()..];
+    let end = rest
+        .find(|c: char| !c.is_ascii_digit() && c != '.')
+        .unwrap_or(rest.len());
+    rest[..end]
+        .trim_end_matches('.')
+        .split('.')
+        .map(|part| part.parse().ok())
+        .collect()
+}
+/// Validated reference releases. Other supported releases run, but each run
+/// records that output interpretation for that release is unvalidated.
+pub const LLVM_REFERENCE: &str = "19.1.7";
+pub const ESBMC_REFERENCE: &str = "8.6.0";
+pub const FRAMA_C_REFERENCE: &str = "25.0-beta (Manganese)";
+/// Supported LLVM release: any 19.1.x patch release, matching LLVM's own
+/// major.minor compatibility rule for the native module.
+pub fn llvm_release(version_output: &str) -> Option<String> {
+    version_after(version_output, "version ")
+        .filter(|v| v.len() == 3 && v.starts_with(&[19, 1]))
+        .map(|v| v.iter().map(u32::to_string).collect::<Vec<_>>().join("."))
+}
+/// Limitation for a supported release that is not the validated reference.
+/// Releases are compared as full strings, so 25.0 and 25.0-beta differ.
+pub fn reference_note(tool: &str, release: &str, reference: &str) -> Option<String> {
+    (release != reference).then(|| {
+        format!(
+            "{tool} {release} differs from the validated reference {reference}; output interpretation for this release is unvalidated"
+        )
+    })
+}
 pub fn executable(name: &str, allowlist: &[PathBuf]) -> Option<PathBuf> {
     let candidate = std::env::var_os("PATH").and_then(|v| {
         std::env::split_paths(&v)
@@ -340,6 +373,45 @@ mod tests {
         for f in ["@evil", "-fplugin=evil", "-Xclang", "-funknown"] {
             assert!(!validate_args(&[f.into()]).is_empty());
         }
+    }
+    #[test]
+    fn versions() {
+        assert_eq!(
+            llvm_release("Ubuntu LLVM version 19.1.7\n").as_deref(),
+            Some("19.1.7")
+        );
+        assert_eq!(
+            llvm_release("LLVM version 19.1.8 (x)").as_deref(),
+            Some("19.1.8")
+        );
+        assert_eq!(
+            llvm_release("Ubuntu LLVM version 19.1.1").as_deref(),
+            Some("19.1.1")
+        );
+        assert_eq!(
+            llvm_release("LLVM version 19.1.0").as_deref(),
+            Some("19.1.0")
+        );
+        assert_eq!(llvm_release("LLVM version 19.2.0"), None);
+        assert_eq!(llvm_release("LLVM version 20.1.0"), None);
+        assert_eq!(llvm_release("LLVM version 18.1.8"), None);
+        assert_eq!(llvm_release("no version here"), None);
+        assert_eq!(reference_note("LLVM", "19.1.7", LLVM_REFERENCE), None);
+        assert!(reference_note("LLVM", "19.1.1", LLVM_REFERENCE).is_some());
+        assert_eq!(
+            reference_note("Frama-C", "25.0-beta (Manganese)", FRAMA_C_REFERENCE),
+            None
+        );
+        assert!(reference_note("Frama-C", "25.0 (Manganese)", FRAMA_C_REFERENCE).is_some());
+        assert_eq!(
+            version_after("ESBMC version 8.6.0.", "ESBMC version "),
+            Some(vec![8, 6, 0])
+        );
+        assert_eq!(
+            version_after("25.0-beta (Manganese)", ""),
+            Some(vec![25, 0])
+        );
+        assert_eq!(version_after("version x", "version "), None);
     }
     #[test]
     fn variants() {

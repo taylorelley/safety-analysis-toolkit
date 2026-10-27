@@ -1,8 +1,6 @@
 # Contributing
 
-Use Rust 1.89 or later and LLVM 19.1.0 or later in the 19.1 series. CI checks
-both the minimum Rust version and current stable; minimum versions are recorded
-in `Cargo.toml` (`rust-version`), `clang/CMakeLists.txt` and `src/version.rs`. Original contributions must be
+Use Rust 1.89 or later and LLVM 19.1.0 or a later 19.1.x release. Original contributions must be
 Apache-2.0 compatible. Do not submit MISRA standards text. Review dependency
 licenses before distributing binaries, containers or installers.
 
@@ -29,7 +27,7 @@ validation requires `clang-tidy-19`, `llvm-cov-19`, `llvm-profdata-19`, `clang-1
 real integration results with mocked output. The formal suites are opt-in; missing analyzers are skipped, never reported as passed.
 
 Use `make full-validation` with installed dependencies and Python jsonschema
-4.26.0. JSON/SARIF checks use original committed schemas and an external SARIF schema cached during setup:
+4.26.0 or later. JSON/SARIF checks use original committed schemas and an external SARIF schema cached during setup:
 
 ```sh
 mkdir -p .cache

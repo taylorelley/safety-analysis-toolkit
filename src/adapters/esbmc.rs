@@ -63,7 +63,7 @@ fn translate(unit: &discovery::Unit) -> Result<Vec<String>> {
     }
     Ok(out)
 }
-fn results(log: &str, exit: Option<i32>, bounded: u32, bits: u32, release: &str) -> Vec<Property> {
+fn results(log: &str, exit: Option<i32>, bounded: u32, bits: u32, version: &str) -> Vec<Property> {
     let success = exit == Some(0)
         && log.lines().any(|l| l == "VERIFICATION SUCCESSFUL")
         && !log.to_lowercase().contains("warning");
@@ -88,7 +88,7 @@ fn results(log: &str, exit: Option<i32>, bounded: u32, bits: u32, release: &str)
         } else {
             ProofOutcome::Unknown
         };
-        properties.push(Property{id:id.into(),description:description.trim().into(),outcome,scope:format!("ESBMC {release} sequential source model with entry main; {bits}-bit little-endian; Z3; finite unwind {bounded}; default unwinding assertions enabled; source assumptions and library models apply"),assumptions:Vec::new(),unwind_bound:Some(bounded),completeness_established:success,native_references:vec!["raw/esbmc.log".into()]});
+        properties.push(Property{id:id.into(),description:description.trim().into(),outcome,scope:format!("ESBMC {version} sequential source model with entry main; {bits}-bit little-endian; Z3; finite unwind {bounded}; default unwinding assertions enabled; source assumptions and library models apply"),assumptions:Vec::new(),unwind_bound:Some(bounded),completeness_established:success,native_references:vec!["raw/esbmc.log".into()]});
     }
     if properties.is_empty() {
         properties.push(Property {
@@ -176,22 +176,24 @@ pub fn prove(
             return evidence::finish(root, c, &dir, run);
         }
     };
-    let found = version
-        .failure
-        .is_none()
-        .then(|| crate::version::parse(&version.stdout, "ESBMC version "))
-        .flatten();
+    let detected = discovery::version_after(&version.stdout, "ESBMC version ")
+        .filter(|v| version.failure.is_none() && *v >= vec![8, 6, 0]);
     run.record(version);
-    use crate::version::{ESBMC_MINIMUM, ESBMC_REFERENCE, check, display};
-    let release = found.as_deref().map(display).unwrap_or_default();
-    match check("ESBMC", found, ESBMC_MINIMUM, ESBMC_REFERENCE) {
-        Ok(note) => run.limitations.extend(note),
-        Err(reason) => {
-            run.completeness.unsupported = 1;
-            run.limitations.push(reason);
-            return evidence::finish(root, c, &dir, run);
-        }
-    }
+    let Some(detected) = detected else {
+        run.completeness.unsupported = 1;
+        run.limitations.push("Requires ESBMC 8.6.0 or later".into());
+        return evidence::finish(root, c, &dir, run);
+    };
+    let detected = detected
+        .iter()
+        .map(u32::to_string)
+        .collect::<Vec<_>>()
+        .join(".");
+    run.limitations.extend(discovery::reference_note(
+        "ESBMC",
+        &detected,
+        discovery::ESBMC_REFERENCE,
+    ));
     let mut args = std::iter::once(source.display().to_string())
         .chain(vec![
             "--z3".into(),
@@ -223,7 +225,7 @@ pub fn prove(
         Ok(e) => {
             let log = format!("{}\n{}", e.stdout, e.stderr);
             evidence::write_new(&dir.join("raw/esbmc.log"), log.as_bytes())?;
-            run.properties = results(&log, e.exit_code, unwind, bits, &release);
+            run.properties = results(&log, e.exit_code, unwind, bits, &detected);
             for p in &mut run.properties {
                 p.scope = p.scope.replace("entry main", &format!("entry {entry}"));
                 if method == "induction" {

@@ -150,7 +150,7 @@ fn properties(
             description: format!("{description} [native status: {status}]"),
             outcome,
             scope: format!(
-                "Frama-C, {method}, entry {entry}, x86 {bits}-bit model; {}",
+                "{method}, entry {entry}, x86 {bits}-bit model; {}",
                 if method == "eva" {
                     "reachable sequential C states; alarms and native assumptions apply"
                 } else {
@@ -239,11 +239,11 @@ pub fn prove(
             root,
             c,
             &dir,
-            "Pinned Clang preprocessor unavailable or not allowlisted".into(),
+            "Clang 19 preprocessor unavailable or not allowlisted".into(),
             false,
         );
     };
-    let mut release = String::new();
+    let mut version = String::new();
     for args in [vec!["-version".into()], vec!["-print-share-path".into()]] {
         match runner::execute(
             &tool,
@@ -256,12 +256,11 @@ pub fn prove(
         ) {
             Ok(e) => {
                 let failed = e.failure.is_some();
-                let version = args[0] == "-version";
-                let found = version
-                    .then(|| crate::version::parse(e.stdout.trim(), ""))
-                    .flatten();
-                if version {
-                    release = e.stdout.trim().to_string();
+                // A recognised release below the minimum is unsupported, not a
+                // failure; an unrecognised version or failed call is a failure.
+                let recognised = discovery::version_after(e.stdout.trim(), "");
+                if args[0] == "-version" {
+                    version = e.stdout.trim().to_string();
                 }
                 run.record(e);
                 if failed {
@@ -274,11 +273,37 @@ pub fn prove(
                         true,
                     );
                 }
-                if version {
-                    use crate::version::{FRAMA_C_MINIMUM, FRAMA_C_REFERENCE, check};
-                    match check("Frama-C", found, FRAMA_C_MINIMUM, FRAMA_C_REFERENCE) {
-                        Ok(note) => run.limitations.extend(note),
-                        Err(reason) => return incomplete(run, root, c, &dir, reason, true),
+                if args[0] == "-version" {
+                    match recognised {
+                        Some(v) if v >= vec![25] => {
+                            run.limitations.extend(discovery::reference_note(
+                                "Frama-C",
+                                &version,
+                                discovery::FRAMA_C_REFERENCE,
+                            ))
+                        }
+                        Some(_) => {
+                            return incomplete(
+                                run,
+                                root,
+                                c,
+                                &dir,
+                                "Unsupported Frama-C version; requires Frama-C 25.0 or later"
+                                    .into(),
+                                false,
+                            );
+                        }
+                        None => {
+                            return incomplete(
+                                run,
+                                root,
+                                c,
+                                &dir,
+                                "Unrecognised Frama-C version; requires Frama-C 25.0 or later"
+                                    .into(),
+                                true,
+                            );
+                        }
                     }
                 }
             }
@@ -414,9 +439,7 @@ pub fn prove(
                     Err(e) => return incomplete(run, root, c, &dir, e.to_string(), true),
                 };
             for p in &mut run.properties {
-                p.scope = p
-                    .scope
-                    .replacen("Frama-C,", &format!("Frama-C {release},"), 1);
+                p.scope = format!("Frama-C {version}, {}", p.scope);
             }
             if run.executions.last().is_some_and(|e| e.failure.is_some()) {
                 for p in &mut run.properties {

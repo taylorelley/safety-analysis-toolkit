@@ -1,11 +1,12 @@
 # Installation and repeatable validation
 
-Minimum versions are Rust 1.89, LLVM/Clang 19.1.0 (19.1.x series), CMake 3.25,
-Frama-C 25.0 and ESBMC 8.6.0 with Z3. The validated reference is Linux x86-64,
-Rust 1.99.1, LLVM/Clang 19.1.7, Frama-C Manganese 25.0-beta and ESBMC 8.6.0.
-Runs with any other release at or above the minimum record that difference as a
-limitation. Build the extension against the same LLVM as the clang-tidy host
-that loads it. Other compiler flags,
+Minimum versions are Rust 1.89, LLVM/Clang 19.1.0 (later 19.1.x patch releases
+accepted), Frama-C 25.0 (Manganese) and ESBMC 8.6.0 with Z3. The validated
+reference is Linux x86-64 with Rust 1.99.1, LLVM/Clang 19.1.7, Frama-C
+Manganese 25.0-beta and ESBMC 8.6.0; other supported releases are accepted, each
+run records that their output formats have not been revalidated, and parsers fail closed on
+unrecognised output. Build the extension and run clang-tidy with the same
+LLVM 19.1.x release. Other compiler flags,
 versions, concurrency models and targets can be unsupported; discovery is not
 a claim of analyzer compatibility.
 

@@ -3,7 +3,7 @@
 # Setup builds the image with network; all validation runs without networking.
 set -eu
 safety_repository=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
-: "${SAFETY_ESBMC_DIR:?Set SAFETY_ESBMC_DIR to an externally reviewed ESBMC 8.6.0 bin directory}"
+: "${SAFETY_ESBMC_DIR:?Set SAFETY_ESBMC_DIR to an externally reviewed ESBMC 8.6.0 (or later) bin directory}"
 test -x "$SAFETY_ESBMC_DIR/esbmc"
 cd "$safety_repository"
 mkdir -p build/reference-results validation/completion
