@@ -2,6 +2,7 @@
 build:
 	cargo build --locked --release
 check:
+	python3 scripts/check_versions.py
 	cargo fmt --check
 	cargo clippy --locked --all-targets -- -D warnings
 test:

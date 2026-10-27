@@ -4,7 +4,8 @@
     "llvm": "19.1.0",
     "cmake": "3.25",
     "esbmc": "8.6.0",
-    "frama_c": "25.0"
+    "frama_c": "25.0",
+    "python_jsonschema": "4.26.0"
   },
   "rust": "1.99.1",
   "llvm": "19.1.7",

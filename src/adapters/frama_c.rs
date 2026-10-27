@@ -275,7 +275,7 @@ pub fn prove(
                 }
                 if args[0] == "-version" {
                     match recognised {
-                        Some(v) if v >= vec![25] => {
+                        Some(v) if discovery::at_least(&v, &discovery::FRAMA_C_MINIMUM) => {
                             run.limitations.extend(discovery::reference_note(
                                 "Frama-C",
                                 &version,

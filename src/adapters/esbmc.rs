@@ -177,7 +177,7 @@ pub fn prove(
         }
     };
     let detected = discovery::version_after(&version.stdout, "ESBMC version ")
-        .filter(|v| version.failure.is_none() && *v >= vec![8, 6, 0]);
+        .filter(|v| version.failure.is_none() && discovery::at_least(v, &discovery::ESBMC_MINIMUM));
     run.record(version);
     let Some(detected) = detected else {
         run.completeness.unsupported = 1;

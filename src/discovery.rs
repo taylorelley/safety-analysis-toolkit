@@ -231,6 +231,15 @@ pub fn version_after(text: &str, marker: &str) -> Option<Vec<u32>> {
         .map(|part| part.parse().ok())
         .collect()
 }
+/// Minimum supported releases; scripts/check_versions.py keeps these in step
+/// with docs/tool-versions.json. LLVM is further limited to its 19.1 series.
+pub const LLVM_MINIMUM: [u32; 3] = [19, 1, 0];
+pub const ESBMC_MINIMUM: [u32; 3] = [8, 6, 0];
+pub const FRAMA_C_MINIMUM: [u32; 2] = [25, 0];
+/// Whether a parsed version meets a minimum, compared component-wise.
+pub fn at_least(version: &[u32], minimum: &[u32]) -> bool {
+    version >= minimum
+}
 /// Validated reference releases. Other supported releases run, but each run
 /// records that output interpretation for that release is unvalidated.
 pub const LLVM_REFERENCE: &str = "19.1.7";
@@ -240,7 +249,7 @@ pub const FRAMA_C_REFERENCE: &str = "25.0-beta (Manganese)";
 /// major.minor compatibility rule for the native module.
 pub fn llvm_release(version_output: &str) -> Option<String> {
     version_after(version_output, "version ")
-        .filter(|v| v.len() == 3 && v.starts_with(&[19, 1]))
+        .filter(|v| v.len() == 3 && v.starts_with(&LLVM_MINIMUM[..2]) && at_least(v, &LLVM_MINIMUM))
         .map(|v| v.iter().map(u32::to_string).collect::<Vec<_>>().join("."))
 }
 /// Limitation for a supported release that is not the validated reference.
@@ -362,7 +371,7 @@ fn capabilities(
             }
         },
         "esbmc" => match version_after(banner, "ESBMC version ") {
-            Some(v) if v >= vec![8, 6, 0] => {
+            Some(v) if at_least(&v, &ESBMC_MINIMUM) => {
                 let release = v.iter().map(u32::to_string).collect::<Vec<_>>().join(".");
                 if let Some(note) = reference_note("ESBMC", &release, ESBMC_REFERENCE) {
                     problems.push((note, false));
@@ -380,7 +389,7 @@ fn capabilities(
             _ => problems.push(("requires ESBMC 8.6.0 or later".into(), true)),
         },
         "frama-c" => match version_after(banner.trim(), "") {
-            Some(v) if v >= vec![25] => {
+            Some(v) if at_least(&v, &FRAMA_C_MINIMUM) => {
                 if let Some(note) = reference_note("Frama-C", banner.trim(), FRAMA_C_REFERENCE) {
                     problems.push((note, false));
                 }
