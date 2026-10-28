@@ -693,7 +693,11 @@ void addRulesDeclarations(Table &T) {
                    const auto *V = Res.Nodes.getNodeAs<VarDecl>("v");
                    if (!isUserDecl(V) || !V->getTypeSourceInfo()) return;
                    if (!V->getTypeSourceInfo()->getTypeLoc().getAs<IncompleteArrayTypeLoc>()) return;
-                   const auto *L = cast<InitListExpr>(V->getInit()->IgnoreImplicit());
+                   // hasInitializer() also matches redeclarations (such as an extern
+                   // declaration) whose initializer belongs to another declaration.
+                   const Expr *Init = V->getInit();
+                   const auto *L = Init ? dyn_cast<InitListExpr>(Init->IgnoreImplicit()) : nullptr;
+                   if (!L) return;
                    if (const InitListExpr *Syntax = L->getSyntacticForm()) L = Syntax;
                    for (const Expr *Init : L->inits())
                      if (const auto *D = dyn_cast<DesignatedInitExpr>(Init); D && D->getDesignator(0)->isArrayDesignator()) {
