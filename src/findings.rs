@@ -48,9 +48,18 @@ pub fn parse(
     let mut sources: BTreeMap<String, (usize, Vec<usize>)> = BTreeMap::new();
     let mut findings = Vec::new();
     for d in export.diagnostics {
+        // Fail closed: a diagnostic that cannot be placed in source cannot be
+        // reported, so the unit stays incomplete with a specific reason.
+        anyhow::ensure!(
+            !d.message.file.is_empty(),
+            "diagnostic {} has no source location: {}",
+            d.name,
+            d.message.text
+        );
         let file = directory.join(&d.message.file);
         if !sources.contains_key(&d.message.file) {
-            let source = std::fs::read(&file).context("diagnostic source unavailable")?;
+            let source = std::fs::read(&file)
+                .with_context(|| format!("diagnostic source unavailable: {}", file.display()))?;
             let newlines = source
                 .iter()
                 .enumerate()
@@ -136,6 +145,11 @@ mod tests {
     #[test]
     fn malformed() {
         assert!(parse(b"invalid yaml", "v", "raw/x", Path::new(".")).is_err());
+        let located = b"Diagnostics:\n  - {DiagnosticName: misra-x, DiagnosticMessage: {Message: m, FilePath: '', FileOffset: 0}}\n";
+        let err = parse(located, "v", "raw/x", Path::new("."))
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("misra-x has no source location"), "{err}");
     }
     #[test]
     fn positions() {
