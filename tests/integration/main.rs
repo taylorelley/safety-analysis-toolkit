@@ -191,6 +191,21 @@ fn doctor_reports_missing_analyzer_capabilities() {
     );
 }
 #[test]
+fn mcp_operation_limit_is_bounded() {
+    for (value, accepted) in [(9, false), (10, true), (86400, true), (86401, false)] {
+        let t = tempfile::tempdir().unwrap();
+        fs::write(
+            t.path().join("safety.yaml"),
+            format!(
+                "version: 1\nproject: {{name: limits}}\ntools: {{mcp_operation_seconds: {value}}}\n"
+            ),
+        )
+        .unwrap();
+        let out = bin().arg("doctor").arg(t.path()).output().unwrap();
+        assert_eq!(out.status.code() != Some(2), accepted, "{value}");
+    }
+}
+#[test]
 fn invalid_config() {
     let t = tempfile::tempdir().unwrap();
     fs::write(

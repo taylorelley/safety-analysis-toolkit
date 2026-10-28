@@ -152,6 +152,7 @@ pub struct CoverageRequest {
 #[derive(Clone)]
 pub struct Server {
     root: PathBuf,
+    operation_limit: std::time::Duration,
     gate: Arc<tokio::sync::Semaphore>,
     tool_router: ToolRouter<Self>,
 }
@@ -176,8 +177,9 @@ impl Server {
         let root = self.root.clone();
         let token = ctx.ct.clone();
         let deadline_token = token.clone();
+        let limit = self.operation_limit;
         let timer = tokio::spawn(async move {
-            tokio::time::sleep(std::time::Duration::from_secs(300)).await;
+            tokio::time::sleep(limit).await;
             deadline_token.cancel();
         });
         let job = tokio::task::spawn_blocking(move || {
@@ -200,9 +202,10 @@ impl Server {
 }
 #[tool_router]
 impl Server {
-    pub fn new(root: PathBuf) -> Self {
+    pub fn new(root: PathBuf, operation_seconds: u64) -> Self {
         Self {
             root,
+            operation_limit: std::time::Duration::from_secs(operation_seconds),
             gate: Arc::new(tokio::sync::Semaphore::new(1)),
             tool_router: Self::tool_router(),
         }
@@ -384,8 +387,8 @@ impl ServerHandler for Server {
     }
 }
 pub async fn serve(root: PathBuf) -> anyhow::Result<()> {
-    Config::load(&root)?;
-    Server::new(root)
+    let limit = Config::load(&root)?.tools.mcp_operation_seconds;
+    Server::new(root, limit)
         .serve(rmcp::transport::stdio())
         .await?
         .waiting()

@@ -220,6 +220,11 @@
               "type": "null"
             }
           ]
+        },
+        "mcp_operation_seconds": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 86400
         }
       },
       "required": [],
