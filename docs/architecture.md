@@ -24,6 +24,10 @@ only with successful exit and empty stdout/stderr. Malformed structured output,
 unexpected output without an export, parser errors and timeouts are incomplete.
 Raw output is always retained. A diagnostic remains a diagnostic, not a formally
 established production defect. Correlation preserves property and variant.
+Diagnostics located in an included file are attributed to the first unit with
+the same compile configuration (identical commands apart from the unit's own
+source file and output), so a header finding repeated by many units becomes one
+finding whose `native_references` list every reporting unit.
 
 The custom C++ module uses Clang AST matchers, preprocessor callbacks and
 comment handlers. Its three original policy checks carry no MISRA rule

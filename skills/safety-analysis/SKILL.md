@@ -65,7 +65,8 @@ missing policy instead of inventing lifecycle decisions.
   based on this toolkit. Agent reasoning remains advisory.
 
 MCP exposes only supported operations, fixes one workspace when started, validates
-strict inputs and bounds responses. Use `safety.get_findings` pagination and
-`safety.get_run`/`safety.report`; inspect referenced local evidence for large
-results. There is no shell tool or source-write method. See
+strict inputs and bounds responses. For large runs, read `finding_counts` from
+the operation summary, then call `safety.get_findings` with `rule_prefix`,
+`exclude_rule_prefixes`, `category` or `file` filters (compact records by
+default), and use `safety.report` with `format: "summary"` for an overview. There is no shell tool or source-write method. See
 [interfaces](references/interfaces.md) for commands and limitations.
