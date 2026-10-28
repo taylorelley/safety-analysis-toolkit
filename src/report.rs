@@ -1,5 +1,62 @@
 use crate::model::Run;
 use serde_json::{Value, json};
+/// Bounded Markdown overview: status, completeness, finding counts by rule and
+/// limitations, without listing individual findings.
+pub fn summary_markdown(r: &Run) -> String {
+    const MAX_RULES: usize = 40;
+    const MAX_LIMITATIONS: usize = 40;
+    let mut counts = std::collections::BTreeMap::<&str, usize>::new();
+    for f in &r.findings {
+        *counts.entry(f.rule_id.as_str()).or_default() += 1;
+    }
+    let mut counts: Vec<_> = counts.into_iter().collect();
+    counts.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(b.0)));
+    let mut s = format!(
+        "# Safety analysis summary\n\nProject: {}\n\nRun: {}\n\nStatus: {:?}; complete: {}\n\nTranslation units: {} total, {} analyzed, {} failed, {} unsupported, {} excluded.\n\n## Findings by rule ({} findings, {} rules)\n\n| Rule | Count |\n| --- | ---: |\n",
+        r.project,
+        r.id,
+        r.status,
+        r.complete,
+        r.completeness.total,
+        r.completeness.analyzed,
+        r.completeness.failed,
+        r.completeness.unsupported,
+        r.completeness.excluded,
+        r.findings.len(),
+        counts.len()
+    );
+    for (rule, n) in counts.iter().take(MAX_RULES) {
+        s.push_str(&format!("| `{rule}` | {n} |\n"));
+    }
+    if counts.len() > MAX_RULES {
+        s.push_str(&format!(
+            "\n{} further rules omitted.\n",
+            counts.len() - MAX_RULES
+        ));
+    }
+    if !r.properties.is_empty() {
+        s.push_str("\n## Properties\n\n");
+        for p in &r.properties {
+            s.push_str(&format!(
+                "- {:?}: {}\n",
+                p.outcome,
+                p.description.replace('\n', " ")
+            ));
+        }
+    }
+    s.push_str("\n## Limitations\n\n");
+    for l in r.limitations.iter().take(MAX_LIMITATIONS) {
+        s.push_str(&format!("- {}\n", l.replace('\n', " ")));
+    }
+    if r.limitations.len() > MAX_LIMITATIONS {
+        s.push_str(&format!(
+            "- {} further limitations in evidence\n",
+            r.limitations.len() - MAX_LIMITATIONS
+        ));
+    }
+    s.push_str("\nUse safety.get_findings with rule_prefix, exclude_rule_prefixes, category or file filters to retrieve individual findings.\n");
+    s
+}
 pub fn markdown(r: &Run) -> String {
     let mut s = format!(
         "# Safety analysis evidence\n\nProject: {}\n\nRun: {}\n\nStatus: {:?}; complete: {}\n\nTranslation units: {} total, {} analyzed, {} failed, {} unsupported, {} excluded.\n\n## Findings\n\n",
