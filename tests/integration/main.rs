@@ -287,6 +287,60 @@ fn scan_fixture(cpp: bool) {
 }
 #[test]
 #[ignore = "requires real clang-tidy 19.1+ on PATH"]
+fn real_header_findings_merge_per_configuration() {
+    let t = tempfile::tempdir().unwrap();
+    fs::write(
+        t.path().join("safety.yaml"),
+        "version: 1\nproject: {name: headers}\nbuild: {compile_commands: compile_commands.json}\n",
+    )
+    .unwrap();
+    fs::write(
+        t.path().join("h.h"),
+        "static inline int deref(void) { int *p = 0; return *p; }\n",
+    )
+    .unwrap();
+    for name in ["a", "b", "c"] {
+        fs::write(
+            t.path().join(format!("{name}.c")),
+            format!("#include \"h.h\"\nint {name}_value(void) {{ return deref(); }}\n"),
+        )
+        .unwrap();
+    }
+    // a.c and b.c share a configuration; c.c differs by one definition.
+    let entries: Vec<_> = [("a", "-DCFG=1"), ("b", "-DCFG=1"), ("c", "-DCFG=2")]
+        .iter()
+        .map(|(name, define)| serde_json::json!({"directory":t.path(),"file":format!("{name}.c"),"arguments":["clang-19","-std=c11",define,"-c",format!("{name}.c")]}))
+        .collect();
+    fs::write(
+        t.path().join("compile_commands.json"),
+        serde_json::to_vec(&entries).unwrap(),
+    )
+    .unwrap();
+    let out = bin().arg("scan").arg(t.path()).output().unwrap();
+    let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    let header: Vec<_> = v["findings"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|f| f["file"] == "h.h" && f["rule_id"] == "clang-analyzer-core.NullDereference")
+        .collect();
+    assert_eq!(header.len(), 2, "one per configuration: {v}");
+    let shared = header
+        .iter()
+        .find(|f| f["native_references"].as_array().unwrap().len() == 2)
+        .expect("a.c and b.c merged with both logs referenced");
+    let variants = v["completeness"]["build_variants"].as_array().unwrap();
+    assert_eq!(shared["build_variant"], variants[0]);
+    assert!(
+        v["limitations"].as_array().unwrap().iter().any(|l| l
+            .as_str()
+            .unwrap()
+            .contains("included-file findings repeated")),
+        "{v}"
+    );
+}
+#[test]
+#[ignore = "requires real clang-tidy 19.1+ on PATH"]
 fn real_c_pipeline() {
     scan_fixture(false)
 }
