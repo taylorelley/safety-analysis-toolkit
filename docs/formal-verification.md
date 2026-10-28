@@ -9,7 +9,9 @@ The adapter selects Z3, 32/64-bit width, overflow checking and default unwinding
 assertions. Select one compilation entry using `--variant` when necessary.
 Only reviewed argument translations are accepted; semantic options are never
 silently dropped. BMC is the default; `--method induction` selects native
-k-induction with `--max-k-step` equal to `--unwind` (default 8).
+k-induction with `--max-k-step` equal to `--unwind` (default 8). When ESBMC
+stops at the unwinding bound, affected properties stay `UNKNOWN` and the run
+records a limitation suggesting a larger `--unwind`.
 
 ```sh
 safety prove harness/component.c --engine esbmc --unwind 8 --bits 32
@@ -35,10 +37,14 @@ below 25.0 is unsupported; an unrecognised version is a failure.
 The validated reference package is Debian `frama-c-base=20220511-manganese-3+b4`.
 C only; a selected complete analysis unit must contain the entry function.
 The default is Eva; WP is selected explicitly and uses Qed for supplied ACSL
-contracts. Other external prover commands are not exposed.
+contracts. Other external prover commands are not exposed. Eva runs at
+Frama-C's default precision unless `--precision 0-11` (`-eva-precision`) is
+given; the level is recorded in each property scope. Loops often need a higher
+level before Eva can establish a property.
 
 ```sh
 safety prove harness/component.c --engine frama-c --method eva --entry main
+safety prove harness/loops.c --engine frama-c --precision 11
 safety prove src/contracts.c --engine frama-c --method wp --entry identity
 ```
 

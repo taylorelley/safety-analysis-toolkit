@@ -62,6 +62,9 @@ pub struct ProveRequest {
     pub unwind: u32,
     #[serde(default = "bits_default")]
     pub bits: u32,
+    /// Frama-C Eva precision level, 0 (fast) to 11 (precise).
+    #[serde(default)]
+    pub precision: Option<u8>,
 }
 #[derive(Default, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "kebab-case")]
@@ -221,6 +224,7 @@ impl Server {
                     method: req.method,
                     entry: req.entry,
                     harness: req.harness,
+                    precision: req.precision,
                 },
             )?;
             Ok(summary(&r))

@@ -31,6 +31,8 @@ pub struct Request {
     pub bits: u32,
     pub entry: String,
     pub harness: Option<PathBuf>,
+    /// Frama-C Eva precision level (0-11).
+    pub precision: Option<u8>,
 }
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -66,6 +68,10 @@ pub fn verify(root: &Path, c: &Config, mut request: Request) -> Result<Run> {
             .into()
         })
         .clone();
+    anyhow::ensure!(
+        request.precision.is_none() || request.engine == "frama-c",
+        "--precision applies only to Frama-C Eva"
+    );
     anyhow::ensure!(
         !request.entry.is_empty()
             && request
@@ -113,9 +119,12 @@ pub fn verify(root: &Path, c: &Config, mut request: Request) -> Result<Run> {
                 c,
                 &request.source,
                 request.variant.as_deref(),
-                &method,
-                &request.entry,
-                request.bits,
+                adapters::frama_c::Options {
+                    method: &method,
+                    entry: &request.entry,
+                    bits: request.bits,
+                    precision: request.precision,
+                },
             )?,
             "esbmc" => adapters::esbmc::prove(
                 root,

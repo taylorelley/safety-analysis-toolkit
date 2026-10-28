@@ -263,7 +263,20 @@ fn isolate(output: &std::ffi::CStr, require_filesystem_isolation: bool) -> std::
                 allowed: access,
                 parent,
             };
-            let add = libc::syscall(libc::SYS_landlock_add_rule, ruleset, 1, &rule, 0);
+            let mut add = libc::syscall(libc::SYS_landlock_add_rule, ruleset, 1, &rule, 0);
+            // Tools such as git open /dev/null read-write; permit only file
+            // writes and truncation on that device, nothing else outside evidence.
+            let null = libc::open(c"/dev/null".as_ptr(), libc::O_PATH | libc::O_CLOEXEC);
+            if add == 0 && null >= 0 {
+                let rule = Rule {
+                    allowed: (1 << 1) | (1 << 14),
+                    parent: null,
+                };
+                add = libc::syscall(libc::SYS_landlock_add_rule, ruleset, 1, &rule, 0);
+            }
+            if null >= 0 {
+                libc::close(null);
+            }
             let restrict = if add == 0 {
                 libc::syscall(libc::SYS_landlock_restrict_self, ruleset, 0)
             } else {
@@ -493,6 +506,24 @@ mod tests {
         )
         .unwrap();
         assert_eq!(e.failure.as_deref(), Some("cancelled"));
+    }
+    #[test]
+    fn isolated_tools_can_write_dev_null() {
+        let out = tempfile::tempdir().unwrap();
+        let e = execute(
+            Path::new("/usr/bin/sh"),
+            &[
+                "-c".into(),
+                "echo x > /dev/null && exec 3<>/dev/null".into(),
+            ],
+            out.path(),
+            out.path(),
+            2,
+            256,
+            false,
+        )
+        .unwrap();
+        assert_eq!(e.exit_code, Some(0), "{}", e.stderr);
     }
     #[test]
     fn strict_isolation_fails_closed_or_blocks_writes() {

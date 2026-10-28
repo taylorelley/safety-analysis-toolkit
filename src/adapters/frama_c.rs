@@ -88,6 +88,21 @@ fn incomplete(
     });
     evidence::finish(root, c, dir, run)
 }
+/// Plain explanation for native statuses that are easily misread. The native
+/// status itself is always kept verbatim.
+fn status_note(method: &str, status: &str) -> Option<&'static str> {
+    match (method, status) {
+        // The Report plugin prints never-tried properties as "Ignored".
+        ("wp", "Ignored") => Some(
+            "no prover result: Qed could not discharge this goal and no other prover is configured; not evidence that the property holds or fails",
+        ),
+        (_, "Ignored") => Some("no analysis attempted this property"),
+        (_, "Invalid or unreachable") => Some(
+            "Frama-C found the property invalid or its code unreachable; never treated as proof",
+        ),
+        _ => None,
+    }
+}
 // Version-specific statuses are interpreted conservatively. In particular
 // 'Considered valid' and 'Invalid or unreachable' are never proof success.
 fn properties(
@@ -147,7 +162,10 @@ fn properties(
         };
         result.push(Property {
             id: format!("FC-{}", &evidence::hash(description.as_bytes())[..20]),
-            description: format!("{description} [native status: {status}]"),
+            description: match status_note(method, &status) {
+                Some(note) => format!("{description} [native status: {status}; {note}]"),
+                None => format!("{description} [native status: {status}]"),
+            },
             outcome,
             scope: format!(
                 "{method}, entry {entry}, x86 {bits}-bit model; {}",
@@ -180,15 +198,30 @@ fn properties(
     }
     Ok(result)
 }
+pub struct Options<'a> {
+    pub method: &'a str,
+    pub entry: &'a str,
+    pub bits: u32,
+    /// Eva `-eva-precision` level (0-11); None keeps Frama-C's default.
+    pub precision: Option<u8>,
+}
 pub fn prove(
     root: &Path,
     c: &Config,
     source: &Path,
     variant: Option<&str>,
-    method: &str,
-    entry: &str,
-    bits: u32,
+    options: Options,
 ) -> Result<Run> {
+    let Options {
+        method,
+        entry,
+        bits,
+        precision,
+    } = options;
+    anyhow::ensure!(
+        precision.is_none_or(|p| method == "eva" && p <= 11),
+        "Eva precision applies only to --method eva and must be 0-11"
+    );
     anyhow::ensure!(
         ["eva", "wp"].contains(&method)
             && [32, 64].contains(&bits)
@@ -275,7 +308,7 @@ pub fn prove(
                 }
                 if args[0] == "-version" {
                     match recognised {
-                        Some(v) if v >= vec![25] => {
+                        Some(v) if discovery::at_least(&v, &discovery::FRAMA_C_MINIMUM) => {
                             run.limitations.extend(discovery::reference_note(
                                 "Frama-C",
                                 &version,
@@ -380,6 +413,9 @@ pub fn prove(
     ];
     if method == "eva" {
         args.extend(["-eva".into(), "-eva-no-reduce-on-logic-alarms".into()]);
+        if let Some(p) = precision {
+            args.extend(["-eva-precision".into(), p.to_string()]);
+        }
     } else {
         args.extend([
             "-wp".into(),
@@ -440,6 +476,9 @@ pub fn prove(
                 };
             for p in &mut run.properties {
                 p.scope = format!("Frama-C {version}, {}", p.scope);
+                if let Some(level) = precision {
+                    p.scope.push_str(&format!("; Eva precision {level}"));
+                }
             }
             if run.executions.last().is_some_and(|e| e.failure.is_some()) {
                 for p in &mut run.properties {
@@ -467,6 +506,18 @@ pub fn prove(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn ignored_wp_goal_is_explained_not_proven() {
+        let t = tempfile::tempdir().unwrap();
+        fs::write(t.path().join("x.c"), "").unwrap();
+        let data = b"directory\tfile\tline\tfunction\tproperty kind\tstatus\tproperty\n.\tx.c\t1\tmax\tpostcondition\tIgnored\tr >= a\n";
+        let p = properties(data, t.path(), t.path(), "wp", "max", 64, true).unwrap();
+        assert_eq!(p[0].outcome, ProofOutcome::Unknown);
+        assert!(
+            p[0].description
+                .contains("native status: Ignored; no prover result")
+        );
+    }
     #[test]
     fn external_assumptions_are_not_proofs() {
         let t = tempfile::tempdir().unwrap();

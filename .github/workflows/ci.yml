@@ -9,6 +9,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal --component clippy --component rustfmt && rustup default stable
+      - run: python3 scripts/check_versions.py
       - run: cargo fmt --check
       - run: cargo clippy --locked --all-targets -- -D warnings
       - run: cargo test --locked
@@ -36,10 +37,7 @@ jobs:
           sh /tmp/rustup.sh -y --default-toolchain stable --profile minimal --component clippy --component rustfmt
           echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
       - name: Cache external SARIF schema with content pin
-        run: |
-          mkdir -p .cache
-          curl -fsSL https://json.schemastore.org/sarif-2.1.0.json -o .cache/sarif-2.1.0.json
-          echo 'c96eb2d311c37b0a38cbd18c52d79a68f778bbd2d831abed7412d9850740f785  .cache/sarif-2.1.0.json' | sha256sum -c -
+        run: make cache
       - run: make validation
       - name: Formal scope notice
         run: echo "Frama-C and ESBMC suites are not run in this LLVM job; no formal acceptance is claimed here."
@@ -50,6 +48,27 @@ jobs:
           name: clang-evidence
           path: examples/**/.safety/runs/
           include-hidden-files: true
+  clang-distribution-llvm:
+    # Exercises the documented LLVM minimum with a non-reference 19.1.x
+    # release (Ubuntu 24.04 ships 19.1.1); the clang job covers 19.1.7.
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Install Ubuntu LLVM 19 packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-19 clang-tidy-19 llvm-19-dev libclang-19-dev libclang-rt-19-dev cmake
+          version="$(clang-tidy-19 --version | sed -n 's/.*version \(19\.1\.[0-9]*\).*/\1/p')"
+          echo "Distribution LLVM: $version"
+          dpkg --compare-versions "$version" ge 19.1.0
+          if [ "$version" = 19.1.7 ]; then echo "Runner provides the reference 19.1.7; this job no longer tests a non-reference release" >&2; exit 1; fi
+      - name: Install stable Rust
+        run: rustup toolchain install stable --profile minimal && rustup default stable
+      - run: make clang examples
+      - name: Real Clang integration tests
+        run: |
+          PATH="$PWD/build/clang:/usr/lib/llvm-19/bin:$PATH" SAFETY_TEST_MODULE="$PWD/build/clang/SafetyMisra.so" \
+            cargo test --locked -- --include-ignored --skip real_esbmc --skip real_frama_c
   reference-formal-and-package:
     runs-on: ubuntu-24.04
     timeout-minutes: 30

@@ -104,6 +104,19 @@ fn results(log: &str, exit: Option<i32>, bounded: u32, bits: u32, version: &str)
     }
     properties
 }
+/// Limitation when ESBMC stopped at the unwinding bound. Only a FAILED
+/// unwinding assertion shows the bound was reached; a PASSED one can still be
+/// reported UNKNOWN when another property fails, which the bound cannot fix.
+fn unwind_hint(log: &str, unwind: u32) -> Option<String> {
+    log.lines()
+        .map(str::trim)
+        .any(|l| l.starts_with("FAILED ") && l.to_lowercase().contains("unwinding assertion"))
+        .then(|| {
+            format!(
+                "ESBMC reached the unwinding bound {unwind} before exploring all loop iterations; results are unknown, not proven or violated. Re-run with a larger --unwind"
+            )
+        })
+}
 pub struct Options<'a> {
     pub unwind: u32,
     pub bits: u32,
@@ -177,7 +190,7 @@ pub fn prove(
         }
     };
     let detected = discovery::version_after(&version.stdout, "ESBMC version ")
-        .filter(|v| version.failure.is_none() && *v >= vec![8, 6, 0]);
+        .filter(|v| version.failure.is_none() && discovery::at_least(v, &discovery::ESBMC_MINIMUM));
     run.record(version);
     let Some(detected) = detected else {
         run.completeness.unsupported = 1;
@@ -226,6 +239,7 @@ pub fn prove(
             let log = format!("{}\n{}", e.stdout, e.stderr);
             evidence::write_new(&dir.join("raw/esbmc.log"), log.as_bytes())?;
             run.properties = results(&log, e.exit_code, unwind, bits, &detected);
+            run.limitations.extend(unwind_hint(&log, unwind));
             for p in &mut run.properties {
                 p.scope = p.scope.replace("entry main", &format!("entry {entry}"));
                 if method == "induction" {
@@ -282,6 +296,22 @@ pub fn prove(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn unwind_bound_hint() {
+        let stopped = "FAILED [P1] unwinding assertion loop 3\nVERIFICATION FAILED";
+        assert!(unwind_hint(stopped, 8).unwrap().contains("--unwind"));
+        let complete = "PASSED [P1] unwinding assertion loop 3\nVERIFICATION SUCCESSFUL";
+        assert_eq!(unwind_hint(complete, 12), None);
+        // Loops fully unwound, but a different property fails: the PASSED
+        // unwinding assertion becomes UNKNOWN, yet the bound is not the cause.
+        let other = "PASSED [P1] unwinding assertion loop 3\nFAILED [P2] array bounds violated\nVERIFICATION FAILED";
+        assert!(
+            results(other, Some(1), 12, 64, "8.6.0")
+                .iter()
+                .any(|p| p.id == "P1" && p.outcome == ProofOutcome::Unknown)
+        );
+        assert_eq!(unwind_hint(other, 12), None);
+    }
     #[test]
     fn no_false_proof() {
         for (log, exit) in [

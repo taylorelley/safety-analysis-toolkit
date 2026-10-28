@@ -231,6 +231,15 @@ pub fn version_after(text: &str, marker: &str) -> Option<Vec<u32>> {
         .map(|part| part.parse().ok())
         .collect()
 }
+/// Minimum supported releases; scripts/check_versions.py keeps these in step
+/// with docs/tool-versions.json. LLVM is further limited to its 19.1 series.
+pub const LLVM_MINIMUM: [u32; 3] = [19, 1, 0];
+pub const ESBMC_MINIMUM: [u32; 3] = [8, 6, 0];
+pub const FRAMA_C_MINIMUM: [u32; 2] = [25, 0];
+/// Whether a parsed version meets a minimum, compared component-wise.
+pub fn at_least(version: &[u32], minimum: &[u32]) -> bool {
+    version >= minimum
+}
 /// Validated reference releases. Other supported releases run, but each run
 /// records that output interpretation for that release is unvalidated.
 pub const LLVM_REFERENCE: &str = "19.1.7";
@@ -240,7 +249,7 @@ pub const FRAMA_C_REFERENCE: &str = "25.0-beta (Manganese)";
 /// major.minor compatibility rule for the native module.
 pub fn llvm_release(version_output: &str) -> Option<String> {
     version_after(version_output, "version ")
-        .filter(|v| v.len() == 3 && v.starts_with(&[19, 1]))
+        .filter(|v| v.len() == 3 && v.starts_with(&LLVM_MINIMUM[..2]) && at_least(v, &LLVM_MINIMUM))
         .map(|v| v.iter().map(u32::to_string).collect::<Vec<_>>().join("."))
 }
 /// Limitation for a supported release that is not the validated reference.
@@ -252,6 +261,17 @@ pub fn reference_note(tool: &str, release: &str, reference: &str) -> Option<Stri
         )
     })
 }
+/// Tool names resolved from PATH when no explicit allowlist is configured.
+pub const SUPPORTED_TOOLS: [&str; 8] = [
+    "clang-tidy-19",
+    "clang-19",
+    "llvm-cov-19",
+    "llvm-profdata-19",
+    "frama-c",
+    "esbmc",
+    "safety-source-index",
+    "git",
+];
 pub fn executable(name: &str, allowlist: &[PathBuf]) -> Option<PathBuf> {
     let candidate = std::env::var_os("PATH").and_then(|v| {
         std::env::split_paths(&v)
@@ -261,18 +281,7 @@ pub fn executable(name: &str, allowlist: &[PathBuf]) -> Option<PathBuf> {
     let p = candidate.canonicalize().ok()?;
     if allowlist.is_empty() {
         // Default allowlist is the fixed set of supported tool names.
-        if ![
-            "clang-tidy-19",
-            "clang-19",
-            "llvm-cov-19",
-            "llvm-profdata-19",
-            "frama-c",
-            "esbmc",
-            "safety-source-index",
-            "git",
-        ]
-        .contains(&name)
-        {
+        if !SUPPORTED_TOOLS.contains(&name) {
             return None;
         }
     } else if !allowlist
@@ -282,6 +291,130 @@ pub fn executable(name: &str, allowlist: &[PathBuf]) -> Option<PathBuf> {
         return None;
     }
     Some(p)
+}
+/// Frama-C plugin names listed by `frama-c -plugins`: (Eva, WP).
+fn frama_c_plugins(listing: &str) -> (bool, bool) {
+    let has = |name: &str| {
+        listing
+            .lines()
+            .any(|l| l.split_whitespace().next() == Some(name))
+    };
+    (has("Eva"), has("WP"))
+}
+/// Whether `esbmc --list-solvers` names Z3, the solver the adapter selects.
+fn esbmc_has_z3(listing: &str) -> bool {
+    listing
+        .lines()
+        .filter_map(|l| l.strip_prefix("Available solvers:"))
+        .any(|l| l.split_whitespace().any(|s| s == "z3"))
+}
+/// Version gates and capability probes for a discovered tool, mirroring what
+/// scan, prove and coverage require. Returns (problem, fatal-if-required).
+fn capabilities(
+    name: &str,
+    exe: &Path,
+    banner: &str,
+    root: &Path,
+    dir: &Path,
+    c: &crate::config::Config,
+    run: &mut crate::model::Run,
+) -> Vec<(String, bool)> {
+    let mut probe = |args: &[&str]| {
+        let args = args.iter().map(|a| a.to_string()).collect::<Vec<_>>();
+        match crate::runner::execute(
+            exe,
+            &args,
+            root,
+            dir,
+            c.tools.timeout_seconds,
+            c.tools.memory_mb,
+            c.tools.require_filesystem_isolation,
+        ) {
+            Ok(e) => {
+                // Some tools (ESBMC --list-solvers) report on stderr.
+                let out = (e.failure.is_none()).then(|| format!("{}\n{}", e.stdout, e.stderr));
+                run.record(e);
+                out
+            }
+            Err(_) => None,
+        }
+    };
+    let mut problems = Vec::new();
+    match name {
+        "clang-tidy-19" | "llvm-cov-19" => match llvm_release(banner) {
+            None => problems.push((
+                "requires LLVM 19.1.0 or a later 19.1.x release".into(),
+                true,
+            )),
+            Some(release) => {
+                if let Some(note) = reference_note("LLVM", &release, LLVM_REFERENCE) {
+                    problems.push((note, false));
+                }
+                if name == "clang-tidy-19"
+                    && let Some(module) = &c.tools.clang_module
+                {
+                    let checks = probe(&[
+                        &format!("--load={}", module.display()),
+                        "--checks=-*,misra-c2012-*,safety-*",
+                        "--list-checks",
+                    ]);
+                    let loaded = checks
+                        .as_deref()
+                        .is_some_and(|out| out.contains("misra-c2012-") && out.contains("safety-"));
+                    if !loaded {
+                        problems.push((
+                            "configured clang_module did not load or registered no misra-c2012/safety checks; build it against this clang-tidy".into(),
+                            true,
+                        ));
+                    }
+                }
+            }
+        },
+        "esbmc" => match version_after(banner, "ESBMC version ") {
+            Some(v) if at_least(&v, &ESBMC_MINIMUM) => {
+                let release = v.iter().map(u32::to_string).collect::<Vec<_>>().join(".");
+                if let Some(note) = reference_note("ESBMC", &release, ESBMC_REFERENCE) {
+                    problems.push((note, false));
+                }
+                if !probe(&["--list-solvers"])
+                    .as_deref()
+                    .is_some_and(esbmc_has_z3)
+                {
+                    problems.push((
+                        "Z3 solver unavailable; the ESBMC adapter requires Z3".into(),
+                        true,
+                    ));
+                }
+            }
+            _ => problems.push(("requires ESBMC 8.6.0 or later".into(), true)),
+        },
+        "frama-c" => match version_after(banner.trim(), "") {
+            Some(v) if at_least(&v, &FRAMA_C_MINIMUM) => {
+                if let Some(note) = reference_note("Frama-C", banner.trim(), FRAMA_C_REFERENCE) {
+                    problems.push((note, false));
+                }
+                let (eva, wp) = probe(&["-plugins"])
+                    .as_deref()
+                    .map(frama_c_plugins)
+                    .unwrap_or_default();
+                if !eva {
+                    problems.push((
+                        "Eva plugin unavailable; prove --engine frama-c cannot run".into(),
+                        true,
+                    ));
+                }
+                if !wp {
+                    problems.push((
+                        "WP plugin unavailable; prove --method wp will be incomplete (some distribution packages omit WP)".into(),
+                        false,
+                    ));
+                }
+            }
+            _ => problems.push(("requires Frama-C 25.0 or later".into(), true)),
+        },
+        _ => {}
+    }
+    problems
 }
 pub fn doctor(root: &Path, c: &crate::config::Config) -> Result<crate::model::Run> {
     use crate::{discovery, evidence, model::Status, runner};
@@ -329,7 +462,16 @@ pub fn doctor(root: &Path, c: &crate::config::Config) -> Result<crate::model::Ru
             ) {
                 Ok(e) => {
                     missing |= required && e.failure.is_some();
-                    run.record(e)
+                    let banner = (e.failure.is_none()).then(|| e.stdout.clone());
+                    run.record(e);
+                    if let Some(banner) = banner {
+                        for (problem, fatal) in
+                            capabilities(name, &exe, &banner, root, &dir, c, &mut run)
+                        {
+                            missing |= required && fatal;
+                            run.limitations.push(format!("{name}: {problem}"));
+                        }
+                    }
                 }
                 Err(e) => {
                     missing |= required;
@@ -412,6 +554,20 @@ mod tests {
             Some(vec![25, 0])
         );
         assert_eq!(version_after("version x", "version "), None);
+    }
+    #[test]
+    fn capability_listings() {
+        let full = "Eva                 automatically computes\nWP                  Proof by Weakest Precondition\n";
+        assert_eq!(frama_c_plugins(full), (true, true));
+        assert_eq!(
+            frama_c_plugins("Eva                 automatically computes\nReport  x\n"),
+            (true, false)
+        );
+        assert_eq!(frama_c_plugins("Wpalette x\n"), (false, false));
+        assert!(esbmc_has_z3(
+            "Target: x\nAvailable solvers: smtlib z3 boolector\nESBMC version 8.6.0"
+        ));
+        assert!(!esbmc_has_z3("Available solvers: smtlib boolector z3x\n"));
     }
     #[test]
     fn variants() {

@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: Apache-2.0
 """Execute CLI and independent MCP workflows; preserve real evidence and gaps."""
+import argparse
 import hashlib
 import json
 import os
@@ -12,7 +13,10 @@ import time
 repo=Path(__file__).resolve().parent.parent
 binary=repo/"target/release/safety"
 root=repo/"build/demo"
-output=repo/"validation/completion/e2e"
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--output",type=Path,default=repo/"validation/completion/e2e",
+    help="evidence directory (default: committed validation/completion/e2e)")
+output=parser.parse_args().output.resolve()
 output.mkdir(parents=True,exist_ok=True)
 commands=[("doctor",["doctor",str(root)],0),
  ("scan",["scan",str(root)],3),
