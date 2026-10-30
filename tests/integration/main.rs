@@ -367,7 +367,7 @@ fn real_header_findings_merge_per_configuration() {
         v["limitations"].as_array().unwrap().iter().any(|l| l
             .as_str()
             .unwrap()
-            .contains("included-file findings repeated")),
+            .starts_with("1 repeated findings were merged")),
         "{v}"
     );
 }

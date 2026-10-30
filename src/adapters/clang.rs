@@ -158,7 +158,6 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     // so they always keep the variant of the unit that reported them.
     let mut representative: HashMap<String, String> = HashMap::new();
     let mut canonical: HashMap<String, Option<PathBuf>> = HashMap::new();
-    let mut merged_from = 0;
     for (u, outcome) in units.iter().zip(outcomes) {
         match outcome.transpose()? {
             None => cancelled += 1,
@@ -192,7 +191,6 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
                         && !f.rule_id.starts_with("clang-analyzer-")
                     {
                         f.build_variant = first.clone();
-                        merged_from += 1;
                     }
                     run.findings.push(f);
                 }
@@ -210,11 +208,12 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     }
     let before = run.findings.len();
     run.findings = findings::correlate(run.findings, root);
-    if merged_from > 0 {
+    // Count findings actually collapsed into an identical one, not variant
+    // reassignments: a reassigned finding with a different message stays.
+    let merged = before - run.findings.len();
+    if merged > 0 {
         run.limitations.push(format!(
-            "{} included-file findings repeated by translation units with identical compile configurations were merged ({} findings before merging, {} after); each merged finding names its first unit's variant and lists every reporting unit log in native_references",
-            merged_from,
-            before,
+            "{merged} repeated findings were merged into identical findings (same location, rule and message; included-file findings from units with identical compile configurations), {before} before merging and {} after; each merged finding lists every reporting unit log in native_references",
             run.findings.len()
         ));
     }
