@@ -14,7 +14,7 @@ safety mcp --path /absolute/project
 | `safety.trace` | `{}` |
 | `safety.prove` | `source`, optional `engine` (esbmc), `method`, `entry` (main), `harness`, `variant`, `unwind` (8), `bits` (64), `precision` (Frama-C Eva, 0-11) |
 | `safety.coverage` | `profile`, `binary`, optional `provenance` |
-| `safety.get_run` | `run_id` |
+| `safety.get_run` | `run_id`, `property_offset` (0), `property_limit` (20, maximum 100) |
 | `safety.get_findings` | `run_id`, `offset` (0), `limit` (50, maximum 100), optional `rule_prefix`, `exclude_rule_prefixes`, `category`, `file`, `full` (false) |
 | `safety.report` | `run_id`, `format` (`summary`, `json`, `markdown`, `sarif`) |
 
@@ -34,6 +34,9 @@ largest first), so an agent can choose filters before reading findings:
 4. `safety.report` with `format: "summary"` returns a bounded Markdown overview;
    `json` returns the run summary. `markdown` and `sarif` list every finding and
    suit small runs only.
+5. Run summaries include the first 20 proof properties with `property_count`
+   and `next_property_offset`; page through the rest with `safety.get_run`
+   `property_offset` and `property_limit`.
 
 Findings located in an included file are reported once per compile
 configuration: units whose commands differ only in their own source file and
