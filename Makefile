@@ -1,4 +1,4 @@
-.PHONY: build check test clang validation full-validation examples smoke cache
+.PHONY: build check test clang validation full-validation examples smoke cache image container-smoke
 build:
 	cargo build --locked --release
 check:
@@ -31,6 +31,13 @@ smoke: build
 	rm -rf build/e2e-smoke build/demo
 	python3 scripts/configure_demo.py
 	python3 scripts/e2e.py --output build/e2e-smoke
+
+# Runtime image serving MCP over stdio; ESBMC is fetched on first start.
+IMAGE ?= safety-toolkit:local
+image:
+	docker build -f packaging/Dockerfile -t $(IMAGE) .
+container-smoke:
+	python3 scripts/container_smoke.py $(IMAGE)
 
 full-validation: validation
 	esbmc --version
