@@ -15,7 +15,9 @@ pub fn summary_markdown(r: &Run) -> String {
     const MAX_RULES: usize = 40;
     const MAX_LIMITATIONS: usize = 40;
     const MAX_PROPERTIES: usize = 50;
-    // Keeps the whole summary well inside the 64 KiB MCP response limit.
+    // JSON-encoded bytes for the properties section; keeps the whole summary
+    // well inside the 64 KiB MCP response limit even when quoting and escaping
+    // enlarge the text.
     const PROPERTY_BUDGET: usize = 16 * 1024;
     let mut counts = std::collections::BTreeMap::<&str, usize>::new();
     for f in &r.findings {
@@ -48,19 +50,22 @@ pub fn summary_markdown(r: &Run) -> String {
     }
     if !r.properties.is_empty() {
         s.push_str("\n## Properties\n\n");
-        let budget = s.len() + PROPERTY_BUDGET;
+        let mut encoded = 0;
         let mut shown = 0;
         for p in r.properties.iter().take(MAX_PROPERTIES) {
             let line = format!("- {:?}: {}\n", p.outcome, clip(&p.description));
-            if s.len() + line.len() > budget {
+            // Count the line as it will appear inside the JSON response.
+            let size = serde_json::to_string(&line).map_or(usize::MAX, |j| j.len() - 2);
+            if encoded + size > PROPERTY_BUDGET {
                 break;
             }
             s.push_str(&line);
+            encoded += size;
             shown += 1;
         }
         if shown < r.properties.len() {
             s.push_str(&format!(
-                "- {} further properties omitted; use safety.get_run for all of them\n",
+                "- {} further properties omitted; page through them with safety.get_run property_offset and property_limit\n",
                 r.properties.len() - shown
             ));
         }
@@ -243,7 +248,18 @@ mod tests {
         let run: Run = serde_json::from_value(json!({"schema_version":1,"id":"RUN-1","operation":"prove","project":"p","status":"incomplete","complete":false,"completeness":{"total":1,"analyzed":1,"failed":0,"excluded":0,"unsupported":0,"build_variants":[]},"started_unix_ms":0,"completed_unix_ms":0,"inputs":{},"executions":[],"findings":[],"properties":properties,"limitations":vec![long.clone(); 100],"configuration":null,"verification":null,"toolkit":null,"git":null})).unwrap();
         let text = summary_markdown(&run);
         assert!(text.len() < 40 * 1024, "{}", text.len());
-        assert!(text.contains("further properties omitted; use safety.get_run"));
+        assert!(text.contains("further properties omitted; page through them with safety.get_run"));
+        // Escaping-heavy descriptions are budgeted at their JSON-encoded size.
+        let quoted = "\\\"".repeat(2000);
+        let mut escaped = run.clone();
+        for p in &mut escaped.properties {
+            p.description = quoted.clone();
+        }
+        let text = summary_markdown(&escaped);
+        let section =
+            &text[text.find("## Properties").unwrap()..text.find("## Limitations").unwrap()];
+        let encoded = serde_json::to_string(section).unwrap();
+        assert!(encoded.len() < 16 * 1024 + 256, "{}", encoded.len());
         assert!(text.contains("60 further limitations"));
     }
     #[test]

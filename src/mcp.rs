@@ -17,6 +17,23 @@ pub struct Empty {}
 #[serde(deny_unknown_fields)]
 pub struct RunRequest {
     pub run_id: String,
+    /// First property to return (proof runs can record many properties).
+    #[serde(default)]
+    pub property_offset: usize,
+    #[serde(default = "default_property_limit")]
+    #[schemars(range(min = 1, max = 100))]
+    pub property_limit: usize,
+}
+fn default_property_limit() -> usize {
+    PROPERTY_PAGE
+}
+/// Properties included in a run summary; safety.get_run pages through the rest.
+const PROPERTY_PAGE: usize = 20;
+/// One page of properties with the total and the next offset, if any.
+fn property_page(run: &crate::model::Run, offset: usize, limit: usize) -> Value {
+    let end = offset.saturating_add(limit).min(run.properties.len());
+    let start = offset.min(end);
+    json!({"properties":run.properties[start..end],"property_count":run.properties.len(),"property_offset":start,"next_property_offset":if end<run.properties.len(){Some(end)}else{None}})
 }
 fn default_limit() -> usize {
     50
@@ -159,13 +176,19 @@ pub struct Server {
 fn reply(value: Value) -> CallToolResult {
     if serde_json::to_vec(&value).map_or(true, |v| v.len() > 65536) {
         return CallToolResult::structured_error(
-            json!({"status":"incomplete","complete":false,"error":{"classification":"result_too_large","message":"Response exceeds the 64 KiB limit. Use safety.report with format summary or json for counts by rule, then safety.get_findings with rule_prefix, exclude_rule_prefixes, category or file and a smaller limit. Full Markdown and SARIF reports are only practical for small runs over MCP."}}),
+            json!({"status":"incomplete","complete":false,"error":{"classification":"result_too_large","message":"Response exceeds the 64 KiB limit. Use safety.report with format summary or json for counts by rule, then safety.get_findings with rule_prefix, exclude_rule_prefixes, category or file and a smaller limit, or safety.get_run with a smaller property_limit. Full Markdown and SARIF reports are only practical for small runs over MCP."}}),
         );
     }
     CallToolResult::structured(value)
 }
 fn summary(run: &crate::model::Run) -> Value {
-    json!({"schema_version":1,"run_id":run.id,"status":run.status,"complete":run.complete,"completeness":run.completeness,"finding_count":run.findings.len(),"finding_counts":finding_counts(&run.findings),"properties":run.properties,"evidence_ref":format!("{}/manifest.json",run.id),"limitations":run.limitations})
+    let mut value = json!({"schema_version":1,"run_id":run.id,"status":run.status,"complete":run.complete,"completeness":run.completeness,"finding_count":run.findings.len(),"finding_counts":finding_counts(&run.findings),"evidence_ref":format!("{}/manifest.json",run.id),"limitations":run.limitations});
+    if let (Value::Object(target), Value::Object(page)) =
+        (&mut value, property_page(run, 0, PROPERTY_PAGE))
+    {
+        target.extend(page);
+    }
+    value
 }
 impl Server {
     async fn work(
@@ -323,17 +346,27 @@ impl Server {
     }
     #[tool(
         name = "safety.get_run",
-        description = "Integrity-check and retrieve run metadata; raw logs remain in local evidence"
+        description = "Integrity-check and retrieve run metadata; proof properties are paged with property_offset and property_limit (see property_count and next_property_offset); raw logs remain in local evidence"
     )]
     async fn get_run(
         &self,
         Parameters(req): Parameters<RunRequest>,
         ctx: RequestContext<RoleServer>,
     ) -> Result<CallToolResult, ErrorData> {
+        if !(1..=100).contains(&req.property_limit) {
+            return Err(ErrorData::invalid_params(
+                "property_limit must be 1..100",
+                None,
+            ));
+        }
         self.work(ctx, move |root| {
             let c = Config::load(&root)?;
             let r = evidence::load(&root, &c, &req.run_id)?;
+            anyhow::ensure!(req.property_offset <= r.properties.len(), "property_offset exceeds property count");
             let mut value = summary(&r);
+            if let (Value::Object(target), Value::Object(page)) = (&mut value, property_page(&r, req.property_offset, req.property_limit)) {
+                target.extend(page);
+            }
             let path = crate::config::inside(&root, &c.evidence.directory)?.join(&r.id).join("counterexamples.json");
             if path.is_file() {
                 let native: Value = serde_json::from_slice(&crate::config::read_bounded(&path, 16 * 1024 * 1024)?)?;
@@ -450,6 +483,39 @@ mod tests {
             text.len() < 8192 && text.contains("460 further rules omitted"),
             "{}",
             text.len()
+        );
+    }
+    #[test]
+    fn properties_are_paged() {
+        let properties: Vec<_> = (0..45)
+            .map(|i| json!({"id":format!("P{i}"),"description":"d","outcome":"UNKNOWN","scope":"s","assumptions":[],"unwind_bound":null,"completeness_established":false,"native_references":[]}))
+            .collect();
+        let run: crate::model::Run = serde_json::from_value(json!({"schema_version":1,"id":"RUN-1","operation":"prove","project":"p","status":"incomplete","complete":false,"completeness":{"total":1,"analyzed":1,"failed":0,"excluded":0,"unsupported":0,"build_variants":[]},"started_unix_ms":0,"completed_unix_ms":0,"inputs":{},"executions":[],"findings":[],"properties":properties,"limitations":[],"configuration":null,"verification":null,"toolkit":null,"git":null})).unwrap();
+        let first = summary(&run);
+        assert_eq!(first["properties"].as_array().unwrap().len(), PROPERTY_PAGE);
+        assert_eq!(first["property_count"], 45);
+        assert_eq!(first["next_property_offset"], 20);
+        let mut seen = Vec::new();
+        let mut offset = Some(0);
+        while let Some(start) = offset {
+            let page = property_page(&run, start, 20);
+            seen.extend(
+                page["properties"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|p| p["id"].clone()),
+            );
+            offset = page["next_property_offset"].as_u64().map(|o| o as usize);
+        }
+        assert_eq!(seen.len(), 45);
+        assert_eq!(seen[44], "P44");
+        assert_eq!(property_page(&run, 45, 20)["properties"], json!([]));
+        assert_eq!(
+            serde_json::from_value::<RunRequest>(json!({"run_id":"x"}))
+                .unwrap()
+                .property_limit,
+            PROPERTY_PAGE
         );
     }
     #[test]
