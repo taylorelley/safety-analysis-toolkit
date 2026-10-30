@@ -152,7 +152,10 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     // Diagnostics located in an included file are reported by every unit that
     // includes it. Units with the same compile configuration see the same
     // header, so attribute those findings to the first such unit's variant;
-    // correlate() then merges them and keeps every unit's native reference.
+    // correlate() then merges those with identical content (location, rule and
+    // message) and keeps every unit's native reference. Clang analyzer findings
+    // are path-sensitive (a header function analysed through different callers),
+    // so they always keep the variant of the unit that reported them.
     let mut representative: HashMap<String, String> = HashMap::new();
     let mut canonical: HashMap<String, Option<PathBuf>> = HashMap::new();
     let mut merged_from = 0;
@@ -183,7 +186,11 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
                     let located = canonical
                         .entry(f.file.clone())
                         .or_insert_with(|| Path::new(&f.file).canonicalize().ok());
-                    if located.is_some() && *located != source && first != u.variant {
+                    if located.is_some()
+                        && *located != source
+                        && first != u.variant
+                        && !f.rule_id.starts_with("clang-analyzer-")
+                    {
                         f.build_variant = first.clone();
                         merged_from += 1;
                     }

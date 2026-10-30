@@ -309,15 +309,19 @@ fn real_header_findings_merge_per_configuration() {
         "version: 1\nproject: {name: headers}\nbuild: {compile_commands: compile_commands.json}\n",
     )
     .unwrap();
+    // One syntactic diagnostic (sizeof of a constant) and one path-sensitive
+    // analyzer diagnostic (null dereference) in a shared header.
     fs::write(
         t.path().join("h.h"),
-        "static inline int deref(void) { int *p = 0; return *p; }\n",
+        "static inline unsigned long konst(void) { return sizeof(10); }\nstatic inline int deref(void) { int *p = 0; return *p; }\n",
     )
     .unwrap();
     for name in ["a", "b", "c"] {
         fs::write(
             t.path().join(format!("{name}.c")),
-            format!("#include \"h.h\"\nint {name}_value(void) {{ return deref(); }}\n"),
+            format!(
+                "#include \"h.h\"\nint {name}_value(void) {{ return deref() + (int)konst(); }}\n"
+            ),
         )
         .unwrap();
     }
@@ -333,19 +337,32 @@ fn real_header_findings_merge_per_configuration() {
     .unwrap();
     let out = bin().arg("scan").arg(t.path()).output().unwrap();
     let v: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
-    let header: Vec<_> = v["findings"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|f| f["file"] == "h.h" && f["rule_id"] == "clang-analyzer-core.NullDereference")
-        .collect();
-    assert_eq!(header.len(), 2, "one per configuration: {v}");
-    let shared = header
+    let in_header = |rule: &str| -> Vec<serde_json::Value> {
+        v["findings"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .filter(|f| f["file"] == "h.h" && f["rule_id"] == rule)
+            .cloned()
+            .collect()
+    };
+    let variants = v["completeness"]["build_variants"].as_array().unwrap();
+    // Syntactic: merged for the shared configuration, separate for c.c.
+    let sizeof = in_header("bugprone-sizeof-expression");
+    assert_eq!(sizeof.len(), 2, "one per configuration: {v}");
+    let shared = sizeof
         .iter()
         .find(|f| f["native_references"].as_array().unwrap().len() == 2)
         .expect("a.c and b.c merged with both logs referenced");
-    let variants = v["completeness"]["build_variants"].as_array().unwrap();
     assert_eq!(shared["build_variant"], variants[0]);
+    // Path-sensitive analyzer findings keep each reporting unit's variant.
+    let deref = in_header("clang-analyzer-core.NullDereference");
+    assert_eq!(deref.len(), 3, "one per unit: {v}");
+    let reported: std::collections::BTreeSet<String> = deref
+        .iter()
+        .map(|f| f["build_variant"].as_str().unwrap().to_string())
+        .collect();
+    assert_eq!(reported.len(), 3, "{v}");
     assert!(
         v["limitations"].as_array().unwrap().iter().any(|l| l
             .as_str()
