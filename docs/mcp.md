@@ -37,6 +37,15 @@ exercises all eight tools through actual Codex app-server and Pi RPC hosts,
 including native counterexample retrieval. It does not invoke a cloud model or
 claim independent review. Records are in `validation/completion/harnesses`.
 
+## Container
+
+The runtime image (see [installation](installation.md#container)) starts this
+server on launch. Use `docker` as the server command:
+
+```json
+{"mcpServers":{"safety":{"command":"docker","args":["run","-i","--rm","--user","1000:1000","-v","safety-esbmc:/opt/esbmc","-v","/abs/project:/abs/project","-w","/abs/project","safety-toolkit:local"]}}}
+```
+
 ## Claude Code
 
 ```sh

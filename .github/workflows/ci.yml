@@ -10,6 +10,7 @@ jobs:
       - name: Install stable Rust
         run: rustup toolchain install stable --profile minimal --component clippy --component rustfmt && rustup default stable
       - run: python3 scripts/check_versions.py
+      - run: shellcheck scripts/bootstrap.sh scripts/fetch_esbmc.sh scripts/install.sh packaging/entrypoint.sh
       - run: cargo fmt --check
       - run: cargo clippy --locked --all-targets -- -D warnings
       - run: cargo test --locked
@@ -69,6 +70,23 @@ jobs:
         run: |
           PATH="$PWD/build/clang:/usr/lib/llvm-19/bin:$PATH" SAFETY_TEST_MODULE="$PWD/build/clang/SafetyMisra.so" \
             cargo test --locked -- --include-ignored --skip real_esbmc --skip real_frama_c
+  runtime-image:
+    # Builds the runtime image and drives its MCP server over stdio, including
+    # the first-start ESBMC fetch and a second start that must reuse it.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - run: make image
+      - run: make container-smoke
+  bootstrap:
+    # Fresh-host install path. Frama-C is skipped here because Ubuntu's package
+    # lacks WP and the opam build takes about 20 minutes; the image covers WP.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - run: scripts/bootstrap.sh --frama-c skip --prefix "$HOME/.local"
   reference-formal-and-package:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
