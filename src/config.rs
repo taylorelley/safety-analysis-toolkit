@@ -83,6 +83,8 @@ pub struct Tools {
     pub memory_mb: u64,
     /// Translation units analysed concurrently; each analyzer keeps its own limits.
     pub jobs: usize,
+    /// Wall-clock limit for one MCP tool call, read when the server starts.
+    pub mcp_operation_seconds: u64,
     pub allowlist: Vec<PathBuf>,
 }
 impl Default for Tools {
@@ -96,6 +98,7 @@ impl Default for Tools {
             timeout_seconds: 60,
             memory_mb: 2048,
             jobs: 1,
+            mcp_operation_seconds: 300,
             allowlist: Vec::new(),
         }
     }
@@ -176,6 +179,7 @@ impl Config {
             || self.tools.timeout_seconds > 3600
             || !(128..=65536).contains(&self.tools.memory_mb)
             || !(1..=64).contains(&self.tools.jobs)
+            || !(10..=86400).contains(&self.tools.mcp_operation_seconds)
         {
             bail!("invalid execution limits")
         }

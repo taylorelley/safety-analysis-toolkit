@@ -10,6 +10,9 @@ using namespace clang;
 
 namespace safety::misra {
 void Rule::report(SourceLocation Loc, llvm::StringRef Message) {
+  // Error recovery can synthesise declarations without a location; such a
+  // diagnostic cannot be attributed to source and would fail the whole unit.
+  if (Loc.isInvalid()) return;
   // Diagnostics inside system macros are dropped by clang-tidy; use the
   // location where the macro was expanded instead.
   if (Sources && Loc.isMacroID() && Sources->isInSystemHeader(Sources->getSpellingLoc(Loc)))

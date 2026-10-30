@@ -48,9 +48,18 @@ pub fn parse(
     let mut sources: BTreeMap<String, (usize, Vec<usize>)> = BTreeMap::new();
     let mut findings = Vec::new();
     for d in export.diagnostics {
+        // Fail closed: a diagnostic that cannot be placed in source cannot be
+        // reported, so the unit stays incomplete with a specific reason.
+        anyhow::ensure!(
+            !d.message.file.is_empty(),
+            "diagnostic {} has no source location: {}",
+            d.name,
+            d.message.text
+        );
         let file = directory.join(&d.message.file);
         if !sources.contains_key(&d.message.file) {
-            let source = std::fs::read(&file).context("diagnostic source unavailable")?;
+            let source = std::fs::read(&file)
+                .with_context(|| format!("diagnostic source unavailable: {}", file.display()))?;
             let newlines = source
                 .iter()
                 .enumerate()
@@ -103,7 +112,10 @@ pub fn parse(
     Ok(findings)
 }
 pub fn correlate(findings: Vec<Finding>, root: &Path) -> Vec<Finding> {
-    let mut unique: BTreeMap<(String, usize, usize, String, String), Finding> = BTreeMap::new();
+    // Only identical diagnostics merge: the message is part of the key, so two
+    // different claims at one location are both kept.
+    let mut unique: BTreeMap<(String, usize, usize, String, String, String), Finding> =
+        BTreeMap::new();
     for mut f in findings {
         if let Ok(p) = Path::new(&f.file).strip_prefix(root) {
             f.file = p.to_string_lossy().into_owned()
@@ -114,6 +126,7 @@ pub fn correlate(findings: Vec<Finding>, root: &Path) -> Vec<Finding> {
             f.column,
             f.rule_id.clone(),
             f.build_variant.clone(),
+            f.message.clone(),
         );
         if let Some(existing) = unique.get_mut(&key) {
             existing.native_references.extend(f.native_references);
@@ -136,6 +149,31 @@ mod tests {
     #[test]
     fn malformed() {
         assert!(parse(b"invalid yaml", "v", "raw/x", Path::new(".")).is_err());
+        let located = b"Diagnostics:\n  - {DiagnosticName: misra-x, DiagnosticMessage: {Message: m, FilePath: '', FileOffset: 0}}\n";
+        let err = parse(located, "v", "raw/x", Path::new("."))
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("misra-x has no source location"), "{err}");
+    }
+    #[test]
+    fn correlate_merges_only_identical_diagnostics() {
+        let finding = |message: &str, reference: &str| {
+            serde_json::from_value::<Finding>(serde_json::json!({"id":"F","tool":"clang-tidy","rule_id":"misra-x","file":"h.h","line":1,"column":1,"severity":"warning","message":message,"build_variant":"VAR-1","outcome":"diagnostic","category":"static-diagnostic","native_references":[reference]})).unwrap()
+        };
+        let merged = correlate(
+            vec![finding("same", "raw/a.log"), finding("same", "raw/b.log")],
+            Path::new("/"),
+        );
+        assert_eq!(merged.len(), 1);
+        assert_eq!(merged[0].native_references, ["raw/a.log", "raw/b.log"]);
+        let distinct = correlate(
+            vec![
+                finding("first claim", "raw/a.log"),
+                finding("second claim", "raw/b.log"),
+            ],
+            Path::new("/"),
+        );
+        assert_eq!(distinct.len(), 2);
     }
     #[test]
     fn positions() {

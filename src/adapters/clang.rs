@@ -5,7 +5,11 @@ use crate::{
     runner,
 };
 use anyhow::{Result, bail};
-use std::{fs, path::Path};
+use std::{
+    collections::HashMap,
+    fs,
+    path::{Path, PathBuf},
+};
 const CHECKS: &str = "-*,clang-analyzer-*,bugprone-sizeof-expression,bugprone-integer-division,bugprone-suspicious-semicolon";
 pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     let units = discovery::database(root, &c.build.compile_commands)?;
@@ -145,6 +149,16 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
     // Results are merged in unit order so evidence does not depend on scheduling.
     let outcomes = runner::parallel(&units, c.tools.jobs, analyze);
     let mut cancelled = 0;
+    // Diagnostics located in an included file are reported by every unit that
+    // includes it. Units with the same compile configuration see the same
+    // header, so attribute those findings to the first such unit's variant;
+    // correlate() then merges those with identical content (location, rule and
+    // message) and keeps every unit's native reference. Clang analyzer findings
+    // are path-sensitive (a header function analysed through different callers),
+    // so they always keep the variant of the unit that reported them.
+    let mut representative: HashMap<String, String> = HashMap::new();
+    let mut canonical: HashMap<String, Option<PathBuf>> = HashMap::new();
+    let mut merged_from = 0;
     for (u, outcome) in units.iter().zip(outcomes) {
         match outcome.transpose()? {
             None => cancelled += 1,
@@ -162,7 +176,26 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
                 } else {
                     run.completeness.analyzed += 1
                 }
-                run.findings.extend(out.findings);
+                let config = configuration_key(u);
+                let first = representative
+                    .entry(config)
+                    .or_insert_with(|| u.variant.clone())
+                    .clone();
+                let source = u.file.canonicalize().ok();
+                for mut f in out.findings {
+                    let located = canonical
+                        .entry(f.file.clone())
+                        .or_insert_with(|| Path::new(&f.file).canonicalize().ok());
+                    if located.is_some()
+                        && *located != source
+                        && first != u.variant
+                        && !f.rule_id.starts_with("clang-analyzer-")
+                    {
+                        f.build_variant = first.clone();
+                        merged_from += 1;
+                    }
+                    run.findings.push(f);
+                }
                 run.limitations.extend(out.limitations);
                 if let Some(e) = out.execution {
                     run.record(e);
@@ -175,7 +208,16 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
         run.limitations
             .push("Remaining translation units cancelled".into());
     }
+    let before = run.findings.len();
     run.findings = findings::correlate(run.findings, root);
+    if merged_from > 0 {
+        run.limitations.push(format!(
+            "{} included-file findings repeated by translation units with identical compile configurations were merged ({} findings before merging, {} after); each merged finding names its first unit's variant and lists every reporting unit log in native_references",
+            merged_from,
+            before,
+            run.findings.len()
+        ));
+    }
     run.complete = run.completeness.complete();
     if c.coding.c.is_some() || c.coding.cpp.is_some() {
         run.complete = false;
@@ -189,6 +231,34 @@ pub fn scan(root: &Path, c: &Config) -> Result<Run> {
         Status::Passed
     };
     evidence::finish(root, c, &dir, run)
+}
+/// Compile configuration of a unit: everything except its own source file and
+/// output path, so units differing only in which file they compile share it.
+fn configuration_key(u: &discovery::Unit) -> String {
+    let source = u.file.canonicalize().ok();
+    let mut skip_next = false;
+    let flags: Vec<&str> = u
+        .arguments
+        .iter()
+        .filter(|a| {
+            if std::mem::take(&mut skip_next) {
+                return false;
+            }
+            if a.as_str() == "-o" {
+                skip_next = true;
+                return false;
+            }
+            let path = u.directory.join(a.as_str());
+            !(a.starts_with("-o") || (source.is_some() && path.canonicalize().ok() == source))
+        })
+        .map(String::as_str)
+        .collect();
+    format!(
+        "{}\0{}\0{}",
+        u.directory.display(),
+        u.compiler,
+        flags.join("\0")
+    )
 }
 enum Outcome {
     Unsupported,

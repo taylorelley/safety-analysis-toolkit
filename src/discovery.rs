@@ -176,6 +176,12 @@ fn validate_args(args: &[String]) -> Vec<String> {
             "-fprofile-instr-generate",
             "-fcoverage-mapping",
             "-fcoverage-mcdc",
+            // Position-independent code generation; kept in the analysed command
+            // so the __PIC__/__PIE__ macros match the real build.
+            "-fPIC",
+            "-fpic",
+            "-fPIE",
+            "-fpie",
             "-m32",
             "-m64",
             "-O0",
@@ -428,7 +434,12 @@ pub fn doctor(root: &Path, c: &crate::config::Config) -> Result<crate::model::Ru
                     run.completeness.analyzed += 1
                 } else {
                     run.completeness.unsupported += 1;
-                    run.limitations.extend(u.unsupported.clone())
+                    let file = u.file.strip_prefix(root).unwrap_or(&u.file);
+                    run.limitations.extend(
+                        u.unsupported
+                            .iter()
+                            .map(|p| format!("{} {}: {p}", file.display(), u.variant)),
+                    )
                 }
             }
             evidence::write_new(&dir.join("units.json"), &serde_json::to_vec_pretty(&units)?)?;
@@ -512,6 +523,9 @@ mod tests {
             ])
             .is_empty()
         );
+        for f in ["-fPIC", "-fpic", "-fPIE", "-fpie"] {
+            assert!(validate_args(&[f.into()]).is_empty(), "{f}");
+        }
         for f in ["@evil", "-fplugin=evil", "-Xclang", "-funknown"] {
             assert!(!validate_args(&[f.into()]).is_empty());
         }

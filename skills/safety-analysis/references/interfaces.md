@@ -9,8 +9,10 @@ server's fixed workspace. Proof and coverage source/profile paths must be
 relative, existing and contained. MCP proof supports ESBMC BMC/induction and Frama-C Eva/WP.
 
 CLI JSON has `status`, `complete`, `completeness`, `findings` and `properties`.
-MCP operation summaries use `run_id` and evidence references. Findings pages
-have `offset`, `next_offset`, `total`. Exit codes: 0 selected operation passed,
+MCP operation summaries use `run_id`, evidence references and
+`finding_counts` (by rule and category). Findings pages have `offset`,
+`next_offset`, `total` (after filters) and `run_total`, and accept
+`rule_prefix`, `exclude_rule_prefixes`, `category`, `file` and `full`. Exit codes: 0 selected operation passed,
 1 findings remain, 2 invalid usage/input/evidence, 3 incomplete.
 
 The CLI supports `--format json`, Markdown and per-run SARIF for analysis and

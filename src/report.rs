@@ -1,5 +1,83 @@
 use crate::model::Run;
 use serde_json::{Value, json};
+/// Bounded Markdown overview: status, completeness, finding counts by rule and
+/// limitations, without listing individual findings.
+/// One line of free text, at most `LINE_LIMIT` characters.
+fn clip(text: &str) -> String {
+    const LINE_LIMIT: usize = 240;
+    let line = text.replace('\n', " ");
+    match line.char_indices().nth(LINE_LIMIT) {
+        Some((end, _)) => format!("{}...", &line[..end]),
+        None => line,
+    }
+}
+pub fn summary_markdown(r: &Run) -> String {
+    const MAX_RULES: usize = 40;
+    const MAX_LIMITATIONS: usize = 40;
+    const MAX_PROPERTIES: usize = 50;
+    // Keeps the whole summary well inside the 64 KiB MCP response limit.
+    const PROPERTY_BUDGET: usize = 16 * 1024;
+    let mut counts = std::collections::BTreeMap::<&str, usize>::new();
+    for f in &r.findings {
+        *counts.entry(f.rule_id.as_str()).or_default() += 1;
+    }
+    let mut counts: Vec<_> = counts.into_iter().collect();
+    counts.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(b.0)));
+    let mut s = format!(
+        "# Safety analysis summary\n\nProject: {}\n\nRun: {}\n\nStatus: {:?}; complete: {}\n\nTranslation units: {} total, {} analyzed, {} failed, {} unsupported, {} excluded.\n\n## Findings by rule ({} findings, {} rules)\n\n| Rule | Count |\n| --- | ---: |\n",
+        r.project,
+        r.id,
+        r.status,
+        r.complete,
+        r.completeness.total,
+        r.completeness.analyzed,
+        r.completeness.failed,
+        r.completeness.unsupported,
+        r.completeness.excluded,
+        r.findings.len(),
+        counts.len()
+    );
+    for (rule, n) in counts.iter().take(MAX_RULES) {
+        s.push_str(&format!("| `{}` | {n} |\n", clip(rule)));
+    }
+    if counts.len() > MAX_RULES {
+        s.push_str(&format!(
+            "\n{} further rules omitted.\n",
+            counts.len() - MAX_RULES
+        ));
+    }
+    if !r.properties.is_empty() {
+        s.push_str("\n## Properties\n\n");
+        let budget = s.len() + PROPERTY_BUDGET;
+        let mut shown = 0;
+        for p in r.properties.iter().take(MAX_PROPERTIES) {
+            let line = format!("- {:?}: {}\n", p.outcome, clip(&p.description));
+            if s.len() + line.len() > budget {
+                break;
+            }
+            s.push_str(&line);
+            shown += 1;
+        }
+        if shown < r.properties.len() {
+            s.push_str(&format!(
+                "- {} further properties omitted; use safety.get_run for all of them\n",
+                r.properties.len() - shown
+            ));
+        }
+    }
+    s.push_str("\n## Limitations\n\n");
+    for l in r.limitations.iter().take(MAX_LIMITATIONS) {
+        s.push_str(&format!("- {}\n", clip(l)));
+    }
+    if r.limitations.len() > MAX_LIMITATIONS {
+        s.push_str(&format!(
+            "- {} further limitations in evidence\n",
+            r.limitations.len() - MAX_LIMITATIONS
+        ));
+    }
+    s.push_str("\nUse safety.get_findings with rule_prefix, exclude_rule_prefixes, category or file filters to retrieve individual findings.\n");
+    s
+}
 pub fn markdown(r: &Run) -> String {
     let mut s = format!(
         "# Safety analysis evidence\n\nProject: {}\n\nRun: {}\n\nStatus: {:?}; complete: {}\n\nTranslation units: {} total, {} analyzed, {} failed, {} unsupported, {} excluded.\n\n## Findings\n\n",
@@ -156,6 +234,18 @@ pub fn consolidated(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn summary_stays_bounded_for_many_long_properties() {
+        let long = "é".repeat(5000);
+        let properties: Vec<_> = (0..1000)
+            .map(|i| json!({"id":format!("P{i}"),"description":long,"outcome":"UNKNOWN","scope":"s","assumptions":[],"unwind_bound":null,"completeness_established":false,"native_references":[]}))
+            .collect();
+        let run: Run = serde_json::from_value(json!({"schema_version":1,"id":"RUN-1","operation":"prove","project":"p","status":"incomplete","complete":false,"completeness":{"total":1,"analyzed":1,"failed":0,"excluded":0,"unsupported":0,"build_variants":[]},"started_unix_ms":0,"completed_unix_ms":0,"inputs":{},"executions":[],"findings":[],"properties":properties,"limitations":vec![long.clone(); 100],"configuration":null,"verification":null,"toolkit":null,"git":null})).unwrap();
+        let text = summary_markdown(&run);
+        assert!(text.len() < 40 * 1024, "{}", text.len());
+        assert!(text.contains("further properties omitted; use safety.get_run"));
+        assert!(text.contains("60 further limitations"));
+    }
     #[test]
     fn escapes_uri() {
         assert_eq!(uri("src/a b.c"), "src/a%20b.c");

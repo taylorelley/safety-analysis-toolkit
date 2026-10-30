@@ -11,6 +11,7 @@ must be exercised by at least one fixture with at least one positive line.
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 exe, module, base = sys.argv[1:]
@@ -48,11 +49,18 @@ for source in sorted(fixtures.glob("*.c")):
     covered.update(c for c in checks if c.startswith("misra-c2012-"))
     # Every check together must also survive each fixture, including ones
     # with compile errors, without crashing the analyzer host.
-    together = subprocess.run(
-        [exe, f"--load={module}", "--checks=-*,misra-c2012-*", str(source), "--", *args, f"-I{fixtures}"],
-        capture_output=True, text=True, timeout=300)
-    if together.returncode < 0 or "Stack dump" in together.stderr:
-        failures.append(f"{source.name}: crash with all checks enabled\n{together.stderr[-2000:]}")
+    # Every exported diagnostic must also carry a source file: the toolkit
+    # cannot place one without it and fails the whole unit.
+    with tempfile.TemporaryDirectory() as scratch:
+        export = Path(scratch) / "fixes.yaml"
+        together = subprocess.run(
+            [exe, f"--load={module}", "--checks=-*,misra-c2012-*", f"--export-fixes={export}",
+             str(source), "--", *args, f"-I{fixtures}"],
+            capture_output=True, text=True, timeout=300)
+        if together.returncode < 0 or "Stack dump" in together.stderr:
+            failures.append(f"{source.name}: crash with all checks enabled\n{together.stderr[-2000:]}")
+        if export.exists() and re.search(r"^\s+FilePath:\s+''\s*$", export.read_text(), re.M):
+            failures.append(f"{source.name}: diagnostic exported without a source location\n{export.read_text()[-2000:]}")
 missing = sorted(registered - covered)
 if missing:
     failures.append(f"checks without fixtures: {missing}")
