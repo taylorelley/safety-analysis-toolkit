@@ -14,6 +14,11 @@ native integrations, packaging and offline reference validation are recorded in
 
 ## Build and use
 
+Quickest routes: `scripts/bootstrap.sh` installs every dependency (LLVM/Clang,
+Rust, Frama-C with Eva and WP, ESBMC), builds, tests and installs the toolkit;
+`make image` builds a container that serves MCP on start. See
+[installation](docs/installation.md).
+
 Minimum versions: Rust 1.89, LLVM/Clang **19.1.0** (or a later 19.1.x), ESBMC 8.6.0 and
 Frama-C 25.0. Validated reference: Linux x86-64, Rust 1.99.1, LLVM/Clang 19.1.7.
 Runs with a supported release other than the validated reference record that

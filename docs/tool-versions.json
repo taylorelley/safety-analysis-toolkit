@@ -16,6 +16,8 @@
   "esbmc_download_sha256": "07b00b4a2590fe285edb5ce063ca2e5fbb368bbe556cfe139014c173717637f6",
   "esbmc_redistribution_review": "not approved; upstream bundle contains mixed licenses",
   "frama_c": "25.0-beta (Manganese); Debian 20220511-manganese-3+b4",
+  "frama_c_opam_package": "frama-c.25.0~beta",
+  "frama_c_opam_compiler": "ocaml-base-compiler.4.14.2",
   "mcp_sdk_rmcp": "3.7.0",
   "jsonschema_validation": "4.26.0",
   "sarif_schema_url": "https://json.schemastore.org/sarif-2.1.0.json",
