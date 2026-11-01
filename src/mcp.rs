@@ -23,17 +23,139 @@ pub struct RunRequest {
     #[serde(default = "default_property_limit")]
     #[schemars(range(min = 1, max = 100))]
     pub property_limit: usize,
+    /// With property_field: page through one field of the property at this index.
+    #[serde(default)]
+    pub property_index: Option<usize>,
+    #[serde(default)]
+    pub property_field: Option<PropertyField>,
+    /// Character offset (description, scope) or item offset (lists) in the field.
+    #[serde(default)]
+    pub field_offset: usize,
+}
+#[derive(Clone, Copy, Deserialize, schemars::JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum PropertyField {
+    Description,
+    Scope,
+    Assumptions,
+    NativeReferences,
 }
 fn default_property_limit() -> usize {
     PROPERTY_PAGE
 }
 /// Properties included in a run summary; safety.get_run pages through the rest.
 const PROPERTY_PAGE: usize = 20;
-/// One page of properties with the total and the next offset, if any.
+/// Serialized size of one page of properties, so summaries and get_run stay
+/// well inside the 64 KiB response limit alongside the rest of the summary.
+const PROPERTY_PAGE_BYTES: usize = 24 * 1024;
+/// A property above this serialized size is returned in bounded form.
+const PROPERTY_BYTES: usize = 8 * 1024;
+/// Characters per chunk when paging through a property's text field.
+const FIELD_CHARS: usize = 8000;
+/// Serialized size of one chunk of a property's list field.
+const FIELD_ITEM_BYTES: usize = 24 * 1024;
+fn size(value: &Value) -> usize {
+    serde_json::to_vec(value).map_or(usize::MAX, |v| v.len())
+}
+fn clip_chars(text: &str, limit: usize) -> &str {
+    text.char_indices()
+        .nth(limit)
+        .map_or(text, |(end, _)| &text[..end])
+}
+/// A property as returned in pages: complete when small, otherwise with long
+/// text clipped and lists shortened, naming each truncated field and its full
+/// size so the client can page through it with property_index/property_field.
+fn bounded_property(p: &crate::model::Property) -> Value {
+    let mut value = json!(p);
+    if size(&value) <= PROPERTY_BYTES {
+        return value;
+    }
+    let mut truncated = Vec::new();
+    for (field, text) in [("description", &p.description), ("scope", &p.scope)] {
+        let total = text.chars().count();
+        if total > 1000 {
+            value[field] = json!(clip_chars(text, 1000));
+            truncated.push(json!({"field":field,"total_chars":total}));
+        }
+    }
+    for (field, items) in [
+        ("assumptions", &p.assumptions),
+        ("native_references", &p.native_references),
+    ] {
+        if items.len() > 5 || items.iter().any(|i| i.chars().count() > 200) {
+            value[field] = json!(
+                items
+                    .iter()
+                    .take(5)
+                    .map(|i| clip_chars(i, 200))
+                    .collect::<Vec<_>>()
+            );
+            truncated.push(json!({"field":field,"total_items":items.len()}));
+        }
+    }
+    value["truncated_fields"] = json!(truncated);
+    value
+}
+/// One page of properties, bounded by count and serialized size (at least one
+/// property is returned), with the total and the actual next offset.
 fn property_page(run: &crate::model::Run, offset: usize, limit: usize) -> Value {
-    let end = offset.saturating_add(limit).min(run.properties.len());
-    let start = offset.min(end);
-    json!({"properties":run.properties[start..end],"property_count":run.properties.len(),"property_offset":start,"next_property_offset":if end<run.properties.len(){Some(end)}else{None}})
+    let start = offset.min(run.properties.len());
+    let (mut items, mut used, mut end) = (Vec::new(), 0, start);
+    while end < run.properties.len() && items.len() < limit {
+        let item = bounded_property(&run.properties[end]);
+        let bytes = size(&item);
+        if !items.is_empty() && used + bytes > PROPERTY_PAGE_BYTES {
+            break;
+        }
+        used += bytes;
+        items.push(item);
+        end += 1;
+    }
+    json!({"properties":items,"property_count":run.properties.len(),"property_offset":start,"next_property_offset":if end<run.properties.len(){Some(end)}else{None}})
+}
+/// One chunk of a single property field: text by characters, lists by items.
+/// A list item longer than FIELD_CHARS is clipped and named in items_clipped.
+fn property_field_chunk(
+    p: &crate::model::Property,
+    field: PropertyField,
+    offset: usize,
+) -> anyhow::Result<Value> {
+    let text = match field {
+        PropertyField::Description => Some(&p.description),
+        PropertyField::Scope => Some(&p.scope),
+        _ => None,
+    };
+    if let Some(text) = text {
+        let total = text.chars().count();
+        anyhow::ensure!(offset <= total, "field_offset exceeds field length");
+        let chunk: String = text.chars().skip(offset).take(FIELD_CHARS).collect();
+        let end = offset + chunk.chars().count();
+        return Ok(
+            json!({"total_chars":total,"field_offset":offset,"text":chunk,"next_field_offset":if end<total{Some(end)}else{None}}),
+        );
+    }
+    let items = match field {
+        PropertyField::Assumptions => &p.assumptions,
+        _ => &p.native_references,
+    };
+    anyhow::ensure!(offset <= items.len(), "field_offset exceeds item count");
+    let (mut chunk, mut clipped, mut used, mut end) = (Vec::new(), Vec::new(), 0, offset);
+    while end < items.len() {
+        let item = clip_chars(&items[end], FIELD_CHARS);
+        let bytes = size(&json!(item));
+        if !chunk.is_empty() && used + bytes > FIELD_ITEM_BYTES {
+            break;
+        }
+        if item.len() < items[end].len() {
+            clipped.push(end);
+        }
+        used += bytes;
+        chunk.push(item);
+        end += 1;
+    }
+    Ok(
+        json!({"total_items":items.len(),"field_offset":offset,"items":chunk,"items_clipped":clipped,"next_field_offset":if end<items.len(){Some(end)}else{None}}),
+    )
 }
 fn default_limit() -> usize {
     50
@@ -346,7 +468,7 @@ impl Server {
     }
     #[tool(
         name = "safety.get_run",
-        description = "Integrity-check and retrieve run metadata; proof properties are paged with property_offset and property_limit (see property_count and next_property_offset); raw logs remain in local evidence"
+        description = "Integrity-check and retrieve run metadata; proof properties are paged with property_offset and property_limit (see property_count and next_property_offset). Large properties are returned in bounded form with truncated_fields; page through one field with property_index, property_field and field_offset. Raw logs remain in local evidence"
     )]
     async fn get_run(
         &self,
@@ -363,9 +485,17 @@ impl Server {
             let c = Config::load(&root)?;
             let r = evidence::load(&root, &c, &req.run_id)?;
             anyhow::ensure!(req.property_offset <= r.properties.len(), "property_offset exceeds property count");
+            anyhow::ensure!(req.property_index.is_some() == req.property_field.is_some(), "property_index and property_field must be given together");
             let mut value = summary(&r);
             if let (Value::Object(target), Value::Object(page)) = (&mut value, property_page(&r, req.property_offset, req.property_limit)) {
                 target.extend(page);
+            }
+            if let (Some(index), Some(field)) = (req.property_index, req.property_field) {
+                let property = r.properties.get(index).ok_or_else(|| anyhow::anyhow!("property_index exceeds property count"))?;
+                let mut chunk = property_field_chunk(property, field, req.field_offset)?;
+                chunk["property_index"] = json!(index);
+                chunk["property_id"] = json!(property.id);
+                value["property_field"] = chunk;
             }
             let path = crate::config::inside(&root, &c.evidence.directory)?.join(&r.id).join("counterexamples.json");
             if path.is_file() {
@@ -516,6 +646,92 @@ mod tests {
                 .unwrap()
                 .property_limit,
             PROPERTY_PAGE
+        );
+    }
+    fn prove_run(properties: Vec<Value>) -> crate::model::Run {
+        serde_json::from_value(json!({"schema_version":1,"id":"RUN-1","operation":"prove","project":"p","status":"incomplete","complete":false,"completeness":{"total":1,"analyzed":1,"failed":0,"excluded":0,"unsupported":0,"build_variants":[]},"started_unix_ms":0,"completed_unix_ms":0,"inputs":{},"executions":[],"findings":[],"properties":properties,"limitations":[],"configuration":null,"verification":null,"toolkit":null,"git":null})).unwrap()
+    }
+    fn property(id: &str, description: String, assumptions: Vec<String>) -> Value {
+        json!({"id":id,"description":description,"outcome":"UNKNOWN","scope":"s","assumptions":assumptions,"unwind_bound":null,"completeness_established":false,"native_references":[]})
+    }
+    #[test]
+    fn heavy_properties_stay_within_the_response_limit() {
+        let heavy = (0..20)
+            .map(|i| {
+                property(
+                    &format!("P{i}"),
+                    "d".repeat(3000),
+                    vec!["\"a\"".repeat(1000); 50],
+                )
+            })
+            .collect();
+        let run = prove_run(heavy);
+        let first = summary(&run);
+        assert!(size(&first) < 64 * 1024, "{}", size(&first));
+        let shown = first["properties"].as_array().unwrap().len();
+        assert!(shown > 0 && shown < 20, "{shown}");
+        assert_eq!(first["next_property_offset"], shown);
+        assert!(first["properties"][0]["truncated_fields"].is_array());
+    }
+    #[test]
+    fn oversized_property_is_bounded_and_its_fields_paged() {
+        let description: String = (0..200_000)
+            .map(|i| char::from(b'a' + (i % 26) as u8))
+            .collect();
+        let mut assumptions: Vec<String> =
+            (0..3000).map(|i| format!("assumption {i:05}")).collect();
+        assumptions[7] = "x".repeat(20_000);
+        let run = prove_run(vec![property(
+            "BIG",
+            description.clone(),
+            assumptions.clone(),
+        )]);
+        let page = property_page(&run, 0, 20);
+        assert!(size(&page) < 32 * 1024, "{}", size(&page));
+        assert_eq!(page["properties"][0]["id"], "BIG");
+        assert_eq!(page["next_property_offset"], Value::Null);
+        // Reassemble the description from text chunks.
+        let mut text = String::new();
+        let mut offset = Some(0);
+        while let Some(start) = offset {
+            let chunk = property_field_chunk(&run.properties[0], PropertyField::Description, start)
+                .unwrap();
+            assert!(size(&chunk) < 64 * 1024);
+            text.push_str(chunk["text"].as_str().unwrap());
+            offset = chunk["next_field_offset"].as_u64().map(|o| o as usize);
+        }
+        assert_eq!(text, description);
+        // Page through every assumption; only the oversized item is clipped.
+        let (mut items, mut clipped, mut offset) = (Vec::new(), Vec::new(), Some(0));
+        while let Some(start) = offset {
+            let chunk = property_field_chunk(&run.properties[0], PropertyField::Assumptions, start)
+                .unwrap();
+            assert!(size(&chunk) < 64 * 1024);
+            items.extend(
+                chunk["items"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|i| i.as_str().unwrap().to_string()),
+            );
+            clipped.extend(
+                chunk["items_clipped"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|i| i.as_u64().unwrap()),
+            );
+            offset = chunk["next_field_offset"].as_u64().map(|o| o as usize);
+        }
+        assert_eq!(items.len(), 3000);
+        assert_eq!(items[2999], assumptions[2999]);
+        assert_eq!(clipped, vec![7]);
+        assert!(property_field_chunk(&run.properties[0], PropertyField::Scope, 2).is_err());
+        assert!(
+            serde_json::from_value::<RunRequest>(
+                json!({"run_id":"x","property_index":0,"property_field":"other"})
+            )
+            .is_err()
         );
     }
     #[test]
