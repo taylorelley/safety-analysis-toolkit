@@ -4,7 +4,7 @@ use crate::{
     model::{Finding, Run, Status},
     runner,
 };
-use anyhow::{Context, Result, bail};
+use anyhow::{Result, bail};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -261,18 +261,36 @@ fn validate(manifest: &mut Manifest, symbols: &[Symbol]) -> Vec<(String, Option<
     }
     gaps
 }
+/// YAML to parse from a manifest: the frontmatter between two `---` lines, or
+/// the whole text. A YAML document may itself open with a `---` marker, so only
+/// Markdown manifests require the closing line.
+fn frontmatter(text: &str, markdown: bool) -> Result<&str> {
+    let Some((first, rest)) = text.split_once('\n') else {
+        return Ok(text);
+    };
+    if first.trim_end() != "---" {
+        return Ok(text);
+    }
+    let mut end = 0;
+    for line in rest.split_inclusive('\n') {
+        if line.trim_end() == "---" {
+            return Ok(&rest[..end]);
+        }
+        end += line.len();
+    }
+    anyhow::ensure!(!markdown, "missing Markdown YAML frontmatter terminator");
+    Ok(text)
+}
 pub(crate) fn load_manifest(root: &Path, path: &Path) -> Result<Manifest> {
     let path = inside(root, path)?;
     let text = String::from_utf8(crate::config::read_bounded(&path, 4 * 1024 * 1024)?)?;
-    let text = if text.starts_with("---\n") {
-        text.strip_prefix("---\n")
-            .unwrap()
-            .split_once("\n---")
-            .context("missing Markdown YAML frontmatter terminator")?
-            .0
-    } else {
-        &text
-    };
+    let text = frontmatter(
+        &text,
+        matches!(
+            path.extension().and_then(|e| e.to_str()),
+            Some("md" | "markdown")
+        ),
+    )?;
     let m: Manifest = serde_yaml::from_str(text)?;
     if m.version != 1 {
         bail!("unsupported trace manifest version")
@@ -351,7 +369,12 @@ pub fn analyze(root: &Path, c: &Config) -> Result<Run> {
         }
         if !u.unsupported.is_empty() {
             run.completeness.unsupported += 1;
-            run.limitations.extend(u.unsupported.clone());
+            let file = u.file.strip_prefix(root).unwrap_or(&u.file);
+            run.limitations.extend(
+                u.unsupported
+                    .iter()
+                    .map(|p| format!("{} {}: {p}", file.display(), u.variant)),
+            );
             continue;
         }
         let matched: Vec<_> = c
@@ -528,6 +551,24 @@ mod tests {
             gaps.iter()
                 .any(|(s, _)| s.contains("no linked implementation"))
         );
+    }
+    #[test]
+    fn manifest_frontmatter() {
+        let yaml = "version: 1\nnodes: []\nlinks: []\n";
+        let parse = |text: &str, markdown| {
+            frontmatter(text, markdown).map(|t| serde_yaml::from_str::<Manifest>(t).is_ok())
+        };
+        assert!(parse(yaml, false).unwrap());
+        // A YAML document start marker is not Markdown frontmatter.
+        assert!(parse(&format!("---\n{yaml}"), false).unwrap());
+        assert!(parse(&format!("---\r\n{yaml}"), false).unwrap());
+        let markdown = format!("---\n{yaml}---\n# Notes\n\n- not: [yaml\n");
+        assert_eq!(frontmatter(&markdown, true).unwrap(), yaml);
+        assert!(parse(&markdown, true).unwrap());
+        // Only a whole `---` line closes the frontmatter.
+        let dashes = "---\nversion: 1\nbaseline: x\n  ---y\nnodes: []\nlinks: []\n---\ntext\n";
+        assert!(frontmatter(dashes, true).unwrap().ends_with("links: []\n"));
+        assert!(frontmatter(&format!("---\n{yaml}# Notes\n"), true).is_err());
     }
     #[test]
     fn tokens_only() {
