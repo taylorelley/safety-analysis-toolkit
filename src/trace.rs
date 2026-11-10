@@ -261,10 +261,14 @@ fn validate(manifest: &mut Manifest, symbols: &[Symbol]) -> Vec<(String, Option<
     }
     gaps
 }
-/// YAML to parse from a manifest: the frontmatter between two `---` lines, or
-/// the whole text. A YAML document may itself open with a `---` marker, so only
-/// Markdown manifests require the closing line.
+/// YAML to parse from a manifest. A Markdown manifest supplies the frontmatter
+/// between two `---` lines. Any other manifest is parsed whole: a YAML document
+/// may open with a `---` marker, and a multi-document stream must reach the
+/// parser intact so it is rejected rather than truncated to its first document.
 fn frontmatter(text: &str, markdown: bool) -> Result<&str> {
+    if !markdown {
+        return Ok(text);
+    }
     let Some((first, rest)) = text.split_once('\n') else {
         return Ok(text);
     };
@@ -278,8 +282,7 @@ fn frontmatter(text: &str, markdown: bool) -> Result<&str> {
         }
         end += line.len();
     }
-    anyhow::ensure!(!markdown, "missing Markdown YAML frontmatter terminator");
-    Ok(text)
+    bail!("missing Markdown YAML frontmatter terminator")
 }
 pub(crate) fn load_manifest(root: &Path, path: &Path) -> Result<Manifest> {
     let path = inside(root, path)?;
@@ -562,6 +565,10 @@ mod tests {
         // A YAML document start marker is not Markdown frontmatter.
         assert!(parse(&format!("---\n{yaml}"), false).unwrap());
         assert!(parse(&format!("---\r\n{yaml}"), false).unwrap());
+        // A two-document stream is not truncated, so the parser rejects it.
+        let stream = format!("---\n{yaml}---\n{yaml}");
+        assert_eq!(frontmatter(&stream, false).unwrap(), stream);
+        assert!(!parse(&stream, false).unwrap());
         let markdown = format!("---\n{yaml}---\n# Notes\n\n- not: [yaml\n");
         assert_eq!(frontmatter(&markdown, true).unwrap(), yaml);
         assert!(parse(&markdown, true).unwrap());

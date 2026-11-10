@@ -107,10 +107,14 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
     // incomplete.
     match start(root, c, operation, &base, &dir, id) {
         Ok(run) => Ok((run, dir)),
-        Err(e) => {
-            let _ = fs::remove_dir_all(&dir);
-            Err(e)
-        }
+        Err(e) => match fs::remove_dir_all(&dir) {
+            Ok(()) => Err(e),
+            // Keep the startup error as the cause and name the leftover.
+            Err(cleanup) => Err(e.context(format!(
+                "run could not start and its directory {} could not be removed ({cleanup})",
+                dir.display()
+            ))),
+        },
     }
 }
 fn start(
