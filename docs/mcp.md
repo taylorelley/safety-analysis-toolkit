@@ -42,6 +42,11 @@ largest first), so an agent can choose filters before reading findings:
    `property_index`, `property_field` and `field_offset` (8,000 characters for
    text, about 24 KB of items for lists, following `next_field_offset`).
 
+6. Run summaries list at most 50 build variants (`build_variants_omitted`
+   counts the rest) and about 8 KB of limitations, each clipped to 2,000
+   characters, with `limitation_count` and `limitations_omitted`. The complete
+   lists stay in the run's `manifest.json`.
+
 Findings located in an included file are reported once per compile
 configuration: units whose commands differ only in their own source file and
 output share a configuration, and a merged finding lists every reporting unit's
