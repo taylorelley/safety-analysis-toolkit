@@ -7,8 +7,8 @@ template-parent identities and build variants. It does not detect functions with
 regular expressions. Original JSONL and a combined `trace.json` remain evidence.
 
 Default manifest: `trace.yaml`; override with `trace.manifest` in safety.yaml.
-JSON is accepted as YAML. Markdown manifests use YAML frontmatter delimited by
-`---` lines. The graph is explicit:
+JSON is accepted as YAML. Markdown manifests (`.md`, `.markdown`) use YAML frontmatter
+delimited by `---` lines; a YAML manifest may open with a `---` document marker. The graph is explicit:
 
 ```yaml
 version: 1

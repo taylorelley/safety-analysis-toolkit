@@ -101,8 +101,32 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
     );
     let dir = base.join(&id);
     fs::create_dir(&dir)?;
+    // A run that cannot start has no manifest or inventory. Remove its
+    // directory so one failed start (an unresolved symlink, a cancelled
+    // fingerprint) does not leave every later listing and consolidated report
+    // incomplete.
+    match start(root, c, operation, &base, &dir, id) {
+        Ok(run) => Ok((run, dir)),
+        Err(e) => match fs::remove_dir_all(&dir) {
+            Ok(()) => Err(e),
+            // Keep the startup error as the cause and name the leftover.
+            Err(cleanup) => Err(e.context(format!(
+                "run could not start and its directory {} could not be removed ({cleanup})",
+                dir.display()
+            ))),
+        },
+    }
+}
+fn start(
+    root: &Path,
+    c: &Config,
+    operation: &str,
+    base: &Path,
+    dir: &Path,
+    id: String,
+) -> Result<Run> {
     fs::create_dir(dir.join("raw"))?;
-    let inputs = fingerprint(root, &base)?;
+    let inputs = fingerprint(root, base)?;
     write_new(&dir.join("config.json"), &serde_json::to_vec_pretty(c)?)?;
     let mut run=Run{schema_version:1,configuration:serde_json::to_value(c)?,verification:crate::verification::context(),toolkit:serde_json::json!({"version":env!("CARGO_PKG_VERSION"),"executable_sha256":hash_file(&std::env::current_exe()?)?,"host_arch":std::env::consts::ARCH}),id,operation:operation.into(),project:c.project.name.clone(),status:Status::Incomplete,complete:false,completeness:Completeness::default(),started_unix_ms:now(),completed_unix_ms:0,inputs,executions:Vec::new(),findings:Vec::new(),properties:Vec::new(),limitations:vec!["Automated evidence for human review; no certification or compliance approval.".into(),"MISRA coverage, formal verification, traceability and structural coverage are not established by static analysis.".into(),"System headers/toolchain dependencies are not yet fingerprinted; replay requires the same reference environment.".into()],git:None};
     if c.coding.c.is_some() || c.coding.cpp.is_some() {
@@ -141,7 +165,7 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
                 &git,
                 &args,
                 root,
-                &dir,
+                dir,
                 10,
                 c.tools.memory_mb,
                 c.tools.require_filesystem_isolation,
@@ -168,7 +192,7 @@ pub fn begin(root: &Path, c: &Config, operation: &str) -> Result<(Run, PathBuf)>
             run.git = Some(serde_json::Value::Object(values));
         }
     }
-    Ok((run, dir))
+    Ok(run)
 }
 pub fn finish(root: &Path, c: &Config, dir: &Path, mut run: Run) -> Result<Run> {
     let changed = if crate::runner::cancelled() {
@@ -313,6 +337,20 @@ mod tests {
             result.unwrap_err().to_string(),
             "request cancelled during fingerprinting"
         );
+    }
+    #[test]
+    fn failed_start_leaves_no_run_directory() {
+        let t = tempfile::tempdir().unwrap();
+        let c = Config::new("x".into());
+        std::os::unix::fs::symlink("/etc/hostname", t.path().join("link")).unwrap();
+        let error = begin(t.path(), &c, "test").unwrap_err().to_string();
+        assert!(error.contains("input symlinks"), "{error}");
+        let runs = t.path().join(&c.evidence.directory);
+        assert_eq!(fs::read_dir(&runs).unwrap().count(), 0);
+        fs::remove_file(t.path().join("link")).unwrap();
+        let (r, d) = begin(t.path(), &c, "test").unwrap();
+        finish(t.path(), &c, &d, r).unwrap();
+        assert_eq!(fs::read_dir(&runs).unwrap().count(), 1);
     }
     #[test]
     fn tamper() {

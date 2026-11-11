@@ -303,8 +303,28 @@ fn reply(value: Value) -> CallToolResult {
     }
     CallToolResult::structured(value)
 }
+/// Build variants listed in a run summary; one is recorded per translation unit.
+const SUMMARY_VARIANTS: usize = 50;
+/// Serialized size of the limitations listed in a run summary. Runs record
+/// several per unsupported or failed unit, so a large project would otherwise
+/// push the summary, and with it the run ID, past the response limit.
+const SUMMARY_LIMITATION_BYTES: usize = 8 * 1024;
 fn summary(run: &crate::model::Run) -> Value {
-    let mut value = json!({"schema_version":1,"run_id":run.id,"status":run.status,"complete":run.complete,"completeness":run.completeness,"finding_count":run.findings.len(),"finding_counts":finding_counts(&run.findings),"evidence_ref":format!("{}/manifest.json",run.id),"limitations":run.limitations});
+    let (mut limitations, mut used) = (Vec::new(), 0);
+    for text in &run.limitations {
+        let item = json!(clip_chars(text, 2000));
+        used += size(&item) + 1;
+        if used > SUMMARY_LIMITATION_BYTES {
+            break;
+        }
+        limitations.push(item);
+    }
+    let mut value = json!({"schema_version":1,"run_id":run.id,"status":run.status,"complete":run.complete,"completeness":run.completeness,"finding_count":run.findings.len(),"finding_counts":finding_counts(&run.findings),"evidence_ref":format!("{}/manifest.json",run.id),"limitation_count":run.limitations.len(),"limitations_omitted":run.limitations.len()-limitations.len(),"limitations":limitations});
+    let variants = &run.completeness.build_variants;
+    if variants.len() > SUMMARY_VARIANTS {
+        value["completeness"]["build_variants"] = json!(variants[..SUMMARY_VARIANTS]);
+        value["completeness"]["build_variants_omitted"] = json!(variants.len() - SUMMARY_VARIANTS);
+    }
     if let (Value::Object(target), Value::Object(page)) =
         (&mut value, property_page(run, 0, PROPERTY_PAGE))
     {
@@ -732,6 +752,40 @@ mod tests {
                 json!({"run_id":"x","property_index":0,"property_field":"other"})
             )
             .is_err()
+        );
+    }
+    #[test]
+    fn summary_of_a_large_run_stays_within_the_response_limit() {
+        let mut run = prove_run(Vec::new());
+        // One variant per unit and several limitations per unsupported unit.
+        run.completeness.build_variants = (0..5000)
+            .map(|i| format!("VAR-{}", evidence::hash(&[i as u8, (i >> 8) as u8])))
+            .collect();
+        run.limitations = (0..20_000)
+            .map(|i| format!("src/module/unit-{i}.c VAR-x: unreviewed compiler option: -MD"))
+            .collect();
+        let value = summary(&run);
+        assert!(size(&value) < 32 * 1024, "{}", size(&value));
+        assert_eq!(value["run_id"], "RUN-1");
+        let shown = value["limitations"].as_array().unwrap();
+        assert_eq!(shown[0], run.limitations[0].as_str());
+        assert_eq!(value["limitation_count"], 20_000);
+        assert_eq!(value["limitations_omitted"], 20_000 - shown.len());
+        let variants = &value["completeness"]["build_variants"];
+        assert_eq!(variants.as_array().unwrap().len(), SUMMARY_VARIANTS);
+        assert_eq!(value["completeness"]["build_variants_omitted"], 4950);
+        // One oversized limitation is clipped rather than hiding the rest.
+        run.limitations = vec!["x".repeat(100_000), "kept".into()];
+        let value = summary(&run);
+        assert_eq!(value["limitations"][1], "kept");
+        assert_eq!(value["limitations_omitted"], 0);
+        // Small runs are reported in full.
+        let small = summary(&prove_run(Vec::new()));
+        assert_eq!(small["limitations_omitted"], 0);
+        assert!(
+            small["completeness"]
+                .get("build_variants_omitted")
+                .is_none()
         );
     }
     #[test]
