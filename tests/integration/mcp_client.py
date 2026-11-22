@@ -42,7 +42,7 @@ try:
     send({"method":"notifications/initialized"})
     send({"id":2,"method":"tools/list","params":{}})
     tools = receive(2)["result"]["tools"]
-    assert {tool["name"] for tool in tools} == {"safety.doctor","safety.scan","safety.trace","safety.prove","safety.coverage","safety.get_findings","safety.get_run","safety.report"}
+    assert {tool["name"] for tool in tools} == {"safety.doctor","safety.scan","safety.trace","safety.prove","safety.coverage","safety.rust_import","safety.get_findings","safety.get_run","safety.report"}
     assert all(tool["inputSchema"].get("additionalProperties") is False for tool in tools)
     doctor = call(3,"safety.doctor",{})["result"]["structuredContent"]
     assert "complete" in doctor and doctor["completeness"]["total"] == 4

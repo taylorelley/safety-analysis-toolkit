@@ -9,6 +9,7 @@ mod misra;
 mod model;
 mod report;
 mod runner;
+mod rust_import;
 mod trace;
 mod verification;
 use anyhow::{Context, Result};
@@ -49,7 +50,25 @@ enum CoverageCommands {
     },
 }
 #[derive(Subcommand)]
+enum RustCommands {
+    Snapshot {
+        #[arg(long, default_value = ".")]
+        path: PathBuf,
+    },
+    Import {
+        bundle: PathBuf,
+        #[arg(long, default_value = ".")]
+        path: PathBuf,
+        #[arg(long, value_enum, default_value = "json")]
+        format: Format,
+    },
+}
+#[derive(Subcommand)]
 enum Commands {
+    Rust {
+        #[command(subcommand)]
+        command: RustCommands,
+    },
     Coverage {
         #[command(subcommand)]
         command: CoverageCommands,
@@ -167,6 +186,28 @@ fn main() {
 }
 fn run(cli: Cli) -> Result<i32> {
     match cli.command {
+        Commands::Rust { command } => match command {
+            RustCommands::Snapshot { path } => {
+                let root = root(path)?;
+                let c = Config::load(&root)?;
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&rust_import::snapshot(&root, &c)?)?
+                );
+                Ok(0)
+            }
+            RustCommands::Import {
+                bundle,
+                path,
+                format,
+            } => {
+                let root = root(path)?;
+                let c = Config::load(&root)?;
+                let r = rust_import::import(&root, &c, &bundle)?;
+                emit(&r, format)?;
+                Ok(r.exit_code())
+            }
+        },
         Commands::Coverage {
             command:
                 CoverageCommands::Import {
