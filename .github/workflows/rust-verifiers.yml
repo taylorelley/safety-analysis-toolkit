@@ -1,0 +1,51 @@
+name: Rust verifier replay
+
+on:
+  pull_request:
+  push:
+    branches: [rust]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Install pinned verifiers
+        shell: bash
+        run: |
+          set -euo pipefail
+          tools="$RUNNER_TEMP/verifiers"
+          mkdir -p "$tools"
+          cd "$tools"
+          curl -fsSL https://github.com/model-checking/kani/releases/download/kani-0.68.0/kani-0.68.0-x86_64-unknown-linux-gnu.tar.gz -o kani.tar.gz
+          curl -fsSL https://github.com/esbmc/esbmc/releases/download/v8.7/esbmc-linux.zip -o esbmc.zip
+          curl -fsSL https://github.com/verus-lang/verus/releases/download/release/0.2026.11.02.8bf68ee/verus-0.2026.11.02.8bf68ee-x86-linux.zip -o verus.zip
+          sha256sum -c <<'CHECKSUMS'
+          32e2b484d73ede0bbf64a2cf0879c4259422497d8aec4ee67d448de9ae7843d3  kani.tar.gz
+          deb5230f10755722eac78938c167cfa5631d81c7ef10e23f3350fced7c0ee6da  esbmc.zip
+          f3a0119292df8855e4435da8130bee1873b0e6a60c306accf81a08ea687bba3c  verus.zip
+          CHECKSUMS
+          tar -xf kani.tar.gz
+          unzip -q esbmc.zip
+          unzip -q verus.zip
+          printf '%s\n' "$tools/kani-0.68.0/bin" "$tools/release/bin" "$tools/verus-x86-linux" >> "$GITHUB_PATH"
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup toolchain install nightly-2026-08-21 --profile minimal --component rust-src,rustc-dev,llvm-tools
+      - name: Build and verify the reference and mutated interlock
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo +1.99.1 build --locked
+          export LD_LIBRARY_PATH="$(rustc +nightly-2026-08-21 --print sysroot)/lib"
+          RUSTUP_TOOLCHAIN=nightly-2026-08-21 python3 tests/integration/rust_proof_smoke.py --with-esbmc --with-verus --evidence-dir "$RUNNER_TEMP/proof-evidence"
+      - name: Preserve proof evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rust-proof-replay
+          path: ${{ runner.temp }}/proof-evidence
