@@ -1,6 +1,6 @@
 # Rust support and agentic-development plan
 
-Status: **partially implemented**. The workspace import path for Clippy and Kani/CBMC records is described in [Rust proof and diagnostic import](rust-proof-import.md). It
+Status: **partially implemented**. The workspace import path for Clippy, Kani/CBMC, ESBMC replay and whole-crate Verus records is described in [Rust proof and diagnostic import](rust-proof-import.md). It
 extends the toolkit from C/C++ to Rust applications and adds controls aimed at
 code produced by AI coding agents. The existing guarantees remain binding: no
 compliance or certification claim, no automatic source changes, no reused

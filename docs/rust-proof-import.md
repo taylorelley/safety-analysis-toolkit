@@ -78,3 +78,48 @@ python3 tests/integration/rust_proof_smoke.py
 The script verifies both reset obligations, then removes the active-fault check
 in a temporary copy and requires a witnessed violation of the original
 obligation. It reuses the original reviewed check inventory for the second run.
+
+## Cross-check a Kani model with ESBMC
+
+An `esbmc_goto` check replays a Kani GOTO binary using ESBMC 8.7.0.
+Supply `cbmc` (the paired invocation ID), workspace-relative `model`,
+`model_sha256`, `entry` (the mangled harness), and the reviewed
+`properties` from a complete replay. Record the binary in the input
+snapshot and use the same variant, Kani version, Rust compiler and unwind
+bound for both invocations. Include `toolchain.esbmc` in the replay.
+
+```text
+cbmc MODEL --function ENTRY --unwind N --unwinding-assertions --trace --json-ui
+esbmc --binary MODEL --function ENTRY --ignore-property-class reachability_check --ignore-property-class cover --unwind N --multi-property
+```
+
+Supply the ESBMC result table and process exit status with both output
+streams. Exact reviewed startup warnings about linked `signgam` and
+`errno` declarations can be listed in `allowed_warnings`. The paired CBMC
+record supplies reachability checks. ESBMC omits those classes on replay.
+A divergence leaves the run incomplete and preserves each backend outcome.
+An omitted result stays open even when ESBMC reports another witnessed
+violation. Both checks share the Kani frontend and model.
+
+## Import Verus results
+
+A `verus` check uses pinned Verus `0.2026.11.02.8bf68ee` with the
+Rust 1.99.1 toolchain. The reviewed entry specifies `source`, fully
+qualified `function`, `verified_functions`, `requirement`, `proposition`
+and optional `assumptions`. Use `toolchain.verus` for the Verus version.
+Capture stdout as `output` and stderr as `diagnostics`.
+
+```sh
+verus --output-json --no-cheating --crate-type=lib proofs/interlock.rs
+```
+
+A failed verification condition leaves the obligation open. The reviewed
+specification must describe the domain and its feasibility. The importer
+records the proof under that specification and its library assumptions.
+
+Replay the bounded and deductive interlock with the pinned tools on PATH.
+
+```sh
+cargo build --locked
+python3 tests/integration/rust_proof_smoke.py --with-esbmc --with-verus
+```

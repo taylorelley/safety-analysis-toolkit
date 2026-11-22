@@ -1,3 +1,6 @@
+mod esbmc;
+mod verus;
+
 use crate::{
     config::{Config, inside, read_bounded, relative},
     evidence,
@@ -38,6 +41,8 @@ enum Checks {
         target: String,
         kind: String,
     },
+    Verus(verus::Spec),
+    EsbmcGoto(esbmc::Spec),
     KaniCbmc {
         harness: String,
         unwind: u32,
@@ -74,6 +79,23 @@ struct Invocation {
     exit_code: i32,
     output_sha256: String,
     output: String,
+    #[serde(default)]
+    diagnostics: Option<String>,
+}
+
+struct Attempt<'a> {
+    id: &'a str,
+    variant: &'a str,
+    raw_ref: &'a str,
+    actual: Option<&'a Invocation>,
+}
+
+fn mapped(result: &Result<ProofOutcome>, actual: Option<&Invocation>) -> ProofOutcome {
+    result.as_ref().cloned().unwrap_or(if actual.is_some() {
+        ProofOutcome::Failed
+    } else {
+        ProofOutcome::NotChecked
+    })
 }
 
 fn planned(root: &Path) -> Result<(Vec<u8>, Plan)> {
@@ -86,6 +108,7 @@ fn planned(root: &Path) -> Result<(Vec<u8>, Plan)> {
     ensure!(!plan.invocations.is_empty(), "no expected Rust invocations");
     ensure!(plan.invocations.len() <= 100, "too many Rust invocations");
     let mut obligation_ids = BTreeSet::new();
+    let mut replays = BTreeSet::new();
     for (id, expected) in &plan.invocations {
         ensure!(
             label(id) && label(&expected.variant),
@@ -101,6 +124,8 @@ fn planned(root: &Path) -> Result<(Vec<u8>, Plan)> {
                 "cargo",
                 match expected.checks {
                     Checks::Clippy { .. } => "clippy",
+                    Checks::Verus(_) => "verus",
+                    Checks::EsbmcGoto(_) => "esbmc",
                     Checks::KaniCbmc { .. } => "kani",
                 }
             ]
@@ -111,6 +136,21 @@ fn planned(root: &Path) -> Result<(Vec<u8>, Plan)> {
                 .is_some_and(|v| !v.trim().is_empty())),
             "missing reviewed toolchain versions for {id}"
         );
+        if let Checks::Verus(spec) = &expected.checks {
+            ensure!(
+                obligation_ids.insert((id, &expected.variant)),
+                "repeated obligation {id}"
+            );
+            spec.validate(expected)?;
+        }
+        if let Checks::EsbmcGoto(spec) = &expected.checks {
+            ensure!(
+                replays.insert(&spec.cbmc),
+                "repeated ESBMC replay for {}",
+                spec.cbmc
+            );
+            spec.validate(expected, &plan)?;
+        }
         if let Checks::KaniCbmc {
             harness,
             unwind,
@@ -220,12 +260,26 @@ pub fn import(root: &Path, c: &Config, path: &Path) -> Result<Run> {
             .push("Rust bundle contains unplanned invocations".into());
     }
     let mut witnesses = Vec::new();
-    for (index, (id, expected)) in plan.invocations.iter().enumerate() {
+    let mut completed = BTreeMap::<&str, std::ops::Range<usize>>::new();
+    let invocations = plan.invocations.iter().enumerate();
+    let is_replay =
+        |entry: &(usize, (&String, &Expected))| matches!(entry.1.1.checks, Checks::EsbmcGoto(_));
+    for (index, (id, expected)) in invocations
+        .clone()
+        .filter(|entry| !is_replay(entry))
+        .chain(invocations.filter(is_replay))
+    {
         let mut raw_ref = "rust-import.json".to_string();
         let mut record = None;
         if let Some(actual) = bundle.invocations.get(id) {
             raw_ref = format!("raw/rust-{index}.txt");
             evidence::write_new(&dir.join(&raw_ref), actual.output.as_bytes())?;
+            if let Some(diagnostics) = &actual.diagnostics {
+                evidence::write_new(
+                    &dir.join(format!("{raw_ref}.stderr")),
+                    diagnostics.as_bytes(),
+                )?;
+            }
             if trusted
                 && actual.command == expected.command
                 && actual.toolchain == expected.toolchain
@@ -234,6 +288,13 @@ pub fn import(root: &Path, c: &Config, path: &Path) -> Result<Run> {
                 record = Some(actual);
             }
         }
+        let start = run.properties.len();
+        let attempt = Attempt {
+            id,
+            variant: &expected.variant,
+            raw_ref: &raw_ref,
+            actual: record,
+        };
         let result = match &expected.checks {
             Checks::Clippy {
                 package,
@@ -244,10 +305,22 @@ pub fn import(root: &Path, c: &Config, path: &Path) -> Result<Run> {
                 .and_then(|actual| {
                     clippy(&mut run, expected, package, target, kind, actual, &raw_ref)
                 }),
+            Checks::Verus(spec) => spec.record(&mut run, attempt),
+            Checks::EsbmcGoto(spec) => {
+                let paired = completed
+                    .get(spec.cbmc.as_str())
+                    .map(|range| run.properties[range.clone()].to_vec());
+                spec.record(&mut run, attempt, paired.as_deref(), &mut witnesses)
+            }
             Checks::KaniCbmc { .. } => proof(&mut run, expected, record, &raw_ref, &mut witnesses),
         };
         match result {
-            Ok(()) => run.completeness.analyzed += 1,
+            Ok(()) => {
+                run.completeness.analyzed += 1;
+                if matches!(expected.checks, Checks::KaniCbmc { .. }) {
+                    completed.insert(id, start..run.properties.len());
+                }
+            }
             Err(e) => {
                 run.completeness.failed += 1;
                 run.limitations.push(format!("Rust invocation {id}: {e}"));
@@ -433,6 +506,7 @@ fn proof(
     let mut conclusive = true;
     for (id, obligation) in obligations {
         let mut references = vec![raw_ref.to_string()];
+        let mut model_complete = false;
         let outcome = match &parsed {
             Ok(checks) => {
                 let check = &checks[&obligation.native_check];
@@ -441,7 +515,7 @@ fn proof(
                     .reachability
                     .iter()
                     .all(|id| checks[id].status == "FAILURE" && !checks[id].trace.is_empty());
-                let model_complete = reachable
+                model_complete = reachable
                     && completeness
                         .iter()
                         .chain(safety_checks)
@@ -468,7 +542,7 @@ fn proof(
             id: format!("{id}@{}", expected.variant),
             description: format!("{}: {}", obligation.requirement, obligation.proposition),
             scope: format!("Kani/CBMC harness {harness}, variant {}", expected.variant),
-            completeness_established: outcome == ProofOutcome::Proven,
+            completeness_established: model_complete,
             outcome,
             assumptions: obligation.assumptions.clone(),
             unwind_bound: Some(*unwind),
