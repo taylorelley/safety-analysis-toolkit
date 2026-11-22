@@ -35,3 +35,5 @@ for the demo. There is no certification, authentication or tamper-proof claim.
 See [executed validation](validation.md), [installation](installation.md),
 [formal scope](formal-verification.md), [traceability](traceability.md),
 [coverage](coverage.md) and [MCP](mcp.md).
+
+A proposed, unimplemented plan for Rust application support and agentic-development controls is in [Rust roadmap](rust-roadmap.md).

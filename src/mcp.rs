@@ -32,6 +32,27 @@ pub struct RunRequest {
     #[serde(default)]
     pub field_offset: usize,
 }
+#[derive(Deserialize, schemars::JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct RustImportRequest {
+    pub bundle: PathBuf,
+}
+
+#[derive(Deserialize, schemars::JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct RustCompareRequest {
+    pub base: String,
+    pub head: String,
+    #[serde(default)]
+    pub offset: usize,
+    #[serde(default = "rust_compare_limit")]
+    pub limit: usize,
+}
+
+fn rust_compare_limit() -> usize {
+    25
+}
+
 #[derive(Clone, Copy, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum PropertyField {
@@ -423,6 +444,42 @@ impl Server {
         })
         .await
     }
+    #[tool(
+        name = "safety.rust_import",
+        description = "Import CI-produced Rust diagnostics and proof records against the workspace verification plan"
+    )]
+    async fn rust_import(
+        &self,
+        Parameters(req): Parameters<RustImportRequest>,
+        ctx: RequestContext<RoleServer>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.work(ctx, move |root| {
+            let c = Config::load(&root)?;
+            let run = crate::rust_import::import(&root, &c, &req.bundle)?;
+            Ok(summary(&run))
+        })
+        .await
+    }
+
+    #[tool(
+        name = "safety.rust_compare",
+        description = "Compare reviewed proof scopes in two Rust import runs. Returns paged outcomes and counts."
+    )]
+    async fn rust_compare(
+        &self,
+        Parameters(req): Parameters<RustCompareRequest>,
+        ctx: RequestContext<RoleServer>,
+    ) -> Result<CallToolResult, ErrorData> {
+        self.work(ctx, move |root| {
+            let c = Config::load(&root)?;
+            let (report, _) = crate::rust_import::compare::runs(
+                &root, &c, &req.base, &req.head, req.offset, req.limit,
+            )?;
+            Ok(report)
+        })
+        .await
+    }
+
     #[tool(
         name = "safety.prove",
         description = "Run ESBMC BMC/induction or Frama-C Eva/WP on a selected compile variant; preserve assumptions, bounds and proof scope"

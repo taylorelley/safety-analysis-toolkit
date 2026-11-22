@@ -14,6 +14,8 @@ safety mcp --path /absolute/project
 | `safety.trace` | `{}` |
 | `safety.prove` | `source`, optional `engine` (esbmc), `method`, `entry` (main), `harness`, `variant`, `unwind` (8), `bits` (64), `precision` (Frama-C Eva, 0-11) |
 | `safety.coverage` | `profile`, `binary`, optional `provenance` |
+| `safety.rust_import` | `bundle` (workspace-relative path to a [Rust evidence bundle](rust-proof-import.md)) |
+| `safety.rust_compare` | `base`, `head`, optional `offset` and `limit` |
 | `safety.get_run` | `run_id`, `property_offset` (0), `property_limit` (20, maximum 100), optional `property_index` with `property_field` (`description`, `scope`, `assumptions`, `native_references`) and `field_offset` (0) |
 | `safety.get_findings` | `run_id`, `offset` (0), `limit` (50, maximum 100), optional `rule_prefix`, `exclude_rule_prefixes`, `category`, `file`, `full` (false) |
 | `safety.report` | `run_id`, `format` (`summary`, `json`, `markdown`, `sarif`) |
