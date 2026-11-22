@@ -51,6 +51,18 @@ enum CoverageCommands {
 }
 #[derive(Subcommand)]
 enum RustCommands {
+    Compare {
+        #[arg(long)]
+        base: String,
+        #[arg(long)]
+        head: String,
+        #[arg(long, default_value = ".")]
+        path: PathBuf,
+        #[arg(long, default_value_t = 0)]
+        offset: usize,
+        #[arg(long, default_value_t = 25)]
+        limit: usize,
+    },
     Snapshot {
         #[arg(long, default_value = ".")]
         path: PathBuf,
@@ -187,6 +199,21 @@ fn main() {
 fn run(cli: Cli) -> Result<i32> {
     match cli.command {
         Commands::Rust { command } => match command {
+            RustCommands::Compare {
+                base,
+                head,
+                path,
+                offset,
+                limit,
+            } => {
+                let root = root(path)?;
+                let c = Config::load(&root)?;
+                let (comparison, exit) =
+                    rust_import::compare::runs(&root, &c, &base, &head, offset, limit)?;
+                println!("{}", serde_json::to_string_pretty(&comparison)?);
+                Ok(exit)
+            }
+
             RustCommands::Snapshot { path } => {
                 let root = root(path)?;
                 let c = Config::load(&root)?;

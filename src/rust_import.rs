@@ -1,3 +1,4 @@
+pub mod compare;
 mod esbmc;
 mod lean;
 mod verus;

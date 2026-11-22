@@ -157,3 +157,21 @@ The opt-in pilot uses several GiB for Lean dependencies.
 cargo build --locked
 python3 tests/integration/aeneas_proof_smoke.py --work-dir /path/to/lean-work
 ```
+
+## Compare proof runs
+
+```sh
+safety rust compare --base RUN-ID --head RUN-ID --path WORKSPACE
+```
+
+The command integrity-checks both Rust runs and compares archived plans, the
+proof IDs, claims, bounds and native scopes. Generated model digests may
+change after an implementation change. Other plan changes prevent automatic
+comparison. A formerly proven obligation that becomes open or violated
+returns exit 1 with the regression. An incomplete comparison without a
+confirmed regression returns exit 3. CI can use a reviewed baseline's run ID
+as its protected input.
+
+The same result is available from `safety.rust_compare` over MCP with
+`base`, `head`, and optional `offset` and `limit`. Counts cover the full
+comparison even when the response is paged.

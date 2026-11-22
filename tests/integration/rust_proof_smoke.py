@@ -126,4 +126,13 @@ with tempfile.TemporaryDirectory() as tmp:
             shutil.copytree(root / ".safety/runs" / run["id"], destination / "run")
             if args.with_esbmc:
                 shutil.copy(root / model, destination / model)
+        if not broken:
+            baseline_id = run["id"]
+        else:
+            compared = subprocess.run([safety, "rust", "compare", "--base", baseline_id,
+                                       "--head", run["id"], "--path", root],
+                                      capture_output=True, text=True)
+            comparison = json.loads(compared.stdout)
+            assert compared.returncode == 1 and comparison["reviewed_plan_matches"], comparison
+            assert comparison["counts"]["regressed"] == 1 + 2 * args.with_esbmc + args.with_verus
         print(outcomes)
