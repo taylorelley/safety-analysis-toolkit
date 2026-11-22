@@ -17,6 +17,8 @@ stability of rustdoc JSON output.
 
 Goals:
 
+- Let an agent take a reviewed safety requirement through a reproducible proof attempt, inspect an open obligation and submit a proof for independent review. Section 8 defines the first end-to-end delivery.
+
 - Analyse Rust crates and workspaces with the same evidence model
   (`.safety/runs/RUN-*`, SHA-256 inventory, completeness, provenance) as C/C++.
 - Support mixed C/C++ and Rust projects, including FFI boundaries.
@@ -59,14 +61,14 @@ unchanged.
 
 | Work item | Files | Detail |
 | --- | --- | --- |
-| Build-variant abstraction | `src/discovery.rs`, `src/adapters/*.rs` | Introduce `enum Unit { C(CUnit), Rust(RustUnit) }` (or a trait) where `CUnit` is the current `Unit` struct. Adapters match on the variant they support and report others as `unsupported`. |
-| Finding language field | `src/model.rs`, `schemas/findings.schema.json` | Add `language: Option<String>` (`c`, `cpp`, `rust`) with serde default; bump `schema_version` to 2 and keep reading version 1. |
+| Build-variant abstraction | `src/discovery.rs`, `src/adapters/*.rs` | Introduce `enum Unit { C(CUnit), Rust(RustUnit) }` (or a trait) where `CUnit` is the current `Unit` struct. Plan applicable checks per language, unit and variant before dispatch. Count each expected check once. An unrelated adapter has no work for that unit. A missing required adapter leaves its scope incomplete. |
+| Finding language field | `src/model.rs`, `src/evidence.rs`, `schemas/findings.schema.json` | Add `language: Option<String>` (`c`, `cpp`, `rust`) with serde default; bump `schema_version` to 2 and keep reading version 1. |
 | Stable fingerprints | `src/findings.rs`, `src/model.rs` | Add `fingerprint` = SHA-256 of tool, rule, language, symbol path (USR or Rust item path) and normalised span text, excluding line numbers. Prerequisite for run comparison (9.2). Applies to C/C++ as well. |
 | Config layout | `src/config.rs`, `schemas/project.schema.json` | Add `project.languages` (default `[c, cpp]`) and an optional `rust:` section (section 4). Keep `deny_unknown_fields`. Config `version` stays 1; new keys are optional. |
 | Operation registry | `src/main.rs`, `src/mcp.rs` | Route `scan`/`trace`/`prove`/`coverage` per configured language, so a mixed project produces one run per operation containing all languages with per-language completeness counters. |
 
 Acceptance: `make validation` passes; JSON output for existing examples is
-identical apart from the new optional fields; schema tests cover v1 and v2.
+identical apart from the new optional fields; schema tests cover v1 and v2. Round-trip a v2 finding through finalisation, reload and report with its category intact. Run a mixed-language fixture with both adapters present and again with one required result missing.
 
 ## 4. Phase 1: Rust discovery and toolchain provenance
 
@@ -86,17 +88,21 @@ rust:
     host-debug:   {profile: dev,     target: x86_64-unknown-linux-gnu, features: [],        no_default_features: false}
     target-rel:   {profile: release, target: thumbv7em-none-eabihf,   features: [hw-v2],   no_default_features: true}
   imports:                   # used in import mode
-    clippy: build/clippy.jsonl
-    provenance: build/rust-provenance.json
+    host-debug: [build/host-invocation.json]
+    target-rel: [build/target-invocation.json]
 ```
 
 ### 4.2 Discovery
 
-- Read workspace structure from `cargo metadata --format-version 1 --locked
-  --offline --no-deps`. `--no-deps` metadata does not run build scripts, but
-  it is still Cargo execution: run it through `runner::execute` with the
-  cleared environment, no network and an allowlisted `cargo`. As a fallback that
-  executes nothing, parse `Cargo.toml` and `Cargo.lock` directly.
+- In import mode read manifests, the lockfile and supplied Cargo metadata. Record
+  unresolved workspace or dependency information as incomplete. In authorised
+  execute mode use pinned Cargo metadata under the same isolation as Clippy.
+- Each invocation record binds the raw output digest to the input snapshot,
+  package and targets checked, target triple, profile, features, effective cfg,
+  lint profile, tool versions, command and exit status. Match it against expected
+  units. Require evidence of fresh analysis even when diagnostics are empty.
+  Reject missing, duplicate or contradictory scope. Hash checks establish
+  consistency with supplied provenance. Record who produced it and how.
 - `RustUnit` = package id + target name and kind (lib, bin, test, bench,
   example, proc-macro, build-script) + variant (profile, target triple, feature
   set, `cfg` set) + edition + manifest path.
@@ -142,18 +148,20 @@ variants) produces deterministic discovery output in a unit test and in
 
 Execute-mode constraints:
 
-- Seccomp network denial and the cleared environment already provided by the
-  runner; `CARGO_HOME` and `CARGO_TARGET_DIR` inside the run's evidence
-  directory or a configured scratch directory; vendored dependencies required.
-- Landlock write restriction to the target directory; when
-  `tools.require_filesystem_isolation` is true and Landlock is unavailable the
-  run is refused, as for analyzers today.
-- Per-variant time, memory and output limits from `tools`.
+- Require effective network and filesystem isolation for every process that can
+  execute project or proof code. Refuse execution when either is unavailable.
+  Use a fresh writable scratch directory outside the evidence tree. Give the
+  child read-only access to the necessary inputs and pinned vendored tools.
+  Set Cargo home, target and temporary directories under scratch. Only the
+  parent copies bounded output into evidence after the process tree stops.
+- Apply time, aggregate process-tree memory and output limits before enabling
+  local execution. Test refusal, cancellation, and denied writes to source and
+  evidence in addition to the network test.
 - Never `cargo build` of the final artifact, never `cargo test` or `cargo run`
   (test execution keeps its separate authorization, section 7.2).
 
 Acceptance: integration test proving that import mode executes no Cargo
-subprocess besides optional metadata; a fixture `build.rs` that attempts a
+subprocess including metadata; a fixture `build.rs` that attempts a
 network connection fails under execute mode and the run records the failure.
 
 ## 6. Phase 1: static analysis adapter (`src/adapters/rust.rs`)
@@ -283,15 +291,13 @@ measured.
 
 ## 8. Phase 3: formal verification
 
-### 8.1 Kani adapter (`src/adapters/kani.rs`)
+### 8.1 First bounded checker: Kani (`src/adapters/kani.rs`)
 
 - `safety prove --engine kani --harness-fn crate::module::harness --variant VAR`.
-- Runs `cargo kani --harness <name> --output-format terse`, or imports its
-  output in import mode. Kani compiles the crate, so it falls under the section 5
+- Import enumerated native checks, reachability results and diagnostics from a pinned real run first. Validate the version-specific output format and witness options on fixtures before adding local execution. Kani compiles the crate, so it falls under the section 5
   execution policy.
 - Map each Kani check to `Property` with `ProofOutcome`:
-  `SUCCESS` → `PROVEN` (scoped to the recorded unwind bound, solver and harness
-  assumptions), `FAILURE` → `VIOLATED` with the counterexample stored in
+  `SUCCESS` → `PROVEN` only for an enumerated reachable claim with established completeness in the declared model; a bound alone is insufficient, `FAILURE` → `VIOLATED` with the counterexample stored in
   `counterexamples.json`, `UNREACHABLE` → `NOT_CHECKED` with a note,
   `UNDETERMINED` or a timeout → `UNKNOWN`, and an unwinding assertion failure →
   `UNKNOWN` with a hint (as `esbmc::unwind_hint` does).
@@ -305,17 +311,109 @@ measured.
   proof mode; contract-replacement proofs are reported as compositional and
   depending on the replaced contracts being proven separately.
 
-### 8.2 Further engines (evaluation only)
+### 8.2 Proof obligations and the agent interface
 
-Verus, Creusot and Prusti are evaluated after Kani for deductive proofs of
-specific modules. Each needs a pinned toolchain and its own outcome mapping;
-none is adopted without known-answer fixtures. ESBMC's Rust support is also
-evaluated (**verify** maturity) because it would reuse the existing adapter.
+Start with a reviewed requirement and enumerate the expected obligations before
+reading tool output. Use one manifest entry per property and variant. Reuse
+`verification::Request`, `Property`, the trace IDs and evidence inventory.
+Keep the specification in the engine's native language. Different formulations
+of the same requirement need a reviewed mapping before comparing outcomes.
 
-Acceptance: real Kani run on `examples/embedded-rust` with one proven harness,
-one violated harness with a stored counterexample and one bounded harness that
-reports `UNKNOWN` when the unwind bound is too small, all gated behind an
-opt-in `make full-validation` step like ESBMC/Frama-C.
+| Record | Required information |
+| --- | --- |
+| Obligation | Stable ID, requirement or hazard-control ID, Rust item, target variant, exact proposition, input domain, preconditions, arithmetic/panic semantics, and whether termination is required |
+| Attempt | Source, specification, harness and dependency digests; backend, frontend, solver or kernel and versions; model, bounds, options, budget, raw output and expected native check IDs |
+| Dependencies | Callee contracts, library models, stubs, FFI and hardware assumptions, imported axioms, review references and dependent obligation IDs |
+| Result | Native status, mapped outcome, completeness, missing checks, witness or failed goal, evidence origin (supplied CI record or locally replayed), and review status |
+
+Compute requirement closure from the required obligations across variants. Keep
+technical proof status separate from outstanding assumptions and review.
+Report cycles in assumed contracts as open unless a checked joint or inductive
+argument closes them. Changing a contract, model or variant invalidates dependent
+claims for the new run. Existing evidence remains addressable by digest.
+
+**Agent workflow.** Extend the existing MCP proof request with an obligation ID
+and registered engine. Add a paged obligation query by requirement, status and
+variant. Return the failed proposition, source span, native diagnostic, model
+assumptions, remaining goals and bounded witness when available. Agents may
+draft harnesses, invariants, lemmas and proofs via their host editor. An
+advisory attempt has a fixed budget. On exhaustion, return the open goal and
+reason. The final evidence run replays the reviewed inputs in a fresh workspace
+or imports a fresh CI record. The report identifies which occurred.
+
+Treat changes to preconditions, postconditions, enabled goals, external bodies,
+axioms, target features or unwind bounds as reviewable changes. Pin the reviewed
+manifest independently of the candidate patch. An agent cannot approve its own
+change. Check reachability of the harness and feasibility of assumptions where
+supported. A contradictory precondition, ignored check or empty proof selection
+must never close the requirement. An SMT failure to prove an assertion is
+`UNKNOWN` unless the backend supplies a validated violation in the stated model.
+A broken tool, truncated record or parse failure is `FAILED`.
+
+### 8.3 Backend choices and promotion gates
+
+| Backend | Proposed use | First acceptance gate |
+| --- | --- | --- |
+| Kani | First delivery. Check assertions and panic freedom in a small bounded Rust component. | Replay a reachable claim, a witnessed failure, a bound too small, and contradictory assumptions. Retain individual results even when the run fails. |
+| ESBMC | Second bounded backend. Reuse the existing ESBMC result handling where validated. Add a Rust-specific input path for Kani's per-harness GOTO binary. | Pin a compatible pair, record the binary digest and entry point, and run both backends on the same model. Check source-level witness mapping, failed unwinding and ignored property classes. Report disagreement for review. Both share the Rust frontend and harness. |
+| Verus | First deductive adapter. Choose it for source-level contracts, loop invariants and proofs over arbitrary admissible inputs. Agents can work on one failed obligation at a time. | Verify a loop invariant and postcondition on the actual executable function. A boundary mutation must break the proof. Inventory assumptions and trusted external bodies. A failed verification condition stays open. |
+| Aeneas with Lean | First external theorem-prover pilot. Use it for an existing safe Rust component whose proof should live outside the production source. | Pin Rust, Charon, Aeneas, Lean and model libraries. Regenerate the model, check the named theorem, inspect its transitive axioms and reject proof holes. An unsupported extraction, opaque callee or stale generated file must remain visible. |
+| rocq-of-rust | Adopt the separation of translation, linking, simulation and specification. Pilot an importer if a project already produces Rocq proofs. | Bind each stage to its inputs and theorem. Replay the kernel check and inspect transitive assumptions, including admitted lemmas. A theorem about a handwritten model needs a checked link to the extracted program. |
+
+The 2025 Rust Foundation announcement describes the GOTO-Transcoder integration.
+The current Verify Rust Std guide documents direct GOTO input from ESBMC 8.4
+and an 8.7 CI example. Start with the direct path. Keep the toolkit's C/C++
+8.6 reference separate. Record excluded reachability and cover classes and
+obtain feasibility evidence separately. [Announcement](https://rustfoundation.org/media/expanding-the-rust-formal-verification-ecosystem-welcoming-esbmc/) · [Current integration](https://model-checking.github.io/verify-rust-std/tools/esbmc.html)
+
+Verus keeps specifications near Rust source and uses solver feedback. Aeneas
+generates a functional model and currently targets a subset of safe Rust.
+Start its pilot on sequential code. For both approaches, record which target
+semantics, libraries and external calls the proof relies on. [Verus use cases](https://www.amazon.science/blog/developing-provably-correct-rust-code-with-verus) · [Aeneas workflow](https://lean-lang.org/use-cases/aeneas/) · [Aeneas supported subset](https://github.com/AeneasVerif/aeneas#targeted-subset-and-current-limitations)
+
+Formal Land lists the Rocq proofs and libraries under MIT and the Rust
+transpiler under AGPL-3.0. The proposed first release borrows the workflow
+and leaves the transpiler out of the distribution. Keep generated models,
+handwritten specifications and checked refinement lemmas separately identifiable.
+[rocq-of-rust workflow and licences](https://github.com/formal-land/rocq-of-rust)
+
+Use the Rust Formal Methods Interest Group's work on specification
+interoperability to guide obligation IDs and mappings. Maintain a tested
+capability table per backend/version for integer semantics, panics, termination,
+unsafe code, allocation, concurrency and FFI. Mark unsupported and untested
+cases explicitly. Revisit Creusot or an unsafe-focused tool when a concrete
+obligation falls outside the validated set. [Interest group and talks](https://rust-formal-methods.github.io/)
+
+### 8.4 First end-to-end acceptance case
+
+Use a small no_std interlock state machine with a reviewed requirement: a reset
+while the fault input is active must keep the inhibit latch set. Include a
+second requirement that reset clears the latch once the fault has cleared.
+Together they rule out an implementation that always leaves the latch set.
+
+1. Import Clippy and Kani records for a host and an embedded configuration.
+   Show clean, diagnostic, compile-failed and missing invocations separately.
+   Exercise CLI, persisted evidence, report and MCP against the same fixture.
+2. Prove each one-step transition for all admissible inputs. To claim the
+   invariant over an arbitrary sequence, also prove the initial state and
+   preservation for every transition. Record hardware sampling and reset
+   assumptions separately. Timing and behaviour of real hardware remain open.
+3. Remove the fault check in a fixture copy. Require a Kani counterexample and
+   present an agent with the exact requirement, variant, input and state.
+   Run ESBMC against the same GOTO artifact when its adapter is ready.
+4. In the deductive milestone, replay the interlock invariant with Verus.
+   Narrowing an input domain to exclude the failing case, removing a target,
+   introducing an assumption, or omitting an expected obligation must block
+   closure. A repaired implementation with the original specification must pass.
+5. For the external-proof pilot, prove the transition refines a small reference
+   function. Reject a valid theorem about the wrong function and a theorem that
+   depends on an unreviewed axiom. Archive extraction inputs and the replay log.
+
+Run parser fixtures in ordinary CI. For every promoted backend, require a
+pinned real-tool job on its reference platform and publish the outcome and
+artifacts. A missing tool can skip a developer's local job; it cannot satisfy
+the release gate. Track required obligations closed, unresolved assumptions,
+known-bad fixtures rejected and agent attempts per accepted proof.
 
 ## 9. Phase 1-2: controls for agentic development
 
@@ -343,7 +441,7 @@ Rust quickly and pressure to make diagnostics disappear is high.
   `unchanged` and `moved`; compares completeness, executions, toolchain,
   configuration hashes, inventories (`unsafe`, panics, suppressions,
   dependencies) and proof outcomes (a `PROVEN` property becoming `UNKNOWN` is a
-  regression).
+  regression). Only compare matched, completed scopes. Mark a dropped or failed variant as not assessed. Match repeated fingerprints by occurrence and expose ambiguous matches. Test two identical calls with one removed.
 - Optional reviewed ratchet policy in `safety.yaml`:
 
   ```yaml
@@ -377,8 +475,8 @@ Rust quickly and pressure to make diagnostics disappear is high.
 - Expose `suggestions` (6.1) in compact `safety.get_findings` records,
   bounded per finding. Agents apply them with their own editing tools within
   authorized scope; the toolkit has no source-write method and gains none.
-- The report states, for each resolved finding in a comparison, whether the
-  change was a code change or a suppression/configuration change.
+- The report states, for each resolved finding in a comparison, the evidence for a
+  code, suppression or configuration change; allow unknown or mixed attribution.
 
 ### 9.5 Authorship and review provenance
 
@@ -401,7 +499,8 @@ cancellation, no shell, no source writes.
 | `safety.compare_runs` | Run diff (9.2), paged |
 | `safety.unsafe_inventory` | Paged `unsafe` inventory with justification and trace status |
 | `safety.dependencies` | Paged dependency and supply-chain status |
-| `safety.prove` | Extended with `engine: kani` |
+| `safety.prove` | Selected obligation and registered backend (section 8.2) |
+| `safety.obligations` | Paged goals, assumptions, dependencies and evidence by requirement |
 | `safety.explain_rule` | Toolkit-authored description of a lint or check, its mapping status and known limitations; never MISRA text |
 
 `safety.get_findings` gains `language`, `fingerprint`, `since_run` and
@@ -458,8 +557,7 @@ deliberate signature mismatch and one untraced `unsafe` block reported.
   mappings Clippy lacks, with known-answer fixtures and CI on the pinned
   nightly.
 - Execute-mode hardening: fuzz the JSON parsers (Clippy, Kani, cargo-deny,
-  rustdoc) with the existing bounded readers; aggregate memory limits for
-  Cargo's process tree.
+  rustdoc) with the existing bounded readers and exercise cancellation under load.
 - Ferrocene as a first-class reference toolchain: doctor recognises its
   version string; documentation records which qualification artefacts the
   project must obtain from the vendor (**verify** scope). The toolkit itself
@@ -473,7 +571,7 @@ deliberate signature mismatch and one untraced `unsafe` block reported.
 | --- | --- | --- |
 | `examples/embedded-rust` known-answer workspace | `make validation` | Documented expected findings per variant, like the C examples |
 | Mixed C/Rust FFI fixture | `make validation` | Trace and `unsafe` inventory joins |
-| Import-mode tests (no Cargo execution) | `make test` | Asserts no subprocess besides allowlisted metadata |
+| Import-mode tests (no Cargo execution) | `make test` | Asserts no Cargo subprocess, including metadata |
 | Execute-mode tests with hostile `build.rs` | `make full-validation` | Network and write attempts fail and are recorded |
 | Real Clippy run | `make validation` (ignored unless requested) | Same pattern as real-Clang tests |
 | Real Kani, Miri import, cargo-deny/audit/vet | `make full-validation` | Opt-in; a missing tool is skipped, never passed |
@@ -487,18 +585,20 @@ Kani, cargo-deny, cargo-audit, cargo-vet, advisory database snapshot hash) and
 
 ## 13. Sequencing and dependencies
 
-```
-Phase 0 refactor ──┬─> Phase 1 discovery + provenance ─> Phase 1 Clippy adapter + inventories
-                   │                                   └─> Phase 2 coverage + supply chain
-                   └─> 9.1/9.2 suppressions, fingerprints, compare_runs (C/C++ first)
-Phase 1 adapter ──────> 9.3 advisory runs ─> 9.6 MCP tools ─> 9.7 skill and hooks
-Phase 1 execute mode ─> Phase 3 Kani ─> Phase 4 traceability (rustdoc/SCIP) ─> Phase 5
-```
-
-Rough size, as a guide only: phase 0 small; phase 1 the largest (discovery,
-policy, adapter, inventories, example); phase 2 medium; 9.x medium and largely
-language-neutral; phase 3 medium; phase 4 large because of symbol identity and
-FFI joins; phase 5 open-ended.
+1. **Evidence foundation.** Deliver Phase 0 and import-only discovery. Test
+   per-invocation provenance, completeness and v1/v2 round trips.
+2. **First agent proof.** Deliver section 8.4 steps 1–3 with Kani, a minimal
+   obligation query, proof import, and run reporting. Coverage, complete call
+   graphs and local Cargo execution are independent workstreams.
+3. **Two complementary checks.** Add ESBMC replay for an existing Kani model
+   and Verus for deductive obligations. Promote each independently on real
+   known-answer fixtures. Add protected baseline comparison and advisory loops.
+4. **External proofs.** Pilot Aeneas/Lean. Add the Rocq importer only when a
+   project supplies a replayable chain. Broaden traceability, coverage and
+   supply-chain evidence alongside these milestones.
+5. **Local execution and wider scope.** Enable project and proof execution only
+   after the isolation tests in section 5 pass. Extend the tested target and
+   feature matrix as projects need it.
 
 ## 14. Risks and open decisions
 
