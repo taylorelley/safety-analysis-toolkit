@@ -123,3 +123,37 @@ Replay the bounded and deductive interlock with the pinned tools on PATH.
 cargo build --locked
 python3 tests/integration/rust_proof_smoke.py --with-esbmc --with-verus
 ```
+
+## Pilot an Aeneas and Lean refinement
+
+The `aeneas_lean` import uses Hax 0.5.0, Charon nightly-2026.10.31,
+Aeneas build-2b9e3ea, Hax Lean library v0.3.41 and Lean 4.35.0. Put these
+versions in the `hax`, `charon`, `aeneas`, `hax-lean-lib` and `lean`
+toolchain fields. Preserve the Rust source and extraction configuration,
+generated Lean models, handwritten proof and probe in the input snapshot.
+
+The reviewed entry supplies `source`, `proof` and `probe` paths, a
+`models` map of generated Lean paths to SHA-256 digests, the import `module`,
+`theorem`, exact one-line Lean `proposition`, `requirement`, and
+`allowed_axioms`. The probe has these four lines and a final newline.
+
+```lean
+import Reviewed.Proof
+set_option warningAsError true
+#check (@reviewed_theorem : ReviewedProposition)
+#print axioms reviewed_theorem
+```
+
+After fresh extraction and compilation, run `lake env lean --json PROBE`.
+Supply the native JSON and the freshly regenerated digest map as
+`regenerated_models`. The importer validates the probe and model digests
+against the reviewed inputs and checks the theorem's transitive axiom list.
+Proof holes and unreviewed axioms leave the obligation open. CI supplies
+the extraction and build provenance.
+
+The opt-in pilot uses several GiB for Lean dependencies.
+
+```sh
+cargo build --locked
+python3 tests/integration/aeneas_proof_smoke.py --work-dir /path/to/lean-work
+```

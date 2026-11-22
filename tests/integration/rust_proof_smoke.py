@@ -11,6 +11,7 @@ import tempfile
 parser = argparse.ArgumentParser(description="Replay the pinned interlock proofs")
 parser.add_argument("--with-esbmc", action="store_true")
 parser.add_argument("--with-verus", action="store_true")
+parser.add_argument("--evidence-dir", type=Path)
 args = parser.parse_args()
 
 def record(command, tools, result, output):
@@ -120,4 +121,9 @@ with tempfile.TemporaryDirectory() as tmp:
         if args.with_verus:
             expected["deductive@host"] = "UNKNOWN" if broken else "PROVEN"
         assert outcomes == expected, outcomes
+        if args.evidence_dir is not None:
+            destination = args.evidence_dir / ("mutant" if broken else "reference")
+            shutil.copytree(root / ".safety/runs" / run["id"], destination / "run")
+            if args.with_esbmc:
+                shutil.copy(root / model, destination / model)
         print(outcomes)

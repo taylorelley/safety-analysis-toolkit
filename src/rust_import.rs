@@ -1,4 +1,5 @@
 mod esbmc;
+mod lean;
 mod verus;
 
 use crate::{
@@ -43,6 +44,7 @@ enum Checks {
     },
     Verus(verus::Spec),
     EsbmcGoto(esbmc::Spec),
+    AeneasLean(lean::Spec),
     KaniCbmc {
         harness: String,
         unwind: u32,
@@ -81,6 +83,8 @@ struct Invocation {
     output: String,
     #[serde(default)]
     diagnostics: Option<String>,
+    #[serde(default)]
+    regenerated_models: Option<BTreeMap<String, String>>,
 }
 
 struct Attempt<'a> {
@@ -126,6 +130,7 @@ fn planned(root: &Path) -> Result<(Vec<u8>, Plan)> {
                     Checks::Clippy { .. } => "clippy",
                     Checks::Verus(_) => "verus",
                     Checks::EsbmcGoto(_) => "esbmc",
+                    Checks::AeneasLean(_) => "lean",
                     Checks::KaniCbmc { .. } => "kani",
                 }
             ]
@@ -137,6 +142,13 @@ fn planned(root: &Path) -> Result<(Vec<u8>, Plan)> {
             "missing reviewed toolchain versions for {id}"
         );
         if let Checks::Verus(spec) = &expected.checks {
+            ensure!(
+                obligation_ids.insert((id, &expected.variant)),
+                "repeated obligation {id}"
+            );
+            spec.validate(expected)?;
+        }
+        if let Checks::AeneasLean(spec) = &expected.checks {
             ensure!(
                 obligation_ids.insert((id, &expected.variant)),
                 "repeated obligation {id}"
@@ -306,6 +318,7 @@ pub fn import(root: &Path, c: &Config, path: &Path) -> Result<Run> {
                     clippy(&mut run, expected, package, target, kind, actual, &raw_ref)
                 }),
             Checks::Verus(spec) => spec.record(&mut run, attempt),
+            Checks::AeneasLean(spec) => spec.record(&mut run, attempt),
             Checks::EsbmcGoto(spec) => {
                 let paired = completed
                     .get(spec.cbmc.as_str())
